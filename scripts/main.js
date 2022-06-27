@@ -3,10 +3,17 @@ const ctx = canvas.getContext("2d");
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 const BOARD_SIZE = 280;
-
 const BOARD = createBoard(ctx, BOARD_SIZE);
 
-console.table(BOARD);
+/**
+ * @type {Spot}
+ */
+let PREVIOUSLY_SELECTED_SPOT = null
+/**
+ * @type {Piece}
+ */
+let CURRENTLY_SELECTED_PIECE = null
+
 
 for (let i = 0; i < BOARD.length; i++) {
     if (i <= 3)
@@ -162,6 +169,7 @@ function createBoard(context, size) {
     return board;
 }
 
+
 canvas.addEventListener("click", (event) => {
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -169,16 +177,30 @@ canvas.addEventListener("click", (event) => {
     for (let i = 0; i < BOARD.length; i++) {
         for (let j = 0; j < BOARD[i].length; j++) {
             let spot = BOARD[i][j];
-            if (spot != 0) {
-                if (spot.isOccupied) {
-                    if (spot.piece.clicked(x, y)) spot.showPossibleMoves(BOARD)
+            if (spot != 0) 
+                if (spot.isOccupied) {    
+                    if (spot.piece.isClicked(x, y)) {
+                        CURRENTLY_SELECTED_PIECE = spot.piece
+                        spot.showPossibleMoves(BOARD, PREVIOUSLY_SELECTED_SPOT)
+                        PREVIOUSLY_SELECTED_SPOT = spot
+                    } 
                 } else {
-                    spot.clicked(x, y);
+                    if (spot.clicked(x, y)) {
+                        if (spot.possibleMove == true) {       
+                            PREVIOUSLY_SELECTED_SPOT.hidePossibleMoves(BOARD)
+                            CURRENTLY_SELECTED_PIECE.newPosition(spot.x, spot.y)
+                            spot.addPiece(CURRENTLY_SELECTED_PIECE)
+                            PREVIOUSLY_SELECTED_SPOT.removePiece()
+
+                        }
+                    }
                 }
-            }
         }
     }
-});
+})
+
+
+
 
 function drawBoard(size) {
     let x = WIDTH / 2;

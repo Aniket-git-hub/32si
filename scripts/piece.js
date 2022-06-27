@@ -4,17 +4,26 @@ class Piece {
         this.x = x
         this.y = y
         this.radius = 13
+        this.context = context
 
-        context.beginPath();
-        context.fillStyle = isRed ? 'red' : 'blue'
-        context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-        context.fill()
-        context.stroke()
+        this.draw()
     }
-    clicked(mouseX, mouseY) {
+    draw() {
+        this.context.beginPath();
+        this.context.fillStyle = this.isRed ? 'red' : 'blue'
+        this.context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        this.context.fill()
+        this.context.stroke()
+    }
+    isClicked(mouseX, mouseY) {
         const distance = Math.hypot((mouseX - this.x), (mouseY - this.y))
-        if (distance > this.radius) return
-        return this
+        if (distance > this.radius) return false
+        return true
+    }
+    newPosition(x, y) {
+        this.x = x
+        this.y = y
+        this.draw()
     }
    
 }

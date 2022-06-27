@@ -15,7 +15,7 @@ class Spot {
     draw() {
         if (this.possibleMove) {
             this.context.beginPath();
-            this.context.fillStyle = "pink";
+            this.context.fillStyle = "green";
             this.context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
             this.context.fill();
             this.context.stroke()
@@ -36,24 +36,43 @@ class Spot {
     removePiece() {
         this.isOccupied = false;
         this.piece = null;
+        this.draw()
     }
     clicked(mouseX, mouseY) {
         const distance = Math.hypot(mouseX - this.x, mouseY - this.y);
-        if (distance < this.radius) {
-            console.log("clicked the empty spot");
-        }
+        if (distance < this.radius) return true
+        return false
     }
     isPossibleMove(isIt) {
         this.possibleMove = isIt
         this.draw()
     }
-    showPossibleMoves(board) {
+    showPossibleMoves(board, previouslyClickedSpot) {
+        if (previouslyClickedSpot != null) {        
+            previouslyClickedSpot.neighbours.forEach(neighbour => {
+                let [i, j] = neighbour.split('')
+                let spot = board[i][j]
+                if (spot.isOccupied == false) 
+                spot.isPossibleMove(false)
+                
+            })
+        }
+
         this.neighbours.forEach(neighbour => {
             let [i ,j] = neighbour.split('')
             let spot = board[i][j]
-            if (spot.isOccupied == false) {
+            if (spot.isOccupied == false) 
                 spot.isPossibleMove(true)
-            }
+            
+        })
+    }
+
+    hidePossibleMoves(board) {
+        this.neighbours.forEach(neighbour => {
+            let [i, j] = neighbour.split('')
+            let spot = board[i][j]
+            if(spot.isOccupied == false)
+                spot.isPossibleMove(false)
         })
     }
 }
