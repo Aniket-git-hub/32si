@@ -9,3 +9,34 @@ body{
     display: grid;
     place-items: center;
 }
+
+section {
+    display: flex;
+    flex-direction: row;
+    padding:.5rem;
+    box-shadow: 5px 5px 10px lightgray;
+    border-radius: .5rem;
+}
+canvas{
+    border-radius: 1rem;
+}
+
+article{
+    padding: 1rem;
+    border:10px solid rgb(200, 0, 160); 
+    margin:.4rem;
+    border-radius: .5rem;
+}
+.scoreBoard{
+    margin: .5rem 0;
+    text-align: center;
+}
+.scoreBoard h3{
+    font-size: 2rem;
+    text-transform: uppercase;
+    color: #2b2b2b;
+}
+.scoreBoard p{
+    font-size: 4rem;
+    color:#2b2b2b;
+}

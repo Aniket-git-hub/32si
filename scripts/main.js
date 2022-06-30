@@ -1,10 +1,16 @@
+const blueScore = document.getElementById('blueScore')
+const redScore = document.getElementById('redScore')
+
 const canvas = document.querySelector("#canvas");
 const ctx = canvas.getContext("2d");
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 const BOARD_SIZE = 280;
 const BOARD = createBoard(ctx, BOARD_SIZE);
+let RED = 16
+let BLUE = 16
 
+console.table(BOARD)
 /**
  * @type {Spot}
  */
@@ -180,27 +186,57 @@ canvas.addEventListener("click", (event) => {
             if (spot != 0) 
                 if (spot.isOccupied) {    
                     if (spot.piece.isClicked(x, y)) {
-                        CURRENTLY_SELECTED_PIECE = spot.piece
-                        spot.showPossibleMoves(BOARD, PREVIOUSLY_SELECTED_SPOT)
-                        PREVIOUSLY_SELECTED_SPOT = spot
+                        possibleMoves(spot)
                     } 
                 } else {
                     if (spot.clicked(x, y)) {
-                        if (spot.possibleMove == true) {       
-                            PREVIOUSLY_SELECTED_SPOT.hidePossibleMoves(BOARD)
-                            CURRENTLY_SELECTED_PIECE.newPosition(spot.x, spot.y)
-                            spot.addPiece(CURRENTLY_SELECTED_PIECE)
-                            PREVIOUSLY_SELECTED_SPOT.removePiece()
-
-                        }
+                        movePiece(spot)
                     }
                 }
         }
     }
 })
 
+function possibleMoves(spot) {
+    CURRENTLY_SELECTED_PIECE = spot.piece
+    spot.showPossibleMoves(BOARD, PREVIOUSLY_SELECTED_SPOT)
+    PREVIOUSLY_SELECTED_SPOT = spot
+}
+
+function movePiece(spot) {
+    if (spot.possibleMove == true) {
+        PREVIOUSLY_SELECTED_SPOT.hidePossibleMoves(BOARD)
+        CURRENTLY_SELECTED_PIECE.newPosition(spot.x, spot.y)
+        spot.addPiece(CURRENTLY_SELECTED_PIECE)
+        PREVIOUSLY_SELECTED_SPOT.removePiece()
+        killPiece(spot)
+    }
+}
+
+/**
+ * 
+ * @param {Spot} spot 
+ * @return {void}  nothing
+ */
+function killPiece(spot) {
+    if (PREVIOUSLY_SELECTED_SPOT.neighbours.includes(spot.boardPosition) == false) {
+        PREVIOUSLY_SELECTED_SPOT.neighbours.forEach(neighbour => {
+            let [i, j] = neighbour.split('')
+            let neighbouringSpot = BOARD[i][j]
+            if (neighbouringSpot.neighbours.includes(spot.boardPosition)) {
+                console.log(neighbouringSpot.piece)
+            }
+        })
+    }
+}
 
 
+function updateScore() {
+    blueScore.innerText = BLUE
+    redScore.innerText = RED
+    console.log("Red: " + RED, "Blue: " + BLUE)
+    
+}
 
 function drawBoard(size) {
     let x = WIDTH / 2;
