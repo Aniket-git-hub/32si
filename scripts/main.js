@@ -223,8 +223,8 @@ function killPiece(spot) {
         PREVIOUSLY_SELECTED_SPOT.neighbours.forEach(neighbour => {
             let [i, j] = neighbour.split('')
             let neighbouringSpot = BOARD[i][j]
-            if (neighbouringSpot.neighbours.includes(spot.boardPosition)) {
-                console.log(neighbouringSpot.piece)
+            if (neighbouringSpot.neighbours.includes(spot.boardPosition) && neighbouringSpot.isOccupied) {
+                neighbouringSpot.removePiece()
             }
         })
     }

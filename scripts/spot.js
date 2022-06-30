@@ -59,45 +59,61 @@ class Spot {
 
         if (previouslyClickedSpot != null) {        
             previouslyClickedSpot.neighbours.forEach(neighbour => {
-                let [i, j] = neighbour.split('')
-                let spot = board[i][j]
+                let [indexI, indexJ] = neighbour.split('')
+                let spot = board[indexI][indexJ]
                 if (spot.isOccupied == false) {
                     spot.isPossibleMove(false)
                 } else {
-                    spot.neighbours.forEach(n => {
-                        let [neighbourIndexI, neighbourIndexJ] = n.split('')
+                    spot.neighbours.forEach(neighbour => {
+                        let [neighbourIndexI, neighbourIndexJ] = neighbour.split('')
                         let neighbouringSpot = board[neighbourIndexI][neighbourIndexJ]
-                        if ((myI == i && i == neighbourIndexI) || (myJ == j && j == neighbourIndexJ))
-                            if (neighbouringSpot.isOccupied == false)
+
+                        if (myI == indexI || myJ == indexJ) {
+                            if ((myI == neighbourIndexI || myJ == neighbourIndexJ) &&
+                                neighbouringSpot.isOccupied == false)
                                 neighbouringSpot.isPossibleMove(false)
+                        } else {
+                            if ((indexI !== neighbourIndexI && indexJ !== neighbourIndexJ) &&
+                                (myI !== neighbourIndexI && myJ !== neighbourIndexJ) &&
+                                neighbouringSpot.isOccupied == false
+                            )
+                                neighbouringSpot.isPossibleMove(false)
+
+                        }
                     })
                 }
             })
         }
 
-        for (let i = 0; i < this.neighbours.length; i++){
-
+        for (let i = 0; i < this.neighbours.length; i++) {
             let [indexI, indexJ] = this.neighbours[i].split('')
             let spot = board[indexI][indexJ]
 
             if (spot.isOccupied == false) {
                 spot.isPossibleMove(true)
             } else {
-    
-                if (spot.piece.isRed !== this.piece.isRed) {
+                if (spot.piece.isRed !== this.piece.isRed) 
                     spot.neighbours.forEach(neighbour => {
                         let [neighbourIndexI, neighbourIndexJ] = neighbour.split('')
                         let neighbouringSpot = board[neighbourIndexI][neighbourIndexJ]
-                        if ((myI == indexI && indexI == neighbourIndexI) || (myJ == indexJ && indexJ == neighbourIndexJ)) {
-                            if (neighbouringSpot.isOccupied == false)
-                                neighbouringSpot.isPossibleMove(true)
-                        }
-                            
-                    })
-                }
-                
-            }
 
+                        if (myI == indexI || myJ == indexJ) {
+                            if ((myI == neighbourIndexI || myJ == neighbourIndexJ) &&
+                                neighbouringSpot.isOccupied == false) 
+                                neighbouringSpot.isPossibleMove(true)
+                            
+                        } else {
+                            if ((indexI !== neighbourIndexI && indexJ !== neighbourIndexJ) &&
+                                (myI !== neighbourIndexI && myJ !== neighbourIndexJ) &&
+                                neighbouringSpot.isOccupied == false
+                            ) 
+                                neighbouringSpot.isPossibleMove(true)
+                               
+                        }
+                    })
+
+            }
+        
         }
 
     }
@@ -106,17 +122,28 @@ class Spot {
         let [myI, myJ] = this.boardPosition.split('')
 
         this.neighbours.forEach(neighbour => {
-            let [i, j] = neighbour.split('')
-            let spot = board[i][j]
+            let [indexI, indexJ] = neighbour.split('')
+            let spot = board[indexI][indexJ]
             if (spot.isOccupied == false) {
                 spot.isPossibleMove(false) 
             } else {
-                spot.neighbours.forEach(n => {
-                    let [neighbourIndexI, neighbourIndexJ] = n.split('')
+                spot.neighbours.forEach(neighbour => {
+                    let [neighbourIndexI, neighbourIndexJ] = neighbour.split('')
                     let neighbouringSpot = board[neighbourIndexI][neighbourIndexJ]
-                    if ((myI == i && i == neighbourIndexI) || (myJ == j && j == neighbourIndexJ))
-                        if (neighbouringSpot.isOccupied == false)
+
+                    if (myI == indexI || myJ == indexJ) {
+                        if ((myI == neighbourIndexI || myJ == neighbourIndexJ) &&
+                            neighbouringSpot.isOccupied == false)
                             neighbouringSpot.isPossibleMove(false)
+
+                    } else {
+                        if ((indexI !== neighbourIndexI && indexJ !== neighbourIndexJ) &&
+                            (myI !== neighbourIndexI && myJ !== neighbourIndexJ) &&
+                            neighbouringSpot.isOccupied == false
+                        )
+                            neighbouringSpot.isPossibleMove(false)
+
+                    }
                 })
             }
         })
