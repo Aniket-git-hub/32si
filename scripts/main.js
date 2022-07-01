@@ -10,15 +10,10 @@ const BOARD = createBoard(ctx, BOARD_SIZE);
 let RED = 16
 let BLUE = 16
 
-console.table(BOARD)
 /**
  * @type {Spot}
  */
-let PREVIOUSLY_SELECTED_SPOT = null
-/**
- * @type {Piece}
- */
-let CURRENTLY_SELECTED_PIECE = null
+let CURRENTLY_SELECTED_SPOT = null
 
 
 for (let i = 0; i < BOARD.length; i++) {
@@ -198,26 +193,20 @@ canvas.addEventListener("click", (event) => {
 })
 
 function possibleMoves(spot) {
-    CURRENTLY_SELECTED_PIECE = spot.piece
-    spot.showPossibleMoves(BOARD, PREVIOUSLY_SELECTED_SPOT)
-    PREVIOUSLY_SELECTED_SPOT = spot
+    if (CURRENTLY_SELECTED_SPOT != null) CURRENTLY_SELECTED_SPOT.hidePossibleMoves(BOARD)
+    CURRENTLY_SELECTED_SPOT = spot
+    CURRENTLY_SELECTED_SPOT.showPossibleMoves(BOARD)
 }
 
-function movePiece(spot) {
-    if (spot.possibleMove == true) {
-        PREVIOUSLY_SELECTED_SPOT.hidePossibleMoves(BOARD)
-        CURRENTLY_SELECTED_PIECE.newPosition(spot.x, spot.y)
-        spot.addPiece(CURRENTLY_SELECTED_PIECE)
-        PREVIOUSLY_SELECTED_SPOT.removePiece()
-        killPiece(spot)
+function movePiece(newSpot) {
+    if (newSpot.possibleMove == true) {
+        CURRENTLY_SELECTED_SPOT.piece.newPosition(newSpot.x, newSpot.y)
+        newSpot.addPiece(CURRENTLY_SELECTED_SPOT.piece)
+        CURRENTLY_SELECTED_SPOT.removePiece()
+        CURRENTLY_SELECTED_SPOT.hidePossibleMoves(BOARD)
     }
 }
 
-/**
- * 
- * @param {Spot} spot 
- * @return {void}  nothing
- */
 function killPiece(spot) {
     if (PREVIOUSLY_SELECTED_SPOT.neighbours.includes(spot.boardPosition) == false) {
         PREVIOUSLY_SELECTED_SPOT.neighbours.forEach(neighbour => {

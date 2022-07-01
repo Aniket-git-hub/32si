@@ -54,36 +54,8 @@ class Spot {
         this.draw()
     }
 
-    showPossibleMoves(board, previouslyClickedSpot) {
+    showPossibleMoves(board) {
         let [myI, myJ] = this.boardPosition.split('')
-
-        if (previouslyClickedSpot != null) {        
-            previouslyClickedSpot.neighbours.forEach(neighbour => {
-                let [indexI, indexJ] = neighbour.split('')
-                let spot = board[indexI][indexJ]
-                if (spot.isOccupied == false) {
-                    spot.isPossibleMove(false)
-                } else {
-                    spot.neighbours.forEach(neighbour => {
-                        let [neighbourIndexI, neighbourIndexJ] = neighbour.split('')
-                        let neighbouringSpot = board[neighbourIndexI][neighbourIndexJ]
-
-                        if (myI == indexI || myJ == indexJ) {
-                            if ((myI == neighbourIndexI || myJ == neighbourIndexJ) &&
-                                neighbouringSpot.isOccupied == false)
-                                neighbouringSpot.isPossibleMove(false)
-                        } else {
-                            if ((indexI !== neighbourIndexI && indexJ !== neighbourIndexJ) &&
-                                (myI !== neighbourIndexI && myJ !== neighbourIndexJ) &&
-                                neighbouringSpot.isOccupied == false
-                            )
-                                neighbouringSpot.isPossibleMove(false)
-
-                        }
-                    })
-                }
-            })
-        }
 
         for (let i = 0; i < this.neighbours.length; i++) {
             let [indexI, indexJ] = this.neighbours[i].split('')
@@ -111,16 +83,13 @@ class Spot {
                                
                         }
                     })
-
             }
-        
         }
 
     }
 
     hidePossibleMoves(board) {
         let [myI, myJ] = this.boardPosition.split('')
-
         this.neighbours.forEach(neighbour => {
             let [indexI, indexJ] = neighbour.split('')
             let spot = board[indexI][indexJ]
