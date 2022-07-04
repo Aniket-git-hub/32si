@@ -71,7 +71,7 @@ class Spot {
                         let neighbouringSpot = board[neighbourIndexI][neighbourIndexJ]
 
                         if (myI == indexI || myJ == indexJ) {
-                            if ((indexI == neighbourIndexI || indexJ == neighbourIndexJ)) {
+                            if (myI == indexI && indexI == neighbourIndexI || myJ == indexJ && indexJ == neighbourIndexJ) {
                                 if (neighbouringSpot.isOccupied == false) {
                                     neighbouringSpot.isPossibleMove(true)
                                     possibleJumps.push({

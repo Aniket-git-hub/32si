@@ -1,15 +1,15 @@
 const blueScore = document.getElementById('blueScore')
 const redScore = document.getElementById('redScore')
+const turnContainer = document.getElementById('turnContainer')
 
 const canvas = document.querySelector("#canvas");
 const ctx = canvas.getContext("2d");
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 const BOARD_SIZE = 280;
-const BOARD = createBoard(ctx, BOARD_SIZE);
 let RED = 16
 let BLUE = 16
-let TURN = false
+let TURN = true
 
 /**
  * @type {Spot}
@@ -17,6 +17,13 @@ let TURN = false
 let CURRENTLY_SELECTED_SPOT = null
 let way = null
 
+const BOARD = createBoard(ctx, BOARD_SIZE);
+
+const dialog = document.getElementById('dialog')
+const close = document.getElementById("close")
+close.addEventListener("click", () => {
+    dialog.classList.toggle('hide')
+})
 
 for (let i = 0; i < BOARD.length; i++) {
     if (i <= 3)
@@ -182,20 +189,45 @@ canvas.addEventListener("click", (event) => {
             let spot = BOARD[i][j];
             if (spot != 0) 
                 if (spot.isOccupied) {    
-                    if (spot.piece.isClicked(x, y)) {
-                        possibleMoves(spot)
-                    } 
+                    if (spot.piece.isClicked(x, y)) 
+                        decideTurn(spot)
                 } else {
-                    if (spot.clicked(x, y)) {
+                    if (spot.clicked(x, y)) 
                         movePiece(spot)
-                    }
+                    
                 }
         }
     }
 })
 
-function possibleMoves(spot) {
+function updateTurn() {
+    TURN ? TURN = false : TURN = true
+    if (TURN)  turnContainer.innerText = "RED"
+    else turnContainer.innerText = "BLUE"
+}
+
+function decideTurn(spot) {
+    if (TURN == true) {
+        if (spot.piece.isRed == true) possibleMoves(spot)
+        else {    
+            hideMoves()
+            alert("Blue cannot move ")
+        } 
+    } else {
+        if (spot.piece.isRed === false) possibleMoves(spot)
+        else {
+            hideMoves()
+            alert("Red cannot move ")      
+        } 
+    }
+}
+
+function hideMoves() {
     if (CURRENTLY_SELECTED_SPOT != null) CURRENTLY_SELECTED_SPOT.hidePossibleMoves(BOARD)
+}
+
+function possibleMoves(spot) {
+    hideMoves()
     CURRENTLY_SELECTED_SPOT = spot
     way = CURRENTLY_SELECTED_SPOT.showPossibleMoves(BOARD)
 }
@@ -207,6 +239,7 @@ function movePiece(newSpot) {
         newSpot.addPiece(CURRENTLY_SELECTED_SPOT.piece)
         CURRENTLY_SELECTED_SPOT.removePiece()
         killPiece(way.filter(w => w.to === newSpot.boardPosition)[0]?.through)
+        updateTurn()
     }
 }
 
@@ -225,6 +258,7 @@ function killPiece(targetSpot) {
         
     }
 }
+
 
 
 function updateScore() {

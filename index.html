@@ -19,9 +19,11 @@
             <button id="close">Ok</button>
         </article>
     </section>
-    <button id="btn" >button</button>
-    <section>
+    
+
+    <main>
         <article>
+            <h3>Current Game</h3>
             <div class="scoreBoard">
                 <h3>Red</h3>
                 <p id="redScore">16</p>
@@ -30,19 +32,31 @@
                 <h3>blue</h3>
                 <p id="blueScore">16</p>
             </div>
+            <h3>Previous Games</h3>
+            <ul>
+                <li>
+                    <div>
+                        <h3>Red</h3>
+                        <h3>Blue</h3>
+                    </div>
+                    <div>
+                        <h4>0</h4>
+                        <h4>0</h4>
+                    </div>
+                </li>
+            </ul>
         </article>
+        
+        
         <canvas id="canvas" width="700px" height="900px" style="background-color:black; "></canvas>
         <article>
+            <div>
+                <h3>Turn</h3>
+                <p id="turnContainer">RED</p>
+            </div>
             <button>New Game</button>
         </article>
-    </section>
-    <script>
-        const dialog = document.getElementById('dialog')
-        const close = document.getElementById("close")
-        close.addEventListener("click", () => {
-            dialog.classList.toggle('hide')
-        })
-</script>
+    </main>
 </body>
 
 </html>

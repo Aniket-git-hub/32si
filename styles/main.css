@@ -10,13 +10,7 @@ body{
     place-items: center;
 }
 
-section {
-    display: flex;
-    flex-direction: row;
-    padding:.5rem;
-    box-shadow: 5px 5px 10px lightgray;
-    border-radius: .5rem;
-}
+
 canvas{
     border-radius: 1rem;
 }
@@ -30,6 +24,9 @@ article{
 .scoreBoard{
     margin: .5rem 0;
     text-align: center;
+    display: flex;
+    justify-content: space-evenly ;
+    align-items: center;
 }
 .scoreBoard h3{
     font-size: 2rem;
@@ -77,4 +74,15 @@ article{
 
 .hide{
     display: none;
+}
+
+
+@media only screen and (min-width: 768px) {
+    main {
+    display: flex;
+    flex-direction: row;
+    padding:.5rem;
+    box-shadow: 5px 5px 10px lightgray;
+    border-radius: .5rem;
+}
 }
