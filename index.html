@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,8 +10,16 @@
     <script src="./scripts/spot.js" defer></script>
     <script src="./scripts/main.js" defer></script>
     <link rel="stylesheet" href="./styles/main.css">
-</head>     
+</head>
+
 <body>
+    <section class="winDialog-wrapper hide "  id="dialog" >
+        <article class="winDialog ">
+            <h1>You Have Won This Game!</h1>
+            <button id="close">Ok</button>
+        </article>
+    </section>
+    <button id="btn" >button</button>
     <section>
         <article>
             <div class="scoreBoard">
@@ -24,8 +33,16 @@
         </article>
         <canvas id="canvas" width="700px" height="900px" style="background-color:black; "></canvas>
         <article>
-
+            <button>New Game</button>
         </article>
     </section>
+    <script>
+        const dialog = document.getElementById('dialog')
+        const close = document.getElementById("close")
+        close.addEventListener("click", () => {
+            dialog.classList.toggle('hide')
+        })
+</script>
 </body>
+
 </html>

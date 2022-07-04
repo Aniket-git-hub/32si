@@ -9,11 +9,13 @@ const BOARD_SIZE = 280;
 const BOARD = createBoard(ctx, BOARD_SIZE);
 let RED = 16
 let BLUE = 16
+let TURN = false
 
 /**
  * @type {Spot}
  */
 let CURRENTLY_SELECTED_SPOT = null
+let way = null
 
 
 for (let i = 0; i < BOARD.length; i++) {
@@ -195,27 +197,32 @@ canvas.addEventListener("click", (event) => {
 function possibleMoves(spot) {
     if (CURRENTLY_SELECTED_SPOT != null) CURRENTLY_SELECTED_SPOT.hidePossibleMoves(BOARD)
     CURRENTLY_SELECTED_SPOT = spot
-    CURRENTLY_SELECTED_SPOT.showPossibleMoves(BOARD)
+    way = CURRENTLY_SELECTED_SPOT.showPossibleMoves(BOARD)
 }
 
 function movePiece(newSpot) {
     if (newSpot.possibleMove == true) {
+        CURRENTLY_SELECTED_SPOT.hidePossibleMoves(BOARD)
         CURRENTLY_SELECTED_SPOT.piece.newPosition(newSpot.x, newSpot.y)
         newSpot.addPiece(CURRENTLY_SELECTED_SPOT.piece)
         CURRENTLY_SELECTED_SPOT.removePiece()
-        CURRENTLY_SELECTED_SPOT.hidePossibleMoves(BOARD)
+        killPiece(way.filter(w => w.to === newSpot.boardPosition)[0]?.through)
     }
 }
 
-function killPiece(spot) {
-    if (PREVIOUSLY_SELECTED_SPOT.neighbours.includes(spot.boardPosition) == false) {
-        PREVIOUSLY_SELECTED_SPOT.neighbours.forEach(neighbour => {
-            let [i, j] = neighbour.split('')
-            let neighbouringSpot = BOARD[i][j]
-            if (neighbouringSpot.neighbours.includes(spot.boardPosition) && neighbouringSpot.isOccupied) {
-                neighbouringSpot.removePiece()
-            }
-        })
+function killPiece(targetSpot) {
+    if(targetSpot == undefined) return 
+    let [i, j] = targetSpot.split('')
+    let spot = BOARD[i][j]
+    if (spot.piece.isRed) {
+        RED--
+        updateScore()
+        spot.removePiece()
+    } else {
+        BLUE--
+        updateScore()
+        spot.removePiece()
+        
     }
 }
 
@@ -223,8 +230,14 @@ function killPiece(spot) {
 function updateScore() {
     blueScore.innerText = BLUE
     redScore.innerText = RED
+
+    if (BLUE == 0 && RED >= 1) {
+        dialog.classList.toggle('hide')    
+    } else if (RED == 0 && BLUE >= 1) {
+        dialog.classList.toggle('hide')
+    }
+
     console.log("Red: " + RED, "Blue: " + BLUE)
-    
 }
 
 function drawBoard(size) {
