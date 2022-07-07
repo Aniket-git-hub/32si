@@ -8,7 +8,7 @@ const canvas = document.querySelector("#canvas");
 const ctx = canvas.getContext("2d");
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
-const BOARD_SIZE = 280;
+const BOARD_SIZE = 190;
 let RED = 16
 let BLUE = 16
 let TURN = true
@@ -303,7 +303,7 @@ function showPreviousGames() {
 function updateScore() {
     blueScore.innerText = BLUE
     redScore.innerText = RED
-
+    
     if (BLUE == 0 && RED >= 1) {
         dialog.classList.toggle('hide')    
         winner.textContent = `RED! Won This Game`
@@ -317,14 +317,12 @@ function updateScore() {
         dialog.classList.toggle('hide')
         winner.textContent = `BLUE! Won This Game`
         previousGames.push({
-            winner: "RED",
+            winner: "BLUE",
             red:RED,
             blue:BLUE
         })
         showPreviousGames()
     }
-
-    // console.log("Red: " + RED, "Blue: " + BLUE)
 }
 
 function drawBoard(size) {

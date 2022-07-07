@@ -6,7 +6,7 @@ class Spot {
         this.boardPosition = boardPosition;
         this.isOccupied = false;
         this.piece = null;
-        this.radius = 15;
+        this.radius = 12;
         this.neighbours = neighbours;
         this.possibleMove = false;
 

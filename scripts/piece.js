@@ -3,7 +3,7 @@ class Piece {
         this.isRed = isRed
         this.x = x
         this.y = y
-        this.radius = 13
+        this.radius = 10
         this.context = context
 
         this.draw()
