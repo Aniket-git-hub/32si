@@ -2,41 +2,94 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box;
+    color:#fff;
 }
 body{
     width: 100vw;
     height: 100vh;
     display: grid;
     place-items: center;
+    background: url('https://source.unsplash.com/random/1000x600/?nature');
+    background-size: cover;
 }
 
 
 canvas{
     border-radius: 1rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(5px);
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 article{
-    padding: 1rem;
-    border:10px solid rgb(200, 0, 160); 
+    padding: 5rem 1rem;
+    /* border:5px solid rgb(192, 140, 251);  */
     margin:.4rem;
-    border-radius: .5rem;
+    border-radius: 10rem;
+    height: fit-content;
+    text-align: center;
+    margin:0 1rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(5px);
+    background-color: rgba(255, 255, 255, 0.2);
+    /* background-color: #fdde10; */
+}
+article h3{
+    font-size: 1.2rem;
+    margin-bottom: .5rem;
+}
+article button{
+    padding: 1rem;
+    border-radius: 2rem;
+    font-size: 1.3rem;
+    background-color: #fff;
+    border:4px solid black;
+    font-weight: 600;
+    cursor: pointer;
+    color: black;
+}
+article ul{
+    list-style: none;
+}
+li h4{
+    font-size: 2rem;
+    font-weight: lighter;
 }
 .scoreBoard{
     margin: .5rem 0;
     text-align: center;
     display: flex;
+    padding:.5rem 1rem;
     justify-content: space-evenly ;
     align-items: center;
+    border-radius: 3rem;
+}
+.red{
+    background-color: rgb(237, 25, 78);
+}
+.blue{
+    background-color: rgb(80, 150, 249);
 }
 .scoreBoard h3{
     font-size: 2rem;
     text-transform: uppercase;
-    color: #2b2b2b;
+    color:white;
 }
 .scoreBoard p{
+    color:white;
     font-size: 4rem;
-    color:#2b2b2b;
 }
+#turnContainer{
+    background-color: var(--turn);
+    padding:1rem;
+    border-radius: 5rem;
+    color:#fff;
+    font-size:2rem;
+    margin:0.3rem 0 1rem 0;
+}
+
+
+
 
 .winDialog-wrapper{
     position: absolute;
@@ -45,6 +98,7 @@ article{
     background-color: rgba(0, 0, 0, .5);
     display:grid;
     place-items: center;
+    z-index: 100;
 }
 .winDialog{
     display:grid;
@@ -82,7 +136,6 @@ article{
     display: flex;
     flex-direction: row;
     padding:.5rem;
-    box-shadow: 5px 5px 10px lightgray;
     border-radius: .5rem;
 }
 }

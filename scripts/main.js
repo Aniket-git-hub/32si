@@ -1,6 +1,8 @@
 const blueScore = document.getElementById('blueScore')
 const redScore = document.getElementById('redScore')
 const turnContainer = document.getElementById('turnContainer')
+const newGame = document.getElementById('newGame')
+const games = document.getElementById('games')
 
 const canvas = document.querySelector("#canvas");
 const ctx = canvas.getContext("2d");
@@ -10,7 +12,7 @@ const BOARD_SIZE = 280;
 let RED = 16
 let BLUE = 16
 let TURN = true
-
+const previousGames = []
 /**
  * @type {Spot}
  */
@@ -20,23 +22,33 @@ let way = null
 const BOARD = createBoard(ctx, BOARD_SIZE);
 
 const dialog = document.getElementById('dialog')
+const winner = document.getElementById('winner')
 const close = document.getElementById("close")
 close.addEventListener("click", () => {
     dialog.classList.toggle('hide')
 })
+turnContainer.style.setProperty("--turn", "rgb(237, 25, 78)")
+turnContainer.innerText = "RED"
 
-for (let i = 0; i < BOARD.length; i++) {
-    if (i <= 3)
+showPreviousGames()
+
+
+addPiecesToBoard()
+
+function addPiecesToBoard() {    
+    for (let i = 0; i < BOARD.length; i++) {
+        if (i <= 3)
         for (let j = 0; j < BOARD[i].length; j++) {
             let spot = BOARD[i][j];
             if (spot != 0) spot.addPiece(new Piece(ctx, spot.x, spot.y, false));
         }
-
-    if (i >= 5)
+        
+        if (i >= 5)
         for (let j = 0; j < BOARD[i].length; j++) {
             let spot = BOARD[i][j];
             if (spot != 0) spot.addPiece(new Piece(ctx, spot.x, spot.y, true));
         }
+    }   
 }
 
 function createBoard(context, size) {
@@ -199,11 +211,28 @@ canvas.addEventListener("click", (event) => {
         }
     }
 })
+newGame.addEventListener("click", () => {
+    BOARD.forEach(col => {
+        col.forEach(spot => {
+            if(spot.isOccupied == true) spot.removePiece()
+        })
+    })
+    addPiecesToBoard()
+    RED = 16
+    BLUE = 16
+    updateScore()
+})
+
 
 function updateTurn() {
     TURN ? TURN = false : TURN = true
-    if (TURN)  turnContainer.innerText = "RED"
-    else turnContainer.innerText = "BLUE"
+    if (TURN) {
+        turnContainer.style.setProperty("--turn", "rgb(237, 25, 78)")
+        turnContainer.innerText = "RED"
+    } else {
+        turnContainer.style.setProperty("--turn", "rgb(80, 150, 249)")
+        turnContainer.innerText = "BLUE"
+    }
 }
 
 function decideTurn(spot) {
@@ -259,6 +288,16 @@ function killPiece(targetSpot) {
     }
 }
 
+function showPreviousGames() {
+    if (previousGames.length > 0) {  
+        if (previousGames.length == 1) games.innerHTML = ``
+        previousGames.forEach(game => {
+            games.innerHTML += `<li><h4>${game.winner} ${game.red} - ${game.blue}<h4><li>`
+        })
+
+    } else 
+        games.innerHTML += `<li><h4>-<h4><li>`
+}
 
 
 function updateScore() {
@@ -267,11 +306,25 @@ function updateScore() {
 
     if (BLUE == 0 && RED >= 1) {
         dialog.classList.toggle('hide')    
+        winner.textContent = `RED! Won This Game`
+        previousGames.push({
+            winner: "RED",
+            red:RED,
+            blue:BLUE
+        })
+        showPreviousGames()
     } else if (RED == 0 && BLUE >= 1) {
         dialog.classList.toggle('hide')
+        winner.textContent = `BLUE! Won This Game`
+        previousGames.push({
+            winner: "RED",
+            red:RED,
+            blue:BLUE
+        })
+        showPreviousGames()
     }
 
-    console.log("Red: " + RED, "Blue: " + BLUE)
+    // console.log("Red: " + RED, "Blue: " + BLUE)
 }
 
 function drawBoard(size) {

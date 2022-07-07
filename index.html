@@ -16,7 +16,7 @@
 <body>
     <section class="winDialog-wrapper hide "  id="dialog" >
         <article class="winDialog ">
-            <h1>You Have Won This Game!</h1>
+            <h1 id="winner"></h1>
             <button id="close">Ok</button>
         </article>
     </section>
@@ -25,37 +25,25 @@
     <main>
         <article>
             <h3>Current Game</h3>
-            <div class="scoreBoard">
+            <div class="scoreBoard red">
                 <h3>Red</h3>
                 <p id="redScore">16</p>
             </div>
-            <div class="scoreBoard">
+            <div class="scoreBoard blue">
                 <h3>blue</h3>
                 <p id="blueScore">16</p>
             </div>
-            <h3>Previous Games</h3>
-            <ul>
-                <li>
-                    <div>
-                        <h3>Red</h3>
-                        <h3>Blue</h3>
-                    </div>
-                    <div>
-                        <h4>0</h4>
-                        <h4>0</h4>
-                    </div>
-                </li>
+            <h3>Previous Game Winner</h3>
+            <ul  id="games">
             </ul>
         </article>
-        
-        
-        <canvas id="canvas" width="700px" height="900px" style="background-color:black; "></canvas>
+        <canvas id="canvas" width="700px" height="900px"></canvas>
         <article>
             <div>
-                <h3>Turn</h3>
+                <h3>Who's Turn</h3>
                 <p id="turnContainer">RED</p>
             </div>
-            <button>New Game</button>
+            <button id="newGame">New Game</button>
         </article>
     </main>
 </body>
