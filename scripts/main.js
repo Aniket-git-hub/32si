@@ -32,29 +32,25 @@ turnContainer.innerText = "RED"
 
 showPreviousGames()
 
-
+drawRelationLines()
 addPiecesToBoard()
 
 function addPiecesToBoard() {    
     for (let i = 0; i < BOARD.length; i++) {
         if (i <= 3)
-        for (let j = 0; j < BOARD[i].length; j++) {
-            let spot = BOARD[i][j];
-            if (spot != 0) spot.addPiece(new Piece(ctx, spot.x, spot.y, false));
-        }
-        
+            for (let j = 0; j < BOARD[i].length; j++) {
+                let spot = BOARD[i][j];
+                if (spot != 0) spot.addPiece(new Piece(ctx, spot.x, spot.y, false));
+            }
         if (i >= 5)
-        for (let j = 0; j < BOARD[i].length; j++) {
-            let spot = BOARD[i][j];
-            if (spot != 0) spot.addPiece(new Piece(ctx, spot.x, spot.y, true));
-        }
+            for (let j = 0; j < BOARD[i].length; j++) {
+                let spot = BOARD[i][j];
+                if (spot != 0) spot.addPiece(new Piece(ctx, spot.x, spot.y, true));
+            }
     }   
 }
 
 function createBoard(context, size) {
-    square(context, size);
-    drawBoard(size);
-
     let x = WIDTH / 2;
     let y = HEIGHT / 2;
 
@@ -191,6 +187,12 @@ function createBoard(context, size) {
     return board;
 }
 
+function drawRelationLines() {
+    for (let i = 0; i <= 8; i++)
+        for (let j = 0; j <= 4; j++)
+            if (BOARD[i][j] != 0)
+                BOARD[i][j].drawRelationLines(BOARD);
+}
 
 canvas.addEventListener("click", (event) => {
     const rect = canvas.getBoundingClientRect();
@@ -211,6 +213,7 @@ canvas.addEventListener("click", (event) => {
         }
     }
 })
+
 newGame.addEventListener("click", () => {
     BOARD.forEach(col => {
         col.forEach(spot => {
@@ -280,10 +283,12 @@ function killPiece(targetSpot) {
         RED--
         updateScore()
         spot.removePiece()
+        navigator.vibrate(100)
     } else {
         BLUE--
         updateScore()
         spot.removePiece()
+        navigator.vibrate(100)
         
     }
 }
@@ -291,10 +296,10 @@ function killPiece(targetSpot) {
 function showPreviousGames() {
     if (previousGames.length > 0) {  
         if (previousGames.length == 1) games.innerHTML = ``
+        games.innerHTML = ``
         previousGames.forEach(game => {
             games.innerHTML += `<li><h4>${game.winner} ${game.red} - ${game.blue}<h4><li>`
         })
-
     } else 
         games.innerHTML += `<li><h4>-<h4><li>`
 }
@@ -323,126 +328,4 @@ function updateScore() {
         })
         showPreviousGames()
     }
-}
-
-function drawBoard(size) {
-    let x = WIDTH / 2;
-    let y = HEIGHT / 2;
-    let sizeOfThreeParts = size / 2;
-    // horizontal lines
-    drawLine(x - size, y + sizeOfThreeParts, x + size, y + sizeOfThreeParts);
-    drawLine(x - size, y, x + size, y);
-    drawLine(x - size, y - sizeOfThreeParts, x + size, y - sizeOfThreeParts);
-
-    // vertical lines
-    drawLine(x - sizeOfThreeParts, y - size, x - sizeOfThreeParts, y + size);
-    drawLine(x, y - size - sizeOfThreeParts, x, y + size + sizeOfThreeParts);
-    drawLine(x + sizeOfThreeParts, y - size, x + sizeOfThreeParts, y + size);
-
-    // diagonal line
-    drawLine(x - size, y - size, x + size, y + size);
-    drawLine(x + size, y - size, x - size, y + size);
-
-    // internal square
-    drawLine(x - size, y, x, y + size);
-    drawLine(x, y + size, x + size, y);
-    drawLine(x, y - size, x + size, y);
-    drawLine(x, y - size, x - size, y);
-
-    // top triangle
-    drawLine(x, y - size, x - sizeOfThreeParts, y - size - sizeOfThreeParts);
-    drawLine(x, y - size, x + sizeOfThreeParts, y - size - sizeOfThreeParts);
-    drawLine(
-        x - sizeOfThreeParts,
-        y - size - sizeOfThreeParts,
-        x + sizeOfThreeParts,
-        y - size - sizeOfThreeParts
-    );
-    // ||
-    // drawing the triangle bisector
-    drawLine(
-        x,
-        y - size - sizeOfThreeParts / 2,
-        x - sizeOfThreeParts / 2,
-        y - size - sizeOfThreeParts / 2
-    );
-    drawLine(
-        x,
-        y - size - sizeOfThreeParts / 2,
-        x + sizeOfThreeParts / 2,
-        y - size - sizeOfThreeParts / 2
-    );
-
-    // bottom triangle
-    drawLine(x, y + size, x - sizeOfThreeParts, y + size + sizeOfThreeParts);
-    drawLine(x, y + size, x + sizeOfThreeParts, y + size + sizeOfThreeParts);
-    drawLine(
-        x - sizeOfThreeParts,
-        y + size + sizeOfThreeParts,
-        x + sizeOfThreeParts,
-        y + size + sizeOfThreeParts
-    );
-    // ||
-    // drawing the triangle bisector
-    drawLine(
-        x,
-        y + size + sizeOfThreeParts / 2,
-        x + sizeOfThreeParts / 2,
-        y + size + sizeOfThreeParts / 2
-    );
-    drawLine(
-        x,
-        y + size + sizeOfThreeParts / 2,
-        x - sizeOfThreeParts / 2,
-        y + size + sizeOfThreeParts / 2
-    );
-}
-
-/**
- *
- * @param {Number} size - size of the sides of the square
- * @description - creates a sqaure on the canvas when the size is passed.
- * Caution - It us dependent on the width and height of the canvas
- */
-function square(context, size, strokeSize = 2) {
-    const x = WIDTH / 2;
-    const y = HEIGHT / 2;
-
-    context.strokeStyle = "#fff";
-    context.beginPath();
-    context.lineWidth = strokeSize;
-    context.moveTo(x - size, y - size); // top left
-    context.lineTo(x + size, y - size); // top right
-    context.lineTo(x + size, y + size); // bottom right
-    context.lineTo(x - size, y + size); // bottom left
-    context.lineTo(x - size, y - size); // top left
-    context.stroke();
-}
-
-/**
- *
- * @param {Number} startX - From where the line starts X cord
- * @param {Number} startY - From Where the line starts Y cord
- * @param {Number} endX - Where the line ends X cord
- * @param {Number} endY - Where the line ends Y cord
- */
-function drawLine(startX, startY, endX, endY, strokeSize = 2) {
-    ctx.beginPath();
-    ctx.lineWidth = strokeSize;
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
-    ctx.stroke();
-}
-
-function drawCircle(
-    context,
-    x,
-    y,
-    radius,
-    startAngle = 0,
-    endAngle = 2 * Math.PI
-) {
-    context.beginPath();
-    context.arc(x, y, radius, startAngle, endAngle);
-    context.stroke();
 }
