@@ -1,5 +1,5 @@
 class Spot {
-    nullSpot:boolean
+    nullSpot: boolean
     x: number
     y: number
     context: CanvasRenderingContext2D
@@ -17,7 +17,7 @@ class Spot {
         boardPosition: string = '',
         neighbours: string[] = []
     ) {
-        this.nullSpot = nullSpot 
+        this.nullSpot = nullSpot
         this.x = x;
         this.y = y;
         this.context = context as CanvasRenderingContext2D;
@@ -27,7 +27,7 @@ class Spot {
         this.radius = 12;
         this.neighbours = neighbours;
         this.possibleMove = false;
-        
+
         if (!nullSpot) {
             this.draw()
         }
@@ -48,7 +48,7 @@ class Spot {
         }
     }
 
-    drawRelationLines(board:Spot[][]) {
+    drawRelationLines(board: Spot[][]) {
         this.neighbours.forEach(neighbour => {
             let [indexI, indexJ] = neighbour.split('')
             let spot = board[+indexI][+indexJ]
@@ -64,7 +64,7 @@ class Spot {
         return this.piece;
     }
 
-    addPiece(piece:Piece | null) {
+    addPiece(piece: Piece | null) {
         this.isOccupied = true;
         this.piece = piece as Piece;
     }
@@ -75,38 +75,41 @@ class Spot {
         this.draw()
     }
 
-    clicked(mouseX:number, mouseY:number):boolean {
+    clicked(mouseX: number, mouseY: number): boolean {
         const distance = Math.hypot(mouseX - this.x, mouseY - this.y);
         if (distance < this.radius) return true
         return false
     }
 
-    isPossibleMove(isIt:boolean) {
+    isPossibleMove(isIt: boolean) {
         this.possibleMove = isIt
         this.draw()
     }
-    
-    showPossibleMoves(board: Spot[][]):jump[] {
+
+    getPossibleMoves(board: Spot[][]): jump[] {
         type jump = {
             through: string,
             to: string
         }
-        let possibleJumps:jump[] = []
-        let [myI, myJ] = this.boardPosition.split('')
+        let possibleJumps: jump[] = []
+        let [myI, myJ] = this.boardPosition.split('').map(Number)
 
         for (let i = 0; i < this.neighbours.length; i++) {
-            let [indexI, indexJ] = this.neighbours[i].split('')
-            let spot:Spot = board[+indexI][+indexJ]
+            let [indexI, indexJ] = this.neighbours[i].split('').map(Number)
+            let spot: Spot = board[indexI][indexJ]
             // if any of the neighbours is empty, it is a possible move
-            if (spot.isOccupied == false) spot.isPossibleMove(true)
-            // if the neighbour is occupied, it is a possible jump if it is not the same colour as the current piece
-            else {
+            if (spot.isOccupied == false) {
+                possibleJumps.push({
+                    through: '',
+                    to: this.neighbours[i]
+                })
+            } else {
                 // if the spot's piece is of same color as the current spot's piece move to next iteration
                 if (spot.piece!.isRed === this.piece!.isRed) continue
                 // if the neighbour is not the same colour as the current piece, it is a possible jump
                 spot.neighbours.forEach((neighbour) => {
-                    let [neighbourIndexI, neighbourIndexJ] = neighbour.split('')
-                    let neighbouringSpot = board[+neighbourIndexI][+neighbourIndexJ]
+                    let [neighbourIndexI, neighbourIndexJ] = neighbour.split('').map(Number)
+                    let neighbouringSpot = board[neighbourIndexI][neighbourIndexJ]
                     //if the neighbour's neighbour is not empty, just return 
                     if (neighbouringSpot.isOccupied) return
                     // checking the neighbouring spot which are in the same row or column as the current piece
@@ -114,7 +117,6 @@ class Spot {
                         // checking if the neighbouring spot's neighbour is in the same row or column as the current piece
                         // if it is, it is a possible jump
                         if (myI == indexI && indexI == neighbourIndexI || myJ == indexJ && indexJ == neighbourIndexJ) {
-                            neighbouringSpot.isPossibleMove(true)
                             possibleJumps.push({
                                 through: spot.boardPosition,
                                 to: neighbouringSpot.boardPosition,
@@ -125,7 +127,6 @@ class Spot {
                         // if it is, it is a possible jump
                         if ((indexI !== neighbourIndexI && indexJ !== neighbourIndexJ) &&
                             (myI !== neighbourIndexI && myJ !== neighbourIndexJ)) {
-                            neighbouringSpot.isPossibleMove(true)
                             possibleJumps.push({
                                 through: spot.boardPosition,
                                 to: neighbouringSpot.boardPosition,
@@ -139,17 +140,17 @@ class Spot {
         return possibleJumps
     }
 
-    hidePossibleMoves(board:Spot[][]) {
-        let [myI, myJ] = this.boardPosition.split('')
+    hidePossibleMoves(board: Spot[][]) {
+        let [myI, myJ] = this.boardPosition.split('').map(Number)
         this.neighbours.forEach(neighbour => {
-            let [indexI, indexJ] = neighbour.split('')
-            let spot = board[+indexI][+indexJ]
+            let [indexI, indexJ] = neighbour.split('').map(Number)
+            let spot = board[indexI][indexJ]
             if (spot.isOccupied == false) {
                 spot.isPossibleMove(false)
             } else {
                 spot.neighbours.forEach((neighbour) => {
-                    let [neighbourIndexI, neighbourIndexJ] = neighbour.split('')
-                    let neighbouringSpot = board[+neighbourIndexI][+neighbourIndexJ]
+                    let [neighbourIndexI, neighbourIndexJ] = neighbour.split('').map(Number)
+                    let neighbouringSpot = board[neighbourIndexI][neighbourIndexJ]
 
                     if (myI == indexI || myJ == indexJ) {
                         if ((myI == neighbourIndexI || myJ == neighbourIndexJ) &&

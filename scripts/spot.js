@@ -63,24 +63,27 @@ class Spot {
         this.possibleMove = isIt;
         this.draw();
     }
-    showPossibleMoves(board) {
+    getPossibleMoves(board) {
         let possibleJumps = [];
-        let [myI, myJ] = this.boardPosition.split('');
+        let [myI, myJ] = this.boardPosition.split('').map(Number);
         for (let i = 0; i < this.neighbours.length; i++) {
-            let [indexI, indexJ] = this.neighbours[i].split('');
-            let spot = board[+indexI][+indexJ];
+            let [indexI, indexJ] = this.neighbours[i].split('').map(Number);
+            let spot = board[indexI][indexJ];
             // if any of the neighbours is empty, it is a possible move
-            if (spot.isOccupied == false)
-                spot.isPossibleMove(true);
-            // if the neighbour is occupied, it is a possible jump if it is not the same colour as the current piece
+            if (spot.isOccupied == false) {
+                possibleJumps.push({
+                    through: '',
+                    to: this.neighbours[i]
+                });
+            }
             else {
                 // if the spot's piece is of same color as the current spot's piece move to next iteration
                 if (spot.piece.isRed === this.piece.isRed)
                     continue;
                 // if the neighbour is not the same colour as the current piece, it is a possible jump
                 spot.neighbours.forEach((neighbour) => {
-                    let [neighbourIndexI, neighbourIndexJ] = neighbour.split('');
-                    let neighbouringSpot = board[+neighbourIndexI][+neighbourIndexJ];
+                    let [neighbourIndexI, neighbourIndexJ] = neighbour.split('').map(Number);
+                    let neighbouringSpot = board[neighbourIndexI][neighbourIndexJ];
                     //if the neighbour's neighbour is not empty, just return 
                     if (neighbouringSpot.isOccupied)
                         return;
@@ -89,7 +92,6 @@ class Spot {
                         // checking if the neighbouring spot's neighbour is in the same row or column as the current piece
                         // if it is, it is a possible jump
                         if (myI == indexI && indexI == neighbourIndexI || myJ == indexJ && indexJ == neighbourIndexJ) {
-                            neighbouringSpot.isPossibleMove(true);
                             possibleJumps.push({
                                 through: spot.boardPosition,
                                 to: neighbouringSpot.boardPosition,
@@ -101,7 +103,6 @@ class Spot {
                         // if it is, it is a possible jump
                         if ((indexI !== neighbourIndexI && indexJ !== neighbourIndexJ) &&
                             (myI !== neighbourIndexI && myJ !== neighbourIndexJ)) {
-                            neighbouringSpot.isPossibleMove(true);
                             possibleJumps.push({
                                 through: spot.boardPosition,
                                 to: neighbouringSpot.boardPosition,
@@ -114,17 +115,17 @@ class Spot {
         return possibleJumps;
     }
     hidePossibleMoves(board) {
-        let [myI, myJ] = this.boardPosition.split('');
+        let [myI, myJ] = this.boardPosition.split('').map(Number);
         this.neighbours.forEach(neighbour => {
-            let [indexI, indexJ] = neighbour.split('');
-            let spot = board[+indexI][+indexJ];
+            let [indexI, indexJ] = neighbour.split('').map(Number);
+            let spot = board[indexI][indexJ];
             if (spot.isOccupied == false) {
                 spot.isPossibleMove(false);
             }
             else {
                 spot.neighbours.forEach((neighbour) => {
-                    let [neighbourIndexI, neighbourIndexJ] = neighbour.split('');
-                    let neighbouringSpot = board[+neighbourIndexI][+neighbourIndexJ];
+                    let [neighbourIndexI, neighbourIndexJ] = neighbour.split('').map(Number);
+                    let neighbouringSpot = board[neighbourIndexI][neighbourIndexJ];
                     if (myI == indexI || myJ == indexJ) {
                         if ((myI == neighbourIndexI || myJ == neighbourIndexJ) &&
                             neighbouringSpot.isOccupied == false)

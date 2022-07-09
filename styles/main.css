@@ -74,6 +74,12 @@ article button {
     font-weight: 600;
     cursor: pointer;
     color: black;
+    transition: border 0.2s ease-in-out;
+}
+
+.active{
+    border:4px solid rgb(10, 156, 29);
+    color: black;
 }
 
 #turnContainer {
