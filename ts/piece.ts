@@ -4,14 +4,18 @@ class Piece{
     y: number
     radius: number
     context: CanvasRenderingContext2D
+    isSelected: boolean
     constructor(context:CanvasRenderingContext2D | null, x:number, y:number, isRed:boolean = false) {
         this.isRed = isRed
         this.x = x
         this.y = y
         this.radius = 10
         this.context = context as CanvasRenderingContext2D
-
+        this.isSelected = false
         this.draw()
+    }
+    selected(selected:boolean): void {
+        this.isSelected = selected     
     }
     draw():void {
         this.context.beginPath();

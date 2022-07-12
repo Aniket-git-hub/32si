@@ -25,14 +25,13 @@ let HUMAN_TWO: string = "BLUE"
 let AI: string = "BLUE"
 let PLAYER: string = HUMAN_ONE
 let IS_AI_ACTIVE: boolean = false
-
 let CURRENTLY_SELECTED_SPOT: Spot | null = null
 
 type jump = {
     through: string,
     to: string
 }
-let MOVES:jump[] | null= null
+let MOVES:jump[] | null
 
 const dialog = document.getElementById('dialog')
 const winner = document.getElementById('winner')
@@ -268,7 +267,10 @@ function updateTurn() {
 
 function decideTurn(spot:Spot) {
     if (PLAYER === HUMAN_ONE) {
-        if (spot.piece!.isRed === true) possibleMoves(spot);
+        if (spot.piece!.isRed === true) {
+            spot.piece!.isSelected = true;
+            possibleMoves(spot);
+        } 
         else {
             hideMoves();
             alert("Blue cannot move ");
@@ -296,6 +298,7 @@ function possibleMoves(spot:Spot) {
         possibleSpot.isPossibleMove(true)
     })
 }
+
 
 function movePiece(newSpot:Spot) {
     if (newSpot.possibleMove == true) {
@@ -361,18 +364,40 @@ function checkWinner() {
 }
 
 function nextAIMove() {
-    let pickedMove = null
-    let pickedSpot = null
-    for (let i = 0; i < BOARD.length; i++) {
-        for (let j = 0; j < BOARD[i].length; j++) {
-            let spot = BOARD[i][j]
-            if (spot.nullSpot) continue
-            if (spot.isOccupied !== true) continue
-            let piece = spot.piece
-            if (piece!.isRed == false) pickedSpot = spot
-        }
+    type spotMoves = {
+        spot: Spot
+        moves:jump[]
     }
-
-    console.log(pickedSpot)
-
+    let pickedSpot:Spot
+    let allMoves:spotMoves[] = []
+    BOARD.forEach(row => {
+        row.forEach(spot => {
+            if (spot.nullSpot) return 
+            if (spot.piece?.isRed === true) return
+            if (!spot.isOccupied) return
+            allMoves.push({
+                spot:spot,
+                moves:spot.getPossibleMoves(BOARD)
+            })
+        })
+    })
+    let pickedMove:jump 
+    allMoves.forEach(spot => {
+        if (spot.moves.length > 0) {
+            spot.moves.forEach(move => {
+                if (move.through != '') {
+                    pickedMove = move
+                    pickedSpot = spot.spot
+                }
+                if (pickedMove == undefined) {
+                    pickedMove = move
+                    pickedSpot = spot.spot
+                }
+            })
+        }
+    })
+    decideTurn(pickedSpot)
+    let [i, j] = pickedMove.to.split("").map(Number)
+    let newSpot = BOARD[i][j]
+    movePiece(newSpot)
 }

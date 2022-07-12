@@ -19,7 +19,7 @@ let AI = "BLUE";
 let PLAYER = HUMAN_ONE;
 let IS_AI_ACTIVE = false;
 let CURRENTLY_SELECTED_SPOT = null;
-let MOVES = null;
+let MOVES;
 const dialog = document.getElementById('dialog');
 const winner = document.getElementById('winner');
 const closeBtn = document.getElementById("close");
@@ -235,8 +235,10 @@ function updateTurn() {
 }
 function decideTurn(spot) {
     if (PLAYER === HUMAN_ONE) {
-        if (spot.piece.isRed === true)
+        if (spot.piece.isRed === true) {
+            spot.piece.isSelected = true;
             possibleMoves(spot);
+        }
         else {
             hideMoves();
             alert("Blue cannot move ");
@@ -329,19 +331,39 @@ function checkWinner() {
     }
 }
 function nextAIMove() {
-    let pickedMove = null;
-    let pickedSpot = null;
-    for (let i = 0; i < BOARD.length; i++) {
-        for (let j = 0; j < BOARD[i].length; j++) {
-            let spot = BOARD[i][j];
+    let pickedSpot;
+    let allMoves = [];
+    BOARD.forEach(row => {
+        row.forEach(spot => {
             if (spot.nullSpot)
-                continue;
-            if (spot.isOccupied !== true)
-                continue;
-            let piece = spot.piece;
-            if (piece.isRed == false)
-                pickedSpot = spot;
+                return;
+            if (spot.piece?.isRed === true)
+                return;
+            if (!spot.isOccupied)
+                return;
+            allMoves.push({
+                spot: spot,
+                moves: spot.getPossibleMoves(BOARD)
+            });
+        });
+    });
+    let pickedMove;
+    allMoves.forEach(spot => {
+        if (spot.moves.length > 0) {
+            spot.moves.forEach(move => {
+                if (move.through != '') {
+                    pickedMove = move;
+                    pickedSpot = spot.spot;
+                }
+                if (pickedMove == undefined) {
+                    pickedMove = move;
+                    pickedSpot = spot.spot;
+                }
+            });
         }
-    }
-    console.log(pickedSpot);
+    });
+    decideTurn(pickedSpot);
+    let [i, j] = pickedMove.to.split("").map(Number);
+    let newSpot = BOARD[i][j];
+    movePiece(newSpot);
 }

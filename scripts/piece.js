@@ -6,7 +6,11 @@ class Piece {
         this.y = y;
         this.radius = 10;
         this.context = context;
+        this.isSelected = false;
         this.draw();
+    }
+    selected(selected) {
+        this.isSelected = selected;
     }
     draw() {
         this.context.beginPath();
