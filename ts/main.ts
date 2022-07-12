@@ -368,7 +368,7 @@ function nextAIMove() {
         spot: Spot
         moves:jump[]
     }
-    let pickedSpot:Spot
+    let pickedSpot:Spot | any = null
     let allMoves:spotMoves[] = []
     BOARD.forEach(row => {
         row.forEach(spot => {
@@ -381,7 +381,7 @@ function nextAIMove() {
             })
         })
     })
-    let pickedMove:jump 
+    let pickedMove:jump | null
     allMoves.forEach(spot => {
         if (spot.moves.length > 0) {
             spot.moves.forEach(move => {
@@ -397,7 +397,7 @@ function nextAIMove() {
         }
     })
     decideTurn(pickedSpot)
-    let [i, j] = pickedMove.to.split("").map(Number)
+    let [i, j] = pickedMove!.to.split("").map(Number)
     let newSpot = BOARD[i][j]
     movePiece(newSpot)
 }
