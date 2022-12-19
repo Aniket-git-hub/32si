@@ -19,7 +19,7 @@ class Spot {
         if (this.possibleMove) {
             this.context.beginPath();
             this.context.fillStyle = "green";
-            this.context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+            this.context.arc(this.x, this.y, this.radius - 2, 0, 2 * Math.PI);
             this.context.fill();
             this.context.stroke();
         }

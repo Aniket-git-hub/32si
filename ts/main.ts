@@ -5,12 +5,12 @@ const newGame = document.getElementById('newGame')
 const games = document.getElementById('games')
 const toggleAIBtn = document.getElementById('toggleAIBtn')
 
-const canvas:HTMLCanvasElement | null = document.querySelector("#canvas");
-const ctx:CanvasRenderingContext2D | null = canvas!.getContext("2d");
-const WIDTH:number = canvas!.width;
-const HEIGHT:number = canvas!.height;
-const BOARD_SIZE:number = 190;
-let RED:number = 16
+const canvas: HTMLCanvasElement | null = document.querySelector("#canvas");
+const ctx: CanvasRenderingContext2D | null = canvas!.getContext("2d");
+const WIDTH: number = canvas!.width;
+const HEIGHT: number = canvas!.height;
+const BOARD_SIZE: number = 190;
+let RED: number = 16
 let BLUE: number = 16
 
 type finalScore = {
@@ -31,7 +31,7 @@ type jump = {
     through: string,
     to: string
 }
-let MOVES:jump[] | null
+let MOVES: jump[] | null
 
 const dialog = document.getElementById('dialog')
 const winner = document.getElementById('winner')
@@ -42,7 +42,7 @@ closeBtn!.addEventListener("click", () => {
 turnContainer!.style.setProperty("--turn", "rgb(237, 25, 78)")
 turnContainer!.innerText = "RED"
 
-const BOARD:Spot[][] = createBoard(ctx, BOARD_SIZE);
+const BOARD: Spot[][] = createBoard(ctx, BOARD_SIZE);
 
 showPreviousGames()
 
@@ -55,7 +55,7 @@ canvas!.addEventListener("click", (event) => {
     const y = event.clientY - rect.top;
     for (let i = 0; i < BOARD.length; i++) {
         for (let j = 0; j < BOARD[i].length; j++) {
-            let spot:Spot = BOARD[i][j];
+            let spot: Spot = BOARD[i][j];
             if (spot.nullSpot) continue;
             if (spot.isOccupied) {
                 if (spot.piece!.isClicked(x, y)) decideTurn(spot)
@@ -101,9 +101,9 @@ function addPiecesToBoard() {
     }
 }
 
-function createBoard(context:CanvasRenderingContext2D|null, size:number) {
-    let x:number = WIDTH / 2;
-    let y:number = HEIGHT / 2;
+function createBoard(context: CanvasRenderingContext2D | null, size: number) {
+    let x: number = WIDTH / 2;
+    let y: number = HEIGHT / 2;
 
     const sizes = [
         [
@@ -173,7 +173,7 @@ function createBoard(context:CanvasRenderingContext2D|null, size:number) {
     type relationsType = {
         [key: string]: string[]
     }
-    const relations:relationsType = {
+    const relations: relationsType = {
         "01": ["02", "11"],
         "02": ["01", "03", "12"],
         "03": ["02", "13"],
@@ -213,7 +213,7 @@ function createBoard(context:CanvasRenderingContext2D|null, size:number) {
         "83": ["73", "82"],
     };
 
-    const board:Spot[][] = [];
+    const board: Spot[][] = [];
     for (let i = 0; i <= 8; i++) {
         board[i] = [];
         if (i >= 2 && i <= 6)
@@ -265,21 +265,21 @@ function updateTurn() {
     }
 }
 
-function decideTurn(spot:Spot) {
+function decideTurn(spot: Spot) {
     if (PLAYER === HUMAN_ONE) {
         if (spot.piece!.isRed === true) {
             spot.piece!.isSelected = true;
             possibleMoves(spot);
-        } 
+        }
         else {
             hideMoves();
-            alert("Blue cannot move ");
+            console.log("Blue cannot move ");
         }
     } else {
         if (spot.piece!.isRed === false) possibleMoves(spot);
         else {
             hideMoves();
-            alert("Red cannot move ");
+            console.log("Red cannot move ");
         }
     }
 }
@@ -288,7 +288,7 @@ function hideMoves() {
     if (CURRENTLY_SELECTED_SPOT != null) CURRENTLY_SELECTED_SPOT.hidePossibleMoves(BOARD)
 }
 
-function possibleMoves(spot:Spot) {
+function possibleMoves(spot: Spot) {
     hideMoves()
     CURRENTLY_SELECTED_SPOT = spot
     MOVES = CURRENTLY_SELECTED_SPOT.getPossibleMoves(BOARD)
@@ -300,7 +300,7 @@ function possibleMoves(spot:Spot) {
 }
 
 
-function movePiece(newSpot:Spot) {
+function movePiece(newSpot: Spot) {
     if (newSpot.possibleMove == true) {
         CURRENTLY_SELECTED_SPOT!.hidePossibleMoves(BOARD)
         CURRENTLY_SELECTED_SPOT!.piece!.newPosition(newSpot.x, newSpot.y)
@@ -319,7 +319,7 @@ function killPiece(targetSpot: string) {
     if (spot.piece!.isRed) RED--
     else BLUE--
     spot.removePiece()
-    navigator.vibrate([50,50,50])
+    navigator.vibrate([50, 50, 50])
     updateScore()
     checkWinner()
 }
@@ -351,6 +351,7 @@ function checkWinner() {
             blue: BLUE
         })
         showPreviousGames()
+        return "RED"
     } else if (RED === 0 && BLUE >= 1) {
         dialog!.classList.toggle('hide')
         winner!.textContent = `BLUE! Won This Game`
@@ -360,28 +361,31 @@ function checkWinner() {
             blue: BLUE
         })
         showPreviousGames()
+        return "BLUE"
     }
+    return null
 }
 
 function nextAIMove() {
     type spotMoves = {
         spot: Spot
-        moves:jump[]
+        moves: jump[]
+        
     }
-    let pickedSpot:Spot | any = null
-    let allMoves:spotMoves[] = []
+    let pickedSpot: Spot | any = null
+    let allMoves: spotMoves[] = []
     BOARD.forEach(row => {
         row.forEach(spot => {
-            if (spot.nullSpot) return 
+            if (spot.nullSpot) return
             if (spot.piece?.isRed === true) return
             if (!spot.isOccupied) return
             allMoves.push({
-                spot:spot,
-                moves:spot.getPossibleMoves(BOARD)
+                spot: spot,
+                moves: spot.getPossibleMoves(BOARD)
             })
         })
     })
-    let pickedMove:jump | null
+    let pickedMove: jump
     allMoves.forEach(spot => {
         if (spot.moves.length > 0) {
             spot.moves.forEach(move => {

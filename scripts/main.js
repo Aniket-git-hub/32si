@@ -241,7 +241,7 @@ function decideTurn(spot) {
         }
         else {
             hideMoves();
-            alert("Blue cannot move ");
+            console.log("Blue cannot move ");
         }
     }
     else {
@@ -249,7 +249,7 @@ function decideTurn(spot) {
             possibleMoves(spot);
         else {
             hideMoves();
-            alert("Red cannot move ");
+            console.log("Red cannot move ");
         }
     }
 }
@@ -318,6 +318,7 @@ function checkWinner() {
             blue: BLUE
         });
         showPreviousGames();
+        return "RED";
     }
     else if (RED === 0 && BLUE >= 1) {
         dialog.classList.toggle('hide');
@@ -328,10 +329,12 @@ function checkWinner() {
             blue: BLUE
         });
         showPreviousGames();
+        return "BLUE";
     }
+    return null;
 }
 function nextAIMove() {
-    let pickedSpot;
+    let pickedSpot = null;
     let allMoves = [];
     BOARD.forEach(row => {
         row.forEach(spot => {
