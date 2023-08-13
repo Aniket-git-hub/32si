@@ -1,8 +1,46 @@
 import 'dotenv/config'
 
-import epxress from 'express'
-const app = epxress()
+import express from 'express'
+const app = express()
 const PORT = process.env.PORT || 3000
+
+/**
+ *  crossorigin configuration 
+ *  prevents cross origin error and preflight error
+ */
+import cors from 'cors'
+app.use(cors({
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}))
+
+/**
+ * bodyparser configuration for post and put requests
+ * Allows server to receive data from the client 
+ */
+app.use(express.json())
+app.use(express.urlencoded({
+    extended: true
+}))
+
+
+/**
+ * Database Connection
+ * using mongoose
+ */
+import dbConfig from './config/db.config.js'
+import mongoose from 'mongoose' 
+try {
+    await mongoose.connect(dbConfig.mongodb_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+    console.log("Connected to Database")
+} catch (error) {
+    console.log(error.message)
+}
+
 
 /**
  * Routes 
