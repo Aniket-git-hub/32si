@@ -3,6 +3,12 @@ const router = express.Router()
 import jwt from "jsonwebtoken"
 import bcrypt from 'bcryptjs'
 import User from "../models/user.js"
+import errorHandle from "../middleware/errorHandler.js"
+
+/**
+ * Defining /register route 
+ * Handles POST request to create new user or register as in the route
+ */
 router.post("/register", async (req, res) => {
     const { name, username, email, password } = req.body
     const newUser = new User({
@@ -20,14 +26,14 @@ router.post("/register", async (req, res) => {
             username: savedUser.username
         }, process.env.JWT_SECRET_KEY, { expiresIn: '24h' })
         
-        const { password, ...rest} = savedUser._doc
+        const { password, ...rest } = savedUser._doc
         res.status(201).json({
             message: "New User Created Successfully",
             token,
             user: rest
         })
     } catch (error) {
-        console.log(error.message)
+        errorHandle(error, req, res)
     }
 })
 
