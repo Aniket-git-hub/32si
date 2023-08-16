@@ -53,5 +53,11 @@ app.get("/", (req, res) => res.send("Hello world!"))
 import authRoute from './routes/auth.js' 
 app.use("/auth", authRoute)
 
+/**
+ * Middleware to handle error
+ */
+import errorHandler from './middleware/errorHandler.js'
+app.use(errorHandler)
+
 
 app.listen(PORT, () => console.log(`Server running on port: ${PORT}`))
