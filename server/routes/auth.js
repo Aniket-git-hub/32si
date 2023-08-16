@@ -3,12 +3,13 @@ const router = express.Router()
 import jwt from "jsonwebtoken"
 import bcrypt from 'bcryptjs'
 import User from "../models/user.js"
+import validateInputs from "../middleware/validateInputs.js"
 
 /**
  * Defining /register route 
  * Handles POST request to create new user or register as in the route
  */
-router.post("/register", async (req, res, next) => {
+router.post("/register", validateInputs.inputValidationRules, validateInputs.inputValidation, async (req, res, next) => {
     const { name, username, email, password } = req.body
     const newUser = new User({
         name,
