@@ -36,7 +36,7 @@ try {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })
-    console.log("Connected to Database")
+    console.log("[mongodb]: Connected to Database")
 } catch (error) {
     console.log(error.message)
 }
@@ -60,4 +60,4 @@ import errorHandler from './middleware/errorHandler.js'
 app.use(errorHandler)
 
 
-app.listen(PORT, () => console.log(`Server running on port: ${PORT}`))
+app.listen(PORT, () => console.log(`[server]: running on port: ${PORT} | https://localhost:${PORT}/`))

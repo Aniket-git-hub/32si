@@ -8,7 +8,7 @@ import { MongooseError } from "mongoose"
  * @param {Function} next Next Middleware Function
  */
 function errorHandler(error, req, res, next) {
-    console.log(error.message)
+    console.log(`[error]: ${error.message}`)
     if (error instanceof MongooseError.ValidationError) {
         res.status(400).json({
             message: error.message
@@ -32,6 +32,10 @@ function errorHandler(error, req, res, next) {
     } else if (error.name === "ValidationError") { 
         res.status(400).json({
             errors: error.errors
+        })
+    } else if (error.name === "LoginError") {
+        res.status(401).json({
+            message: error.message
         })
     } else {
         res.status(500).json({

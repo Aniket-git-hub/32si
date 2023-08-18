@@ -13,11 +13,15 @@ async function login(req, res, next) {
         const { email, password:pass } = req.body
         const user = await User.findOne({ email })
         if (!user) {
-            throw new Error("Invalid Email")
+            let err = new Error("Invalid email")
+            err.name = "LoginError"
+            throw err
         }
 
         if (!bcrypt.compareSync(pass, user.password)) {
-            throw new Error("Invalid password")
+            let err = new Error("Invalid password")
+            err.name = "LoginError"
+            throw err
         }
 
         const token = jwt.sign({
@@ -35,6 +39,7 @@ async function login(req, res, next) {
         })
 
     } catch (error) {
+
         next(error)
     }
 }
