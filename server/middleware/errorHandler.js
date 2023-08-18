@@ -29,6 +29,10 @@ function errorHandler(error, req, res, next) {
         res.status(400).json({
             message:error.message
         })
+    } else if (error.name === "ValidationError") { 
+        res.status(400).json({
+            errors: error.errors
+        })
     } else {
         res.status(500).json({
             message: "Internal Server Error"
