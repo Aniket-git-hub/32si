@@ -61,3 +61,8 @@ app.use(errorHandler)
 
 
 app.listen(PORT, () => console.log(`[server]: running on port: ${PORT} | https://localhost:${PORT}/`))
+
+/**
+ * export for testing purpose
+ */
+export default app

@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken"
 import bcrypt from 'bcryptjs'
-import User from "../models/user.js"
+import User from "../../models/user.js"
 
 /**
  * @description  controller to login the user.
