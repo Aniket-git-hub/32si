@@ -24,7 +24,7 @@ export default function RegisterPage() {
 
   return (
     <div>
-      <h2>Login</h2>
+      <h2>Register</h2>
       <form onSubmit={handleRegistration} >
         <label htmlFor="name">Name:
           <input type="text" onChange={(e) => setName(e.target.value)} id="name" />
