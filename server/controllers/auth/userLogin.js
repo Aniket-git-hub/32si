@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken"
 import bcrypt from 'bcryptjs'
 import User from "../../models/user.js"
+import generateToken from "../../utils/generateToken.js"
 
 /**
  * @description  controller to login the user.
@@ -24,22 +25,28 @@ async function login(req, res, next) {
             throw err
         }
 
-        const token = jwt.sign({
+        const { accessToken, refreshToken } = generateToken({
             id: user._id,
             name: user.name,
             username: user.username,
             email: user.email
-        }, process.env.JWT_SECRET_KEY, { expiresIn: '24h' })
-        
+        })
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            sameSite: 'strict',
+            // secure: true,
+            maxAge: 24 * 60 * 60 * 1000
+        })
+
         const { password, ...rest } = user._doc
         res.status(200).json({
             message: "User logged in successfully",
-            token,
+            accessToken,
             user: rest
         })
 
     } catch (error) {
-
         next(error)
     }
 }

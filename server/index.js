@@ -23,8 +23,8 @@ app.use(express.json())
 app.use(express.urlencoded({
     extended: true
 }))
-
-
+import cookieParser from 'cookie-parser'
+app.use(cookieParser())
 /**
  * Database Connection
  * using mongoose

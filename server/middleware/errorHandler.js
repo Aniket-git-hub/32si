@@ -8,7 +8,8 @@ import { MongooseError } from "mongoose"
  * @param {Function} next Next Middleware Function
  */
 function errorHandler(error, req, res, next) {
-    console.log(`[server]: Request: ${req.path} - [error]: ${error.message}`)
+    // console.log(`[server]: Request: ${req.path} - [error]: ${error.message}`)
+    console.log(error)
     if (error instanceof MongooseError.ValidationError) {
         res.status(400).json({
             message: error.message
