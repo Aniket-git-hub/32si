@@ -1,32 +1,45 @@
 import { body, validationResult } from 'express-validator'
+
+// Common validation rules
+const commonRules = {
+    name: [
+        body('name')
+            .isString().withMessage("Oops! The name should be a string.")
+            .notEmpty().withMessage("Oh no! You forgot to enter your name.")
+            .isLength({ max: 12 }).withMessage("Hold on! Your name should be no more than 12 characters.")
+            .trim(),
+    ],
+    email: [
+        body('email')
+            .isEmail().withMessage("Hmm... That doesn't look like a valid email.")
+            .normalizeEmail()
+            .trim(),
+    ],
+    password: [
+        body('password')
+            .isString().withMessage("Uh-oh! Your password should be a string.")
+            .trim(),
+    ],
+}
+
 /**
  * @type {Array}
  * Validation rules array for validation of register inputs filed.
  * - rules set for Email filed
  * - rules set for Password filed
  */
+
 export const userRegistrationInputsValidationRules = [
-    body('name')
-        .isString().withMessage("name filed value should be string")
-        .notEmpty().withMessage("Name is required")
-        .isLength({ max: 12 }).withMessage("name filed max length is 12 characters")
-        .trim(),
-    
+    ...commonRules.name,
     body('username')
-        .notEmpty().withMessage("Username is required")
-        .isLength({ max: 10 }).withMessage("username filed max length is 15 characters")
-        .isAlphanumeric().withMessage("Username should be alphanumeric")
+        .notEmpty().withMessage("Oops! You forgot to enter your username.")
+        .isLength({ max: 10 }).withMessage("Hold on! Your username should be no more than 15 characters.")
+        .isAlphanumeric().withMessage("Hmm... Your username should only contain letters and numbers.")
         .trim(),
-    
-    body('email')
-        .isEmail().withMessage("Invalid Email")
-        .normalizeEmail()
-        .trim(),
-    
+    ...commonRules.email,
+    ...commonRules.password,
     body('password')
-        .isString().withMessage("password must be string")
-        .isLength({ max: 15, min: 8 }).withMessage("Password length must be >= 8 and <= 15 characters")
-        .trim(),
+        .isLength({ max: 15, min: 8 }).withMessage("Uh-oh! Your password should be between 8 and 15 characters."),
 ]
 
 /**
@@ -35,16 +48,12 @@ export const userRegistrationInputsValidationRules = [
  * - rules set for Email filed
  * - rules set for Password filed
  */
+
 export const userLoginInputsValidationRules = [
-    body('email')
-        .isEmail().withMessage("Invalid Email")
-        .normalizeEmail()
-        .trim(),
-    
+    ...commonRules.email,
+    ...commonRules.password,
     body('password')
-        .isString().withMessage("password must be string")
-        .notEmpty().withMessage("Password is required")
-        .trim()
+        .notEmpty().withMessage("Oops! You forgot to enter your password."),
 ]
 
 /**
@@ -55,6 +64,7 @@ export const userLoginInputsValidationRules = [
  * @param {Function} next Next Middleware Function
  * @returns {Response} Response to client 
  */
+
 export function inputValidation(req, res, next) {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {

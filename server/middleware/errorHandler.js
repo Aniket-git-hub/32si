@@ -1,5 +1,17 @@
 import { MongooseError } from "mongoose"
 
+const errorTypeMap = {
+    "MongooseError.ValidationError": { status: 400, message: (error) => `Oops! There seems to be a validation error: ${error.message}` },
+    "MongooseError.CastError": { status: 404, message: "Uh-oh! The resource you're looking for cannot be found." },
+    "11000": { status: 409, message: "Hold on! It looks like there's a duplicate key error." },
+    "JsonWebTokenError": { status: 401, message: "Hmm... The token provided seems to be invalid." },
+    "SyntaxError": { status: 400, message: (error) => `Oops! There seems to be a syntax error: ${error.message}` },
+    "ValidationError": { status: 400, message: (error) => ({ errors: `Oops! There seems to be a validation error: ${error.errors}` }) },
+    "LoginError": { status: 401, message: (error) => `Uh-oh! There seems to be a login error: ${error.message}` },
+    "TokenExpiredError": { status: 401, message: "Oh no! Your token has expired." }
+}
+
+
 /**
  * @description middleware function which sends appropriate error response to the client 
  * @param {Error} error Error Object 
@@ -8,41 +20,14 @@ import { MongooseError } from "mongoose"
  * @param {Function} next Next Middleware Function
  */
 function errorHandler(error, req, res, next) {
-    // console.log(`[server]: Request: ${req.path} - [error]: ${error.message}`)
-    console.log(error)
-    if (error instanceof MongooseError.ValidationError) {
-        res.status(400).json({
-            message: error.message
-        })
-    } else if (error instanceof MongooseError.CastError) {
-        res.status(404).json({
-            message: "Resource Not Found"
-        })
-    } else if (error.code === 11000) {
-        res.status(409).json({
-            message: "Duplicate Key Error"
-        })
-    } else if (error.name === "JsonWebTokenError") {
-        res.status(401).json({
-            message: "Invalid Token"
-        })
-    } else if (error.name === "SyntaxError") { 
-        res.status(400).json({
-            message:error.message
-        })
-    } else if (error.name === "ValidationError") { 
-        res.status(400).json({
-            errors: error.errors
-        })
-    } else if (error.name === "LoginError") {
-        res.status(401).json({
-            message: error.message
-        })
-    } else {
-        res.status(500).json({
-            message: "Internal Server Error"
-        })
-    }
+    console.log(`[server]: Request: ${req.path} - [error]: ${error.message}`);
+
+    const errorType = error.code || error.name;
+    const errorInfo = errorTypeMap[errorType] || { status: 500, message: "Internal Server Error" };
+
+    res.status(errorInfo.status).json({
+        message: typeof errorInfo.message === 'function' ? errorInfo.message(error) : errorInfo.message
+    });
 }
 
 export default errorHandler

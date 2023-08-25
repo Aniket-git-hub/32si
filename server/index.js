@@ -5,7 +5,7 @@ const app = express()
 const PORT = process.env.PORT || 3000
 
 /**
- *  crossorigin configuration 
+ *  cross-origin configuration 
  *  prevents cross origin error and preflight error
  */
 import cors from 'cors'
@@ -16,7 +16,7 @@ app.use(cors({
 }))
 
 /**
- * bodyparser configuration for post and put requests
+ * body-parser configuration for post and put requests
  * Allows server to receive data from the client 
  */
 app.use(express.json())
@@ -25,22 +25,13 @@ app.use(express.urlencoded({
 }))
 import cookieParser from 'cookie-parser'
 app.use(cookieParser())
+
 /**
  * Database Connection
  * using mongoose
  */
-import dbConfig from './config/db.config.js'
-import mongoose from 'mongoose' 
-try {
-    await mongoose.connect(dbConfig.mongodb_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    })
-    console.log("[mongodb]: Connected to Database")
-} catch (error) {
-    console.log(error.message)
-}
-
+import connectToDatabase from './db.js'
+connectToDatabase()
 
 /**
  * Routes 
@@ -50,14 +41,22 @@ try {
  */
 app.get("/", (req, res) => res.send("Hello world!"))
 
-import authRoute from './routes/auth.js' 
+import authRoute from './routes/auth.js'
 app.use("/auth", authRoute)
+
+app.get("/user/posts", verifyJWT, (req, res) => res.send(`Hello ${req.user.name}`))
 
 /**
  * Middleware to handle error
  */
 import errorHandler from './middleware/errorHandler.js'
+import verifyJWT from './middleware/verifyJWT.js'
 app.use(errorHandler)
+// fallback default error handler
+app.use(function (err, req, res, next) {
+    console.error(err.stack)
+    res.status(500).send('An error occurred!')
+});
 
 
 app.listen(PORT, () => console.log(`[server]: running on port: ${PORT} | https://localhost:${PORT}/`))
