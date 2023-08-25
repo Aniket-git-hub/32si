@@ -6,7 +6,7 @@ const errorTypeMap = {
     "11000": { status: 409, message: "Hold on! It looks like there's a duplicate key error." },
     "JsonWebTokenError": { status: 401, message: "Hmm... The token provided seems to be invalid." },
     "SyntaxError": { status: 400, message: (error) => `Oops! There seems to be a syntax error: ${error.message}` },
-    "ValidationError": { status: 400, message: (error) => ({ errors: `Oops! There seems to be a validation error: ${error.errors}` }) },
+    "ValidationError": { status: 400, message: (error) => ([`Oops! There seems to be a validation error:`, ...error.errors ]) },
     "LoginError": { status: 401, message: (error) => `Uh-oh! There seems to be a login error: ${error.message}` },
     "TokenExpiredError": { status: 401, message: "Oh no! Your token has expired." }
 }
