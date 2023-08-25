@@ -1,16 +1,23 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { loginUser } from "../api/auth";
+import { UserContext } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
+  const { user:me, setUser } = useContext(UserContext)
+  const navigate = useNavigate()
+
   const handleLogin = async (event) => {
     event.preventDefault()
     console.log({ email, password })
     try {
-      const user = await loginUser({ email, password })
-      console.log(user)
+      const {user, ...data} = await loginUser({ email, password })
+      setUser(user)
+      console.log(me)
+      navigate("/")
     } catch (error) {
       console.log(error)
     }

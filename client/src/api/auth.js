@@ -1,20 +1,20 @@
-import instance from "../config/axios.config"
+import  instance  from "../config/axios.config"
 
-export const loginUser = async (credentials) => {
+const handleRequest = async (url, data) => {
     try {
-        const response = await instance.post('/auth/login', credentials)
-        return response.data
+        const response = await instance.post(url, data)
+        if (response.status === 200) {
+            return response.data
+        } else {
+            throw new Error(`Request failed with  status code ${response.status}`)        
+        }
+
     } catch (error) {
+        console.log(`Error: ${error.message}`)
         throw error
     }
 }
 
-export const registerUser = async (details) => {
-    try {
-        const response = await instance.post('/auth/register', details)
-        return response.data
-    } catch (error) {
-        throw error
-    }
-}
+export const loginUser = async (credentials) => handleRequest('/auth/login', credentials)
 
+export const registerUser = async (details) => handleRequest('auth/register', details)
