@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { registerUser } from "../api/auth";
+import { useAuth } from "../hooks/useAuth";
 
 export default function RegisterPage() {
   const [name, setName] = useState('')
@@ -7,15 +8,16 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
+  const {save} = useAuth()
+
   const handleRegistration = async (event) => {
     event.preventDefault()
-    console.log({
-      name,username, email, password
-    })
+    
 
     try {
-      const user = await registerUser({name, username, email, password})
-      console.log(user)
+      const { user, accessToken, message } = await registerUser({ name, username, email, password })
+      alert(message)
+      save(user, accessToken)
     } catch (error) {
       console.log(error)
     }
