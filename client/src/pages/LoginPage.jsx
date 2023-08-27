@@ -1,45 +1,44 @@
-import { useState } from "react";
 import { loginUser } from "../api/auth";
 import { useAuth } from "../hooks/useAuth";
+import { useFormValidation } from "../hooks/useFormValidation";
+import { Link } from 'react-router-dom'
+import { useSanitizeValues } from "../hooks/useSanitizedValues";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const {save, user:authenticatedUser, isAuthenticated} = useAuth()
-
-  const handleLogin = async (event) => {
-    event.preventDefault()
-    console.log({ email, password })
+  const initialState = { email: '', password: '' }
+  
+  const { save } = useAuth()
+  const login = async () => {
     try {
-      const { user, accessToken, message } = await loginUser({ email, password })
+      const sanitizedValues = useSanitizeValues(values) 
+      const { user, accessToken } = await loginUser(sanitizedValues)
       save(user, accessToken)
     } catch (error) {
       console.log(error)
     }
-
   }
 
+  const {values, errors, handleChange, handleSubmit, isSubmitting} = useFormValidation(initialState, login)
+  
   return (
     <>
-      <div>
-        
-        <h2>{isAuthenticated}</h2>
-        <h3>
-          {authenticatedUser?.email}
-
-        </h3>
-        <form onSubmit={handleLogin} >
+      <section>
+        <h2>32 Beads Login</h2>
+        <form onSubmit={handleSubmit}>
           <label htmlFor="email">Email
-            <input type="email" onChange={(e) => setEmail(e.target.value)} id="email" />
+            <input type="email" name="email" value={values.email} onChange={handleChange} id="email" />
           </label>
+          {errors.email && <p>{errors.email}</p>}
           <br></br>
           <label htmlFor="password">Password
-            <input type="password" onChange={(e) => setPassword(e.target.value)} id="password" />
+            <input type="password" name="password" value={values.password} onChange={handleChange} id="password" />
           </label>
+          {errors.password && <p>{errors.password}</p>}
           <br></br>
-          <button type="submit" >Login</button>
+          <button type="submit" disabled={isSubmitting}>Login</button>
         </form>
-      </div>
+        <Link to="/register">Register</Link>
+      </section>
     </>
   );
 }
