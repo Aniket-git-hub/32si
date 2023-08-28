@@ -5,7 +5,7 @@ export const validationRules = {
     },
     password: {
         validate: (value) => value.length >= 6,
-        error: 'Password needs to be 6 characters or more',
+        error: 'Password needs to be 8 characters or more',
     },
     name: {
         validate: (value) => value.trim() !== '',
