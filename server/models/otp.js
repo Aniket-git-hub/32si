@@ -1,20 +1,20 @@
 import mongoose from "mongoose"
-const otpSchema = mongoose.Schema({
+const optSchema = mongoose.Schema({
     email: {
         type: String,
         unique: true,
         required: true,
     },
     otp: {
-        type: Number,
+        type: String,
         required: true,
-    }, 
-    expiresAt: {
+    },
+    createdAt: {
         type: Date,
         default: Date.now,
-        expires: 11,
+        expires: 11
     }
 })
 
-const otp = mongoose.model('Otp', otpSchema)
-export default otp
+const opt = mongoose.model('Otp', optSchema)
+export default opt

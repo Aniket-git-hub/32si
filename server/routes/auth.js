@@ -10,6 +10,7 @@ import login from "../controllers/auth/userLogin.js"
 import verifyJWT from "../middleware/verifyJWT.js"
 import refreshToken from "../controllers/auth/refreshToken.js"
 import forgotPassword from "../controllers/auth/forgotPassword.js"
+import forgotPasswordVerifyOtp from "../controllers/auth/forgotPasswordVerifyOtp.js"
 /**
  * Defining /register route 
  * Handles POST request to create new user or register as in the route
@@ -24,5 +25,7 @@ router.post("/login", uLIV, inputValidation, login)
 router.post("/token/refresh", verifyJWT, refreshToken)
 
 router.post("/forgot-password", forgotPassword)
+
+router.post("/forgot-password/verify-otp", forgotPasswordVerifyOtp)
 
 export default router
