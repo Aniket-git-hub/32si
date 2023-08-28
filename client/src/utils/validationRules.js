@@ -4,7 +4,7 @@ export const validationRules = {
         error: 'Email address is invalid',
     },
     password: {
-        validate: (value) => value.length >= 6,
+        validate: (value) => value.length >= 8,
         error: 'Password needs to be 8 characters or more',
     },
     name: {
