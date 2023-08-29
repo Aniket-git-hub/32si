@@ -59,7 +59,7 @@ app.use(function (err, req, res, next) {
 });
 
 
-app.listen(PORT, () => console.log(`[server]: running on port: ${PORT} | https://localhost:${PORT}/`))
+app.listen(PORT, () => console.log(`[server]: running on port: ${PORT} | http://localhost:${PORT}/`))
 
 /**
  * export for testing purpose
