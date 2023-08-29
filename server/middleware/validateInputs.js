@@ -1,5 +1,5 @@
 import { body, validationResult } from 'express-validator'
-import createError from '../utils/createError'
+import createError from '../utils/createError.js'
 
 // Common validation rules
 const commonRules = {
@@ -65,8 +65,9 @@ export const forgotPasswordEmailValidationRules = [
 export const forgotPasswordOtpValidationRules = [
     ...commonRules.email,
     body('otp')
-        .notEmpty().withMessage("Oops! You need have otp.")
-        .isInt().withMessage("OTP should numbers only.")
+        .isNumeric().withMessage('OTP should only contain numbers')
+        .isLength({ min: 6, max: 6 }).withMessage('OTP should be 6 digits long')
+        
 ]
 
 

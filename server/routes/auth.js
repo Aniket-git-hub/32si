@@ -26,8 +26,8 @@ router.post("/login", uLIV, inputValidation, login)
 
 router.post("/token/refresh", verifyJWT, refreshToken)
 
-router.post("/forgot-password", fPEV, forgotPassword)
+router.post("/forgot-password", fPEV, inputValidation, forgotPassword)
 
-router.post("/forgot-password/verify-otp", fPOV, forgotPasswordVerifyOtp)
+router.post("/forgot-password/verify-otp", fPOV, inputValidation, forgotPasswordVerifyOtp)
 
 export default router
