@@ -8,7 +8,7 @@ export default function VerifyOtp({email}) {
     
     const submit = async () => {
         try {
-            const response = await verifyOtp({ ...values, email })
+            const response = await verifyOtp({ otp: String(values.otp), email })
             console.log(response)
             navigate("/reset-password", { state: { email }, replace: true })
         } catch (error) {

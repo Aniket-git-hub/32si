@@ -65,7 +65,7 @@ export const forgotPasswordEmailValidationRules = [
 export const forgotPasswordOtpValidationRules = [
     ...commonRules.email,
     body('otp')
-        .isNumeric().withMessage('OTP should only contain numbers')
+        .isString().withMessage('OTP should be string')
         .isLength({ min: 6, max: 6 }).withMessage('OTP should be 6 digits long')
         
 ]
