@@ -70,6 +70,11 @@ export const forgotPasswordOtpValidationRules = [
         
 ]
 
+export const resetPasswordValidationRules = [
+    ...commonRules.email,
+    ...commonRules.password
+]
+
 
 /**
  * @description Checks if validation result has any error and if so then returns status 400 error to the client for 
