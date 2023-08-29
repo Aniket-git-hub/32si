@@ -6,9 +6,9 @@ const transporter = nodemailer.createTransport({
         pass: process.env.MAIL_PASSWORD,
     },
 })
+
 async function sendEmailOtp(receiverEmail, otp) {
     try {
-        console.log({ receiverEmail, otp})
         let info = await transporter.sendMail({
             from: process.env.MAIL_EMAIL,
             to: receiverEmail,
@@ -16,18 +16,27 @@ async function sendEmailOtp(receiverEmail, otp) {
             html: `
       <div
         class="container"
-        style="max-width: 90%; margin: auto; padding-top: 20px"
+        style="
+          max-width: 90%;
+          margin: auto;
+          padding-top: 20px;
+          font-family: Arial, sans-serif;
+          color: #333;
+        "
       >
-        <h4>Request for OTP ✔</h4>
-        <p style="margin-bottom: 30px;">Pleas enter the sign up OTP to get started</p>
-        <h1 style="font-size: 40px; letter-spacing: 2px; text-align:center;">Otp: ${otp}</h1>
-   </div>
+        <h4 style="font-size: 20px;">Request for OTP ✔</h4>
+        <p style="margin-bottom: 30px; font-size: 16px;">
+          Please enter the sign up OTP to get started.
+        </p>
+        <h1 style="font-size: 40px; letter-spacing: 2px; text-align:center;">
+          Otp: ${otp}
+        </h1>
+      </div>
     `,
         });
-        return info
+        return { success: true, info }
     } catch (error) {
-        console.log(error);
-        return false
+        return { success: false, error }
     }
 }
 
