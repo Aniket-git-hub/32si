@@ -14,5 +14,9 @@ export const validationRules = {
     username: {
         validate: (value) => value.trim() !== '',
         error: 'Username is required',
+    }, 
+    otp: {
+        validate: (value) => String(value).length === 6,
+        error: 'OTP is required'
     }
 };
