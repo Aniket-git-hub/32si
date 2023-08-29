@@ -2,16 +2,22 @@ import { useState, useEffect } from "react"
 import { useFormValidation } from "../hooks/useFormValidation"
 import VerifyOtp from "../components/VerifyOtp"
 import { useAuth } from "../hooks/useAuth"
+import { forgotPassword } from "../api/auth"
 
 export default function ForgotPasswordPage() {
     const initialState = { email: '' }
     const { verifyOTP, setVerifyOTP } = useAuth()
     const [countdown, setCountdown] = useState(120)
     
-    const submit = () => {
-        console.log(values)
-        setVerifyOTP(true)
-        setCountdown(120)
+    const submit = async () => {
+        try {
+            const response = await forgotPassword(values)
+            setVerifyOTP(true)
+            setCountdown(120)
+            console.log(response)
+        } catch (error) {
+            console.log(error)
+        }
     }
     const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, submit)
 
@@ -36,7 +42,7 @@ export default function ForgotPasswordPage() {
                     </label>
                     {errors.email && <p>{errors.email}</p>}
                     <br></br>
-                    <button type="submit">{verifyOTP ? `Resend OTP (${countdown})` : 'Send OTP'}</button>
+                    <button type="submit" disabled={isSubmitting}>{verifyOTP ? `Resend OTP (${countdown})` : 'Send OTP'}</button>
                 </form>
             </div>
             {verifyOTP && <VerifyOtp email={values.email} />}

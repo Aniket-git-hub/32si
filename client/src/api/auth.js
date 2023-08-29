@@ -17,4 +17,11 @@ const handleRequest = async (url, data) => {
 
 export const loginUser = async (credentials) => handleRequest('/auth/login', credentials)
 
-export const registerUser = async (details) => handleRequest('auth/register', details)
+export const registerUser = async (details) => handleRequest('/auth/register', details)
+
+export const forgotPassword = async (credentials) => handleRequest('/auth/forgot-password', credentials)
+
+export const verifyOtp = async (credentials) => handleRequest('/auth/forgot-password/verify-otp', credentials)
+
+export const resetPassword = async (credentials) => handleRequest('/auth/reset-password', credentials)
+

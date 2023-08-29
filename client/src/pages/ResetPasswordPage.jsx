@@ -1,11 +1,18 @@
+import { useLocation, useNavigate } from "react-router-dom";
 import { useFormValidation } from "../hooks/useFormValidation";
+import { resetPassword } from "../api/auth";
 
 export default function ResetPasswordPage() {
     const initialState = { password: '', cpassword: '' }
-
+    
+    const location = useLocation()
+    const navigate = useNavigate()
     const savePassword = async () => {
         try {
-            console.log(values)
+            const email = location.state.email
+            const response = await resetPassword({ password: values.password, email })
+            console.log(response)
+            navigate("/login", { replace: true })
         } catch (error) {
             console.log(error)
         }
