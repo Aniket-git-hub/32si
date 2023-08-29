@@ -3,7 +3,9 @@ const router = express.Router()
 import {
     inputValidation,
     userRegistrationInputsValidationRules as uRIV,
-    userLoginInputsValidationRules as uLIV
+    userLoginInputsValidationRules as uLIV,
+    forgotPasswordEmailValidationRules as fPEV,
+    forgotPasswordOtpValidationRules as fPOV,
 } from '../middleware/validateInputs.js'
 import register from "../controllers/auth/userRegistration.js"
 import login from "../controllers/auth/userLogin.js"
@@ -24,8 +26,8 @@ router.post("/login", uLIV, inputValidation, login)
 
 router.post("/token/refresh", verifyJWT, refreshToken)
 
-router.post("/forgot-password", forgotPassword)
+router.post("/forgot-password", fPEV, forgotPassword)
 
-router.post("/forgot-password/verify-otp", forgotPasswordVerifyOtp)
+router.post("/forgot-password/verify-otp", fPOV, forgotPasswordVerifyOtp)
 
 export default router
