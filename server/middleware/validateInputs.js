@@ -1,4 +1,5 @@
 import { body, validationResult } from 'express-validator'
+import createError from '../utils/createError'
 
 // Common validation rules
 const commonRules = {
@@ -68,8 +69,7 @@ export const userLoginInputsValidationRules = [
 export function inputValidation(req, res, next) {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-        let err = new Error("Validation Error")
-        err.name = "ValidationError"
+        let err = createError("ValidationError", "Validation Error")
         err.errors = errors.array().map(obj => obj.msg)
         next(err)
     }

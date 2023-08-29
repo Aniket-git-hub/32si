@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import createJWTError from '../utils/createJWTError.js'
+import createError from '../utils/createError.js'
 
 function verifyJWT(req, res, next) {
     let token
@@ -12,8 +12,7 @@ function verifyJWT(req, res, next) {
         token = req.cookies.refreshToken
         secret = process.env.JWT_REFRESH_TOKEN_SECRET
     } else {
-        console.log("in else")
-        return next(createJWTError('No token provided'))
+        return next(createError("JsonWebTokenError",'No token provided'))
     }
 
     try {
@@ -22,7 +21,7 @@ function verifyJWT(req, res, next) {
         next()
 
     } catch (error) {
-        next(createJWTError('Invalid token'))
+        next(createError("JsonWebTokenError",'Invalid token', error))
     }
 }
 

@@ -4,6 +4,7 @@ import sendEmailOtp from '../../utils/sendEmailOtp.js'
 async function forgotPassword(req, res, next) {
     try {
         const { email } = req.body
+        
         const savedUser = await USER.findOne({ email })
         if (!savedUser) {
             throw new Error("User doesn't Exist")
@@ -11,6 +12,7 @@ async function forgotPassword(req, res, next) {
         const otp = Math.floor(100000 + Math.random() * 900000)
         const newOtp = new OTP({ email, otp })
         await newOtp.save()
+        
         const sent = await sendEmailOtp(email, newOtp.otp) 
         if (!sent) {
             throw new Error("Something went wrong!")
@@ -19,6 +21,7 @@ async function forgotPassword(req, res, next) {
         res.json({
             message: "Otp Sent Successfully",
         })
+    
     } catch (error) {
         next(error)
     }

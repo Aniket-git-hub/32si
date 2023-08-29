@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs'
 import User from "../../models/user.js"
 import generateToken from "../../utils/generateToken.js"
+import createError from '../../utils/createError.js'
 
 /**
  * @description  controller to login the user.
@@ -13,15 +14,11 @@ async function login(req, res, next) {
         const { email, password:pass } = req.body
         const user = await User.findOne({ email })
         if (!user) {
-            let err = new Error("Invalid email")
-            err.name = "LoginError"
-            throw err
+            throw createError("LoginError", "Invalid Email")
         }
 
         if (!bcrypt.compareSync(pass, user.password)) {
-            let err = new Error("Invalid password")
-            err.name = "LoginError"
-            throw err
+            throw createError("LoginError", "Invalid Password")
         }
 
         const { accessToken, refreshToken } = generateToken({
