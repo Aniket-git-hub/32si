@@ -20,7 +20,7 @@ async function forgotPassword(req, res, next) {
             message: "Otp Sent Successfully",
         })
     } catch (error) {
-        console.log(error)
+        next(error)
     }
 }
 
