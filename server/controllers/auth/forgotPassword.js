@@ -1,7 +1,7 @@
 import USER from '../../models/user.js'
 import OTP from '../../models/otp.js'
-import sendEmailOtp from '../../utils/sendEmailOtp.js'
 import createError from '../../utils/createError.js'
+import sendOTPEmail from '../../utils/sendOTPEmail.js'
 async function forgotPassword(req, res, next) {
     try {
         const { email } = req.body
@@ -14,7 +14,7 @@ async function forgotPassword(req, res, next) {
         const newOtp = new OTP({ email, otp })
         await newOtp.save()
         
-        const { success, error } = await sendEmailOtp(email, newOtp.otp) 
+        const { success, error } = await sendOTPEmail(email, newOtp.otp) 
         if (!success) {
             throw createError("SendingEmail", "Email Not Sent", error)
         }

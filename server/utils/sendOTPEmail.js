@@ -7,7 +7,7 @@ const transporter = nodemailer.createTransport({
     },
 })
 
-async function sendEmailOtp(receiverEmail, otp) {
+async function sendOTPEmail(receiverEmail, otp) {
     try {
         let info = await transporter.sendMail({
             from: process.env.MAIL_EMAIL,
@@ -40,4 +40,4 @@ async function sendEmailOtp(receiverEmail, otp) {
     }
 }
 
-export default sendEmailOtp
+export default sendOTPEmail
