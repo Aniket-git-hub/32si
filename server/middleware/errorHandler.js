@@ -9,7 +9,8 @@ const errorTypeMap = {
     "ValidationError": { status: 400, message: (error) => ([`Oops! There seems to be a validation error:`, ...error.errors ]) },
     "AuthError": { status: 401, message: (error) => `Uh-oh! There seems to be a auth error: ${error.message}` },
     "TokenExpiredError": { status: 401, message: "Oh no! Your token has expired." },
-    "InvalidOTP": {status: 400, message: "Oh no! Your otp is invalid." },
+    "InvalidOTP": { status: 400, message: "Oh no! Your otp is invalid." },
+    "SendingEmail": { status: 424, message:"Couldn't Send Email..." },
 }
 
 
