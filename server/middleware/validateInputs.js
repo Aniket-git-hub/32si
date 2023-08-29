@@ -57,6 +57,19 @@ export const userLoginInputsValidationRules = [
         .notEmpty().withMessage("Oops! You forgot to enter your password."),
 ]
 
+
+export const forgotPasswordEmailValidationRules = [
+    ...commonRules.email
+]
+
+export const forgotPasswordOtpValidationRules = [
+    ...commonRules.email,
+    body('otp')
+        .notEmpty().withMessage("Oops! You need have otp.")
+        .isInt().withMessage("OTP should numbers only.")
+]
+
+
 /**
  * @description Checks if validation result has any error and if so then returns status 400 error to the client for 
  * bad request as the data sent to the server failed validation. else next() middleware is called
