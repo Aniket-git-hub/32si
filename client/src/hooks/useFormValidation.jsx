@@ -45,7 +45,7 @@ function validate(values) {
     let errors = {}
 
     for (let [key, value] of Object.entries(values)) {
-        if (validationRules[key] && !validationRules[key].validate(value)) {
+        if (validationRules[key] && !validationRules[key].validate(value, values)) {
             errors[key] = validationRules[key].error
         }
     }

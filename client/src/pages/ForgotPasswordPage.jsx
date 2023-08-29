@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
 import { useFormValidation } from "../hooks/useFormValidation"
 import VerifyOtp from "../components/VerifyOtp"
+import { useAuth } from "../hooks/useAuth"
 
 export default function ForgotPasswordPage() {
     const initialState = { email: '' }
-    const [verifyOTP, setVerifyOTP] = useState(false)
+    const { verifyOTP, setVerifyOTP } = useAuth()
     const [countdown, setCountdown] = useState(120)
     
     const submit = () => {

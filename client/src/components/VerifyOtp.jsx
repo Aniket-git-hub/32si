@@ -1,10 +1,14 @@
 import { useFormValidation } from "../hooks/useFormValidation"
-
+import { useNavigate } from 'react-router-dom'
 export default function VerifyOtp({email}) {
     const initialState = { otp: '' }
+    const navigate = useNavigate()
+    
     const submit = () => {
-        console.log({...values, email})
+        console.log({ ...values, email })
+        navigate("/reset-password")
     }
+    
     const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, submit)
 
     return (
