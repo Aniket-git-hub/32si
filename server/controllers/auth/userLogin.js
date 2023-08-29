@@ -14,11 +14,11 @@ async function login(req, res, next) {
         const { email, password:pass } = req.body
         const user = await User.findOne({ email })
         if (!user) {
-            throw createError("LoginError", "Invalid Email")
+            throw createError("AuthError", "Invalid Email")
         }
 
         if (!bcrypt.compareSync(pass, user.password)) {
-            throw createError("LoginError", "Invalid Password")
+            throw createError("AuthError", "Invalid Password")
         }
 
         const { accessToken, refreshToken } = generateToken({
