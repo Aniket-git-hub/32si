@@ -8,7 +8,8 @@ const errorTypeMap = {
     "SyntaxError": { status: 400, message: (error) => `Oops! There seems to be a syntax error: ${error.message}` },
     "ValidationError": { status: 400, message: (error) => ([`Oops! There seems to be a validation error:`, ...error.errors ]) },
     "LoginError": { status: 401, message: (error) => `Uh-oh! There seems to be a login error: ${error.message}` },
-    "TokenExpiredError": { status: 401, message: "Oh no! Your token has expired." }
+    "TokenExpiredError": { status: 401, message: "Oh no! Your token has expired." },
+    "InvalidOTP": {status: 400, message: "Oh no! Your otp is invalid." },
 }
 
 
