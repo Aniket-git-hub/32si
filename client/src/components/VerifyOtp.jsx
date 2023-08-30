@@ -1,11 +1,12 @@
 import { verifyOtp } from "../api/auth"
 import { useFormValidation } from "../hooks/useFormValidation"
 import { useNavigate } from 'react-router-dom'
+import { Box, Heading, FormControl, FormLabel, Input, FormErrorMessage, Button } from "@chakra-ui/react"
 
-export default function VerifyOtp({email}) {
+export default function VerifyOtp({ email }) {
     const initialState = { otp: '' }
     const navigate = useNavigate()
-    
+
     const submit = async () => {
         try {
             const response = await verifyOtp({ otp: String(values.otp), email })
@@ -15,20 +16,20 @@ export default function VerifyOtp({email}) {
             console.log(error)
         }
     }
-    
+
     const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, submit)
 
     return (
-        <section>
-            <h3>Verify OTP</h3>
+        <Box p={4}>
+            <Heading as="h3" mb={4}>Verify OTP</Heading>
             <form onSubmit={handleSubmit}>
-                <label htmlFor="otp">OTP
-                    <input type="number" name="otp" value={values.otp} onChange={handleChange} id="otp" />
-                </label>
-                {errors.otp && <p>{errors.otp}</p>}
-                <br></br>
-                <button type="submit" disabled={isSubmitting}>Verify OTP</button>
+                <FormControl id="otp" isInvalid={errors.otp}>
+                    <FormLabel>OTP</FormLabel>
+                    <Input type="number" name="otp" value={values.otp} onChange={handleChange} />
+                    <FormErrorMessage>{errors.otp}</FormErrorMessage>
+                </FormControl>
+                <Button type="submit" colorScheme="blue" mt={4} isLoading={isSubmitting}>Verify OTP</Button>
             </form>
-        </section>
+        </Box>
     )
 }

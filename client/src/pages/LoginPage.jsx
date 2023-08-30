@@ -1,8 +1,9 @@
-import { Box, Button, FormControl, FormLabel, Input, Link, VStack } from '@chakra-ui/react';
+import { Box, Button, FormControl, FormLabel, Input, Link, VStack, Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react'
 import { loginUser } from '../api/auth';
 import { useAuth } from '../hooks/useAuth';
 import { useFormValidation } from '../hooks/useFormValidation';
 import { useSanitizeValues } from '../hooks/useSanitizedValues';
+import { useState } from 'react';
 
 export default function LoginPage() {
   const initialState = { email: '', password: '' }
@@ -11,14 +12,19 @@ export default function LoginPage() {
   const login = async () => {
     try {
       const sanitizedValues = useSanitizeValues(values)
-      const { user, accessToken } = await loginUser(sanitizedValues)
+      const { user, accessToken, message } = await loginUser(sanitizedValues)
       save(user, accessToken)
+      setResponseMessage(message)
     } catch (error) {
       console.log(error)
+      setResponseMessage({ message:error.response.data.message, status:"error"})
     }
   };
 
   const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, login)
+
+  const [responseMessage, setResponseMessage] = useState({ message: "", status: "" })
+
 
   return (
     <Box>
@@ -26,6 +32,12 @@ export default function LoginPage() {
         <Box>
           <h2>32 Beads Login</h2>
           <form onSubmit={handleSubmit}>
+            {responseMessage.message && (
+              <Alert status={responseMessage.status} mt={4} variant='left-accent'>
+                <AlertIcon />
+                <AlertTitle>{responseMessage.message}</AlertTitle>
+              </Alert>
+            )}
             <FormControl id="email">
               <FormLabel>Email</FormLabel>
               <Input type="email" name="email" value={values.email} onChange={handleChange} />

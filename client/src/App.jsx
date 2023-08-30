@@ -16,7 +16,7 @@ function App() {
       <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate replace to="/" />} />
       <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate replace to="/" />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage verifyOTP={verifyOTP} />} />
-      <Route path="/reset-password" element={verifyOTP ? <ResetPasswordPage /> : <Error404Page />} />
+      <Route path="/reset-password" element={true ? <ResetPasswordPage /> : <Error404Page />} />
       <Route path="*" element={ <Error404Page />} />
     </Routes>
   )
