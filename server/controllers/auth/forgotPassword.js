@@ -13,7 +13,7 @@ async function forgotPassword(req, res, next) {
             throw createError("AuthError", "Invalid Email")
         }
 
-        const { success: initSuccess, error: initError } = await sendPasswordResetInitiatedEmail(email)
+        const { success: initSuccess, error: initError } = await sendPasswordResetInitiatedEmail(email, savedUser.name)
         if (!initSuccess) {
             throw createError("SendingEmail", "Email Not Sent", initError)
         }
@@ -25,7 +25,7 @@ async function forgotPassword(req, res, next) {
         })
         await newOtp.save()
 
-        const { success: otpSuccess, error: otpError } = await sendOTPEmail(email, otp)
+        const { success: otpSuccess, error: otpError } = await sendOTPEmail(email, savedUser.name, otp)
         if (!otpSuccess) {
             throw createError("SendingEmail", "Email Not Sent", otpError)
         }

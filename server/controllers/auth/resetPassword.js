@@ -14,7 +14,7 @@ async function resetPassword(req, res, next) {
         user.password = hashPassword
         await user.save()
 
-        const { success, error } = await sendPasswordResetSuccessfulEmail(email)
+        const { success, error } = await sendPasswordResetSuccessfulEmail(email, user.name)
         if (!success) {
             throw createError("SendingEmail", "Email Not Sent", error)
         }

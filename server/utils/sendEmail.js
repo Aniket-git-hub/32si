@@ -17,6 +17,6 @@ async function sendEmail(receiverEmail, subject, template) {
   }
 }
 
-export const sendOTPEmail = (receiverEmail, otp) => sendEmail(receiverEmail, 'Hello, OTP here', otpEmailTemplate(otp))
-export const sendPasswordResetInitiatedEmail = (receiverEmail) => sendEmail(receiverEmail, 'Password Reset Initiated', passwordResetInitiatedTemplate())
-export const sendPasswordResetSuccessfulEmail = (receiverEmail) => sendEmail(receiverEmail, 'Password Reset Successful', passwordResetSuccessfulTemplate())
+export const sendOTPEmail = (receiverEmail, name, otp) => sendEmail(receiverEmail, 'Hello, OTP here', otpEmailTemplate(name, otp))
+export const sendPasswordResetInitiatedEmail = (receiverEmail, name) => sendEmail(receiverEmail, 'Password Reset Initiated', passwordResetInitiatedTemplate(name))
+export const sendPasswordResetSuccessfulEmail = (receiverEmail, name) => sendEmail(receiverEmail, 'Password Reset Successful', passwordResetSuccessfulTemplate(name))
