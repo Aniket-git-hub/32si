@@ -1,8 +1,8 @@
-import { loginUser } from "../api/auth";
-import { useAuth } from "../hooks/useAuth";
-import { useFormValidation } from "../hooks/useFormValidation";
-import { Link } from 'react-router-dom'
-import { useSanitizeValues } from "../hooks/useSanitizedValues";
+import { Box, Button, FormControl, FormLabel, Input, Link, VStack } from '@chakra-ui/react';
+import { loginUser } from '../api/auth';
+import { useAuth } from '../hooks/useAuth';
+import { useFormValidation } from '../hooks/useFormValidation';
+import { useSanitizeValues } from '../hooks/useSanitizedValues';
 
 export default function LoginPage() {
   const initialState = { email: '', password: '' }
@@ -16,30 +16,37 @@ export default function LoginPage() {
     } catch (error) {
       console.log(error)
     }
-  }
+  };
 
   const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, login)
 
   return (
-    <>
-      <section>
-        <h2>32 Beads Login</h2>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="email">Email
-            <input type="email" name="email" value={values.email} onChange={handleChange} id="email" />
-          </label>
-          {errors.email && <p>{errors.email}</p>}
-          <br></br>
-          <label htmlFor="password">Password
-            <input type="password" name="password" value={values.password} onChange={handleChange} id="password" />
-          </label>
-          {errors.password && <p>{errors.password}</p>}
-          <br></br>
-          <Link to="/forgot-password"> forgot password </Link><br></br>
-          <button type="submit" disabled={isSubmitting}>Login</button>
-        </form>
-        <Link to="/register">Register</Link>
-      </section>
-    </>
+    <Box>
+      <VStack>
+        <Box>
+          <h2>32 Beads Login</h2>
+          <form onSubmit={handleSubmit}>
+            <FormControl id="email">
+              <FormLabel>Email</FormLabel>
+              <Input type="email" name="email" value={values.email} onChange={handleChange} />
+            </FormControl>
+            {errors.email && <p>{errors.email}</p>}
+            
+            <FormControl id="password">
+              <FormLabel>Password</FormLabel>
+              <Input type="password" name="password" value={values.password} onChange={handleChange} />
+            </FormControl>
+            {errors.password && <p>{errors.password}</p>}
+           
+            <Link href="/forgot-password">Forgot password</Link>
+            <br></br>
+            <Button type="submit" disabled={isSubmitting}>
+              Login
+            </Button>
+          </form>
+          <Link href="/register">Register</Link>
+        </Box>
+      </VStack>
+    </Box>
   )
 }
