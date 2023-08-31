@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000
  */
 import cors from 'cors'
 app.use(cors({
-    origin: true,
+    origin: process.env.NODE_ENV === "development" ? true : process.env.CORS_ORIGIN,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }))
