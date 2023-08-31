@@ -11,13 +11,20 @@ const handleRequest = async (url, data) => {
     }
 }
 
-export const loginUser = async (credentials) => handleRequest('/auth/login', credentials)
+const env = import.meta.env.VITE_ENV
 
-export const registerUser = async (details) => handleRequest('/auth/register', details)
+const loginUserEndpoint = env === 'production' ? import.meta.env.VITE_LOGIN_USER_ROUTE : '/auth/login'
+export const loginUser = async (credentials) => handleRequest(loginUserEndpoint, credentials)
 
-export const forgotPassword = async (credentials) => handleRequest('/auth/forgot-password', credentials)
+const registerUserEndpoint = env === 'production' ? import.meta.env.VITE_REGISTER_USER_ROUTE : '/auth/register'
+export const registerUser = async (details) => handleRequest(registerUserEndpoint, details)
 
-export const verifyOtp = async (credentials) => handleRequest('/auth/forgot-password/verify-otp', credentials)
+const forgotPasswordEndpoint = env === 'production' ? import.meta.env.VITE_FORGOT_PASSWORD_ROUTE : '/auth/forgot-password'
+export const forgotPassword = async (credentials) => handleRequest(forgotPasswordEndpoint, credentials)
 
-export const resetPassword = async (credentials) => handleRequest('/auth/reset-password', credentials)
+const verifyOtpEndpoint = env === 'production' ? import.meta.env.VITE_VERIFY_OTP_ROUTE : '/auth/forgot-password/verify-otp'
+export const verifyOtp = async (credentials) => handleRequest(verifyOtpEndpoint, credentials)
+
+const resetPasswordEndpoint = env === 'production' ? import.meta.env.VITE_RESET_PASSWORD_ROUTE : '/auth/reset-password'
+export const resetPassword = async (credentials) => handleRequest(resetPasswordEndpoint, credentials)
 
