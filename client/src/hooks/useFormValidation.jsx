@@ -34,7 +34,7 @@ export function useFormValidation(initialState, submit) {
                 case 401:
                   toastData = {
                     title: "Authentication Error",
-                    description: error.message,
+                    description: error.response.data.message,
                     status: "error",
                   };
                   break;
@@ -48,14 +48,14 @@ export function useFormValidation(initialState, submit) {
                 case 400:
                   toastData = {
                     title: "Bad Request",
-                    description: error.message,
+                    description: error.response.data.message,
                     status: "error",
                   };
                   break;
                 default:
                   toastData = {
                     title: "Error",
-                    description: error.message,
+                    description: error.response.data.message,
                     status: "error",
                   };
               }
