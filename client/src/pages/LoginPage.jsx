@@ -1,8 +1,7 @@
-import { Button, FormControl, FormLabel, Input, Link, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Flex, VStack, Center, useToast } from '@chakra-ui/react'
+import { Button, FormControl, FormLabel, Input, Link, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Flex, VStack, Center } from '@chakra-ui/react'
 import { loginUser } from '../api/auth';
 import { useAuth } from '../hooks/useAuth';
 import { useFormValidation } from '../hooks/useFormValidation';
-import { useSanitizeValues } from '../hooks/useSanitizedValues';
 import { useState } from 'react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 
@@ -10,40 +9,21 @@ export default function LoginPage() {
   const initialState = { email: '', password: '' }
 
   const { save } = useAuth()
-  const login = async () => {
+
+  const login = async (values) => {
     try {
-      const sanitizedValues = useSanitizeValues(values)
-      const response = await loginUser(sanitizedValues)
-      const {user, accessToken} = response
-      alert({
-        title: "Login Successful",
-        description: `Welcome, back ${user?.name && user?.name}`,
-        status: "success",
-        isClosable: true,
-        duration: 5000,
-        variant: "subtle",
-        position: "top"
-      })
+      const response = await loginUser(values)
+      const {user, accessToken} = response.data 
       save(user, accessToken)
+      return { message: `Welcome back ${ user.name && user.name }`, title:`Login Successful`}
     } catch (error) {
-      const { data: { message }} = error?.response
-      alert({
-        title: "Authentication Error",
-        description: message,
-        status: "error",
-        isClosable: true,
-        duration: 5000,
-        variant: "subtle",
-        position:"top"
-      })
+      throw error
     }
   }
 
   const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, login)
 
   const [showPassword, setShowPassword] = useState(false)
-
-  const alert = useToast()
 
   return (
     <Container as="section" my="50px" maxW="400px">
@@ -74,8 +54,6 @@ export default function LoginPage() {
             <Flex justifyContent="end">
               <Link href="/forgot-password">Forgot password</Link>
             </Flex>
-
-            <br></br>
             <Center>
               <VStack>
                 <Button type="submit" colorScheme='purple' isLoading={isSubmitting} loadingText="logging.." disabled={isSubmitting}>

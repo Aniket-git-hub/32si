@@ -3,40 +3,26 @@ import { useFormValidation } from "../hooks/useFormValidation"
 import VerifyOtp from "../components/VerifyOtp"
 import { useAuth } from "../hooks/useAuth"
 import { forgotPassword } from "../api/auth"
-import { Box, Button, FormControl, FormLabel, Input, Link,FormHelperText, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Flex, VStack, Center, useToast } from '@chakra-ui/react'
-
+import { Button, FormControl, FormLabel, Input, FormHelperText, FormErrorMessage, Heading, Container, Card, CardBody, VStack, Center } from '@chakra-ui/react'
 
 export default function ForgotPasswordPage() {
     const initialState = { email: '' }
     const { verifyOTP, setVerifyOTP } = useAuth()
     const [countdown, setCountdown] = useState(120)
+    const [email, setEmail] = useState('')
 
-    const submit = async () => {
+    const submit = async (values) => {
         try {
             await forgotPassword(values)
             setVerifyOTP(true)
             setCountdown(120)
-            alert({
-                title: "Email Sent",
-                description: `OTP sent to ${ values.email && values.email }`,
-                status: "success",
-                isClosable: true,
-                duration: 5000,
-                variant: "subtle",
-                position: "top"
-            })
-        } catch ({ response: { data: { message }} }) {
-            alert({
-                title: "Authentication Error",
-                description: message,
-                status: "error",
-                isClosable: true,
-                duration: 5000,
-                variant: "subtle",
-                position: "top"
-            })
+            setEmail(values.email)
+            return { title: `Email sent`, message: `OTP sent to ${email}` }
+        } catch (error) {
+            throw error
         }
     }
+
     const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, submit)
 
     useEffect(() => {
@@ -49,8 +35,6 @@ export default function ForgotPasswordPage() {
             setVerifyOTP(false)
         }
     }, [verifyOTP, countdown])
-
-    const alert = useToast()
 
     return (
         <>
@@ -75,8 +59,7 @@ export default function ForgotPasswordPage() {
                             </VStack>
                         </Center>
                         </form>
-                        {verifyOTP && <VerifyOtp email={values.email} />}
-                        {/* <VerifyOtp email={values.email} /> */}
+                        {verifyOTP && <VerifyOtp email={email} />}
                 </CardBody>
             </Card>
         </Container>

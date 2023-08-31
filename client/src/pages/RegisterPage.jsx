@@ -1,8 +1,7 @@
-import { Button, FormControl, FormLabel, Input, Link, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Flex, VStack, Center, useToast } from '@chakra-ui/react'
+import { Button, FormControl, FormLabel, Input, Link, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Flex, VStack, Center } from '@chakra-ui/react'
 import { registerUser } from '../api/auth';
 import { useAuth } from '../hooks/useAuth';
 import { useFormValidation } from '../hooks/useFormValidation';
-import { useSanitizeValues } from '../hooks/useSanitizedValues';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
 
@@ -10,41 +9,22 @@ import { useState } from 'react';
 export default function RegisterPage() {
   const initialState = { name: '', username: '', email: '', password: '' }
 
-  const { save } = useAuth();
-  const register = async event => {
+  const { save } = useAuth()
+  
+  const register = async (values) => {
     try {
-      const sanitizedValues = useSanitizeValues(values)
-      const {user, accessToken} = await registerUser(sanitizedValues)
-      alert({
-        title: "Account Created",
-        description: `Welcome, ${user.name && user.name} to 32 Beads Community`,
-        status: "success",
-        isClosable: true,
-        duration: 5000,
-        variant: "subtle",
-        position: "top"
-      })
+      const response = await registerUser(values)
+      const { user, accessToken } = response.data 
       save(user, accessToken)
+      return { title:`Registration Successful`, message:`Welcome ${user.name && user.name} to 32 Beads Community.`}
     } catch (error) {
-      console.log(error)
-      const { data: { message } } = error?.response
-      alert({
-        title: "Authentication Error",
-        description: message,
-        status: "error",
-        isClosable: true,
-        duration: 5000,
-        variant: "subtle",
-        position: "top"
-      })
+      throw error
     }
   }
 
   const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, register)
 
   const [showPassword, setShowPassword] = useState(false)
-
-  const alert = useToast()
 
   return (
     <Container as="section" my="50px" maxW="400px">

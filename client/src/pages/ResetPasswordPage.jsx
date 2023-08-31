@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useFormValidation } from "../hooks/useFormValidation";
 import { resetPassword } from "../api/auth";
-import { Box, Button, FormControl, FormLabel, Input, Link, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Flex, VStack, Center, useToast } from '@chakra-ui/react'
+import { Button, FormControl, FormLabel, Input, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Center} from '@chakra-ui/react'
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useState } from "react";
 
@@ -13,28 +13,12 @@ export default function ResetPasswordPage() {
     const savePassword = async () => {
         try {
             const email = location.state.email
-            const { message } = await resetPassword({ password: values.password, email })
-            alert({
-                title: "OTP Verified",
-                description: message,
-                status: "success",
-                isClosable: true,
-                duration: 3000,
-                variant: "subtle",
-                position: "top"
-            })
+            const response = await resetPassword({ password: values.password, email })
+            const { message } = response.data
             navigate("/login", { replace: true })
+            return { title: `Password Reset`, message: message }
         } catch (error) {
-            const { data: { message }} = error?.response
-            alert({
-                title: "Authentication Error",
-                description: message,
-                status: "error",
-                isClosable: true,
-                duration: 5000,
-                variant: "subtle",
-                position: "top"
-            })
+            throw error
         }
     }
 
@@ -42,8 +26,6 @@ export default function ResetPasswordPage() {
 
     const [showPassword, setShowPassword] = useState(false)
     const [showCPassword, setShowCPassword] = useState(false)
-
-    const alert = useToast()
 
     return (
 

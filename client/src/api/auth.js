@@ -4,7 +4,7 @@ const handleRequest = async (url, data) => {
     try {
         const response = await instance.post(url, data)
         if (response.status === 200 || response.status === 201) {
-            return response.data
+            return response
         } 
     } catch (error) {
         throw error

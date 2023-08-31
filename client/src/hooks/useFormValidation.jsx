@@ -1,54 +1,116 @@
-import { useState, useEffect } from 'react';
-import { validationRules } from '../utils/validationRules';
+import { useState, useEffect } from "react";
+import { validationRules } from "../utils/validationRules";
+import { useSanitizeValues } from "./useSanitizedValues";
+import { useToast } from "@chakra-ui/react";
 
 export function useFormValidation(initialState, submit) {
-    const [values, setValues] = useState(initialState)
-    const [errors, setErrors] = useState({})
-    const [isSubmitting, setSubmitting] = useState(false)
+  const [values, setValues] = useState(initialState);
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setSubmitting] = useState(false);
 
-    useEffect(() => {
-        if (isSubmitting) {
-            const noErrors = Object.keys(errors).length === 0
-            if (noErrors) {
-                (async () => {
-                    await submit()
-                    setSubmitting(false)
-                })()
+  const sanitizedValues = useSanitizeValues(values);
+  const toast = useToast();
+
+  useEffect(() => {
+    if (isSubmitting) {
+      const noErrors = Object.keys(errors).length === 0;
+      if (noErrors) {
+        (async () => {
+          let toastData = { title: "", description: "", status: "" };
+          try {
+            const response = await submit(sanitizedValues);
+            setSubmitting(false);
+            setValues(initialState);
+            toastData = {
+              title: response.title,
+              description: response.message,
+              status: "success",
+            };
+          } catch (error) {
+            setSubmitting(false);
+            console.log(error);
+            if (error.response) {
+              switch (error.response.status) {
+                case 401:
+                  toastData = {
+                    title: "Authentication Error",
+                    description: error.message,
+                    status: "error",
+                  };
+                  break;
+                case 409:
+                  toastData = {
+                    title: "Authentication Error",
+                    description: "Credentials already exits",
+                    status: "error",
+                  };
+                  break;
+                case 400:
+                  toastData = {
+                    title: "Bad Request",
+                    description: error.message,
+                    status: "error",
+                  };
+                  break;
+                default:
+                  toastData = {
+                    title: "Error",
+                    description: error.message,
+                    status: "error",
+                  };
+              }
             } else {
-                setSubmitting(false)
+              toastData = {
+                title: "Error",
+                description: "Something Went Wrong",
+                status: "error",
+              };
             }
-        }
-    }, [errors])
-
-
-    const handleChange = (event) => {
-        event.persist()
-        setValues((prevValues) => ({
-            ...prevValues,
-            [event.target.name]: event.target.value,
-        }))
-        const validationErrors = validate(values)
-        setErrors(validationErrors)
+          }
+          toast({
+            title: toastData.title,
+            description: toastData.description,
+            status: toastData.status,
+            duration: 5000,
+            isClosable: true,
+            variant: "subtle",
+            position: "top",
+          });
+        })();
+      } else {
+        setSubmitting(false);
+      }
     }
+  }, [errors]);
 
-    const handleSubmit = (event) => {
-        event.preventDefault()
-        const validationErrors = validate(values)
-        setErrors(validationErrors)
-        setSubmitting(true)
-    }
+  const handleChange = (event) => {
+    event.persist();
+    setValues((prevValues) => ({
+      ...prevValues,
+      [event.target.name]: event.target.value,
+    }));
+    const validationErrors = validate(values);
+    setErrors(validationErrors);
+  };
 
-    return { values, errors, handleChange, handleSubmit, isSubmitting }
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const validationErrors = validate(values);
+    setErrors(validationErrors);
+    setSubmitting(true);
+  };
+
+  return { values, errors, handleChange, handleSubmit, isSubmitting };
 }
 
 function validate(values) {
-    let errors = {}
+  let errors = {};
 
-    for (let [key, value] of Object.entries(values)) {
-        if (validationRules[key] && !validationRules[key].validate(value, values)) {
-            errors[key] = validationRules[key].error
-        }
+  for (let [key, value] of Object.entries(values)) {
+    if (validationRules[key] && !validationRules[key].validate(value, values)) {
+      errors[key] = validationRules[key].error;
     }
+  }
 
-    return errors
+  return errors;
 }
