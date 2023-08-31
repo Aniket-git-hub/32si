@@ -27,8 +27,11 @@ export function useFormValidation(initialState, submit) {
               status: "success",
             };
           } catch (error) {
+            if (import.meta.env.VITE_ENV === 'development') {
+              console.log(error);
+            }
+            setValues(initialState);
             setSubmitting(false);
-            console.log(error);
             if (error.response) {
               switch (error.response.status) {
                 case 401:
