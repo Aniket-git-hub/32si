@@ -13,12 +13,23 @@ export default function LoginPage() {
   const login = async () => {
     try {
       const sanitizedValues = useSanitizeValues(values)
-      const { user, accessToken, message } = await loginUser(sanitizedValues)
+      const response = await loginUser(sanitizedValues)
+      const {user, accessToken} = response
+      alert({
+        title: "Login Successful",
+        description: `Welcome, back ${user?.name && user?.name}`,
+        status: "success",
+        isClosable: true,
+        duration: 5000,
+        variant: "subtle",
+        position: "top"
+      })
       save(user, accessToken)
     } catch (error) {
+      const { data: { message }} = error?.response
       alert({
         title: "Authentication Error",
-        description: error.response.data.message,
+        description: message,
         status: "error",
         isClosable: true,
         duration: 5000,
@@ -35,20 +46,20 @@ export default function LoginPage() {
   const alert = useToast()
 
   return (
-    <Container as="section" my="80px" maxW="400px">
+    <Container as="section" my="50px" maxW="400px">
       <Card borderBottom="4px" borderBottomColor="purple.500">
         <CardBody>
           <Center>
             <Heading mb="30px">32 Beads Login</Heading>
           </Center>
           <form onSubmit={handleSubmit}>
-            <FormControl isInvalid={errors.email} isRequired>
+            <FormControl isInvalid={errors.email} isRequired mb=".8rem">
               <FormLabel>Email</FormLabel>
               <Input type='email' name="email" value={values.email} onChange={handleChange} />
-              <FormErrorMessage>Email is required.</FormErrorMessage>
+              <FormErrorMessage>{ errors.email }</FormErrorMessage>
             </FormControl>
 
-            <FormControl id="password" isInvalid={errors.password} isRequired>
+            <FormControl id="password" isInvalid={errors.password} isRequired mb=".8rem">
               <FormLabel>Password</FormLabel>
               <InputGroup>
                 <InputRightElement width="4.5rem">

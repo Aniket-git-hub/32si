@@ -1,7 +1,7 @@
 import { verifyOtp } from "../api/auth"
 import { useFormValidation } from "../hooks/useFormValidation"
 import { useNavigate } from 'react-router-dom'
-import { Box, Heading, FormControl, FormLabel, Input, FormErrorMessage, Button } from "@chakra-ui/react"
+import { Box, Button, FormControl, FormLabel, Input, FormHelperText, FormErrorMessage, Heading, VStack, Center, useToast } from '@chakra-ui/react'
 
 export default function VerifyOtp({ email }) {
     const initialState = { otp: '' }
@@ -9,27 +9,54 @@ export default function VerifyOtp({ email }) {
 
     const submit = async () => {
         try {
-            const response = await verifyOtp({ otp: String(values.otp), email })
-            console.log(response)
+            const { message } = await verifyOtp({ otp: String(values.otp), email })
+            alert({
+                title: "OTP Verified",
+                description: message,
+                status: "success",
+                isClosable: true,
+                duration: 3000,
+                variant: "subtle",
+                position: "top"
+            })
             navigate("/reset-password", { state: { email }, replace: true })
-        } catch (error) {
-            console.log(error)
+        } catch ({ response: { data: { message }}}) {
+            alert({
+                title: "Authentication Error",
+                description: message,
+                status: "error",
+                isClosable: true,
+                duration: 5000,
+                variant: "subtle",
+                position: "top"
+            })
         }
     }
 
     const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, submit)
 
+    const alert = useToast()
+
     return (
-        <Box p={4}>
-            <Heading as="h3" mb={4}>Verify OTP</Heading>
+        <>
+            <Center>
+                <Heading my="30px">OTP Verification</Heading>
+            </Center>
             <form onSubmit={handleSubmit}>
-                <FormControl id="otp" isInvalid={errors.otp}>
+                <FormControl isInvalid={errors.otp} isRequired mb=".8rem">
                     <FormLabel>OTP</FormLabel>
                     <Input type="number" name="otp" value={values.otp} onChange={handleChange} />
+                    <FormHelperText>Enter the OTP that you received on your email</FormHelperText>
                     <FormErrorMessage>{errors.otp}</FormErrorMessage>
                 </FormControl>
-                <Button type="submit" colorScheme="blue" mt={4} isLoading={isSubmitting}>Verify OTP</Button>
+                <Center mb="1.2rem">
+                    <VStack>
+                        <Button type="submit" colorScheme='purple' isLoading={isSubmitting} loadingText="verifying..." disabled={isSubmitting}>
+                            Verify OTP
+                        </Button>
+                    </VStack>
+                </Center>
             </form>
-        </Box>
+        </>
     )
 }

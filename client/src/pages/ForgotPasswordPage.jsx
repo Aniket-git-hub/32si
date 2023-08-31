@@ -3,7 +3,8 @@ import { useFormValidation } from "../hooks/useFormValidation"
 import VerifyOtp from "../components/VerifyOtp"
 import { useAuth } from "../hooks/useAuth"
 import { forgotPassword } from "../api/auth"
-import { Box, Heading, FormControl, FormLabel, Input, FormErrorMessage, Button } from "@chakra-ui/react"
+import { Box, Button, FormControl, FormLabel, Input, Link,FormHelperText, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Flex, VStack, Center, useToast } from '@chakra-ui/react'
+
 
 export default function ForgotPasswordPage() {
     const initialState = { email: '' }
@@ -12,12 +13,28 @@ export default function ForgotPasswordPage() {
 
     const submit = async () => {
         try {
-            const response = await forgotPassword(values)
+            await forgotPassword(values)
             setVerifyOTP(true)
             setCountdown(120)
-            console.log(response)
-        } catch (error) {
-            console.log(error)
+            alert({
+                title: "Email Sent",
+                description: `OTP sent to ${ values.email && values.email }`,
+                status: "success",
+                isClosable: true,
+                duration: 5000,
+                variant: "subtle",
+                position: "top"
+            })
+        } catch ({ response: { data: { message }} }) {
+            alert({
+                title: "Authentication Error",
+                description: message,
+                status: "error",
+                isClosable: true,
+                duration: 5000,
+                variant: "subtle",
+                position: "top"
+            })
         }
     }
     const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, submit)
@@ -33,20 +50,38 @@ export default function ForgotPasswordPage() {
         }
     }, [verifyOTP, countdown])
 
+    const alert = useToast()
+
     return (
-        <Box p={4}>
-            <Heading as="h3" mb={4}>Password Reset</Heading>
-            <Box className={verifyOTP ? 'disabled' : ''}>
-                <form onSubmit={handleSubmit}>
-                    <FormControl id="email" isInvalid={errors.email}>
-                        <FormLabel>Email</FormLabel>
-                        <Input type="email" name="email" value={values.email} onChange={handleChange} />
-                        <FormErrorMessage>{errors.email}</FormErrorMessage>
-                    </FormControl>
-                    <Button type="submit" colorScheme="blue" mt={4} isLoading={isSubmitting}>{verifyOTP ? `Resend OTP (${countdown})` : 'Send OTP'}</Button>
-                </form>
-            </Box>
-            {verifyOTP && <VerifyOtp email={values.email} />}
-        </Box>
+        <>
+        <Container as="section" my="50px" maxW="400px">
+            <Card borderBottom="4px" borderBottomColor="purple.500">
+                <CardBody>
+                    <Center>
+                        <Heading mb="30px">32 Beads Account Password Reset</Heading>
+                    </Center>
+                    <form onSubmit={handleSubmit} className={verifyOTP ? 'disabled' : ''}>
+                        <FormControl isInvalid={errors.email} isRequired mb=".8rem">
+                            <FormLabel>Email</FormLabel>
+                            <Input type='email' name="email" value={values.email} onChange={handleChange} />
+                            <FormHelperText> Enter email that you used to created account.</FormHelperText>
+                            <FormErrorMessage>{errors.email}</FormErrorMessage>
+                        </FormControl>
+                        <Center mt="1.5rem">
+                            <VStack>
+                                <Button type="submit" colorScheme='purple' isLoading={isSubmitting} loadingText="Sending..." disabled={isSubmitting}>
+                                        {verifyOTP ? `Resend OTP (${countdown})` : 'Send OTP'}
+                                </Button>
+                            </VStack>
+                        </Center>
+                        </form>
+                        {verifyOTP && <VerifyOtp email={values.email} />}
+                        {/* <VerifyOtp email={values.email} /> */}
+                </CardBody>
+            </Card>
+        </Container>
+       
+        
+        </>
     )
 }
