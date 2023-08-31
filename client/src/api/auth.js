@@ -5,12 +5,8 @@ const handleRequest = async (url, data) => {
         const response = await instance.post(url, data)
         if (response.status === 200 || response.status === 201) {
             return response.data
-        } else {
-            throw new Error(`Request failed with  status code ${response.status}`)        
-        }
-
+        } 
     } catch (error) {
-        console.log(`Error: ${error.message}`)
         throw error
     }
 }

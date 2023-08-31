@@ -1,9 +1,10 @@
-import { Box, Button, FormControl, FormLabel, Input, Link, VStack, Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react'
+import { Button, FormControl, FormLabel, Input, Link, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Flex, VStack, Center, useToast } from '@chakra-ui/react'
 import { loginUser } from '../api/auth';
 import { useAuth } from '../hooks/useAuth';
 import { useFormValidation } from '../hooks/useFormValidation';
 import { useSanitizeValues } from '../hooks/useSanitizedValues';
 import { useState } from 'react';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 
 export default function LoginPage() {
   const initialState = { email: '', password: '' }
@@ -14,51 +15,68 @@ export default function LoginPage() {
       const sanitizedValues = useSanitizeValues(values)
       const { user, accessToken, message } = await loginUser(sanitizedValues)
       save(user, accessToken)
-      setResponseMessage(message)
     } catch (error) {
-      console.log(error)
-      setResponseMessage({ message:error.response.data.message, status:"error"})
+      alert({
+        title: "Authentication Error",
+        description: error.response.data.message,
+        status: "error",
+        isClosable: true,
+        duration: 5000,
+        variant: "subtle",
+        position:"top"
+      })
     }
-  };
+  }
 
   const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, login)
 
-  const [responseMessage, setResponseMessage] = useState({ message: "", status: "" })
+  const [showPassword, setShowPassword] = useState(false)
 
+  const alert = useToast()
 
   return (
-    <Box>
-      <VStack>
-        <Box>
-          <h2>32 Beads Login</h2>
+    <Container as="section" my="80px" maxW="400px">
+      <Card borderBottom="4px" borderBottomColor="purple.500">
+        <CardBody>
+          <Center>
+            <Heading mb="30px">32 Beads Login</Heading>
+          </Center>
           <form onSubmit={handleSubmit}>
-            {responseMessage.message && (
-              <Alert status={responseMessage.status} mt={4} variant='left-accent'>
-                <AlertIcon />
-                <AlertTitle>{responseMessage.message}</AlertTitle>
-              </Alert>
-            )}
-            <FormControl id="email">
+            <FormControl isInvalid={errors.email} isRequired>
               <FormLabel>Email</FormLabel>
-              <Input type="email" name="email" value={values.email} onChange={handleChange} />
+              <Input type='email' name="email" value={values.email} onChange={handleChange} />
+              <FormErrorMessage>Email is required.</FormErrorMessage>
             </FormControl>
-            {errors.email && <p>{errors.email}</p>}
-            
-            <FormControl id="password">
+
+            <FormControl id="password" isInvalid={errors.password} isRequired>
               <FormLabel>Password</FormLabel>
-              <Input type="password" name="password" value={values.password} onChange={handleChange} />
+              <InputGroup>
+                <InputRightElement width="4.5rem">
+                  <Button h="1.75rem" variant="ghost" size="sm" onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <Icon as={ViewOffIcon} /> : <Icon as={ViewIcon} />}
+                  </Button>
+                </InputRightElement>
+                <Input type={showPassword ? "text" : "password"} name="password" value={values.password} onChange={handleChange} />
+              </InputGroup>
+              <FormErrorMessage>{errors.password}</FormErrorMessage>
             </FormControl>
-            {errors.password && <p>{errors.password}</p>}
-           
-            <Link href="/forgot-password">Forgot password</Link>
+            <Flex justifyContent="end">
+              <Link href="/forgot-password">Forgot password</Link>
+            </Flex>
+
             <br></br>
-            <Button type="submit" disabled={isSubmitting}>
-              Login
-            </Button>
+            <Center>
+              <VStack>
+                <Button type="submit" colorScheme='purple' isLoading={isSubmitting} loadingText="logging.." disabled={isSubmitting}>
+                  Login
+                </Button>
+                <p>Don't have an account? <Link href="/register">Create</Link> </p>
+              </VStack>
+            </Center>
           </form>
-          <Link href="/register">Register</Link>
-        </Box>
-      </VStack>
-    </Box>
+        </CardBody>
+
+      </Card>
+    </Container>
   )
 }
