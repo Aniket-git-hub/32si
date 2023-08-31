@@ -6,7 +6,7 @@ export default function Error404Page() {
 
     return (
         <Box
-            bg="gray.100"
+            bg="gray.50"
             minH="100vh"
             display="flex"
             alignItems="center"
@@ -15,14 +15,14 @@ export default function Error404Page() {
             <Box maxW="lg" textAlign="center">
                 {/* <Image src="[1](https://www.flaticon.com/free-icons/404)" alt="Error 404" mb={8} /> */}
                 <Heading as="h1" fontSize="6xl" color="red.600">
-                    404
+                    Error 404
                 </Heading>
                 <Text fontSize="2xl" color="gray.600">
                     Oops! The page you are looking for does not exist.
                 </Text>
                 <Button
                     mt={4}
-                    colorScheme="blue"
+                    colorScheme="purple"
                     onClick={() => navigate("/")}
                 >
                     Go back to home page
