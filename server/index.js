@@ -9,11 +9,20 @@ const PORT = process.env.PORT || 3000
  *  prevents cross origin error and preflight error
  */
 import cors from 'cors'
+const prodOrigins = [process.env.ORIGIN_1, process.env.ORIGIN_2]
+const devOrigin = ['http://localhost:3000']
+const allowedOrigins = process.env.NODE_ENV === 'production' ? prodOrigins : devOrigin
 app.use(cors({
-    origin: process.env.NODE_ENV === "development" ? true : process.env.CORS_ORIGIN,
+    origin: (origin, callback) => {
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-}))
+}));
 
 /**
  * body-parser configuration for post and put requests
