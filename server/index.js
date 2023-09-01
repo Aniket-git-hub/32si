@@ -10,16 +10,10 @@ const PORT = process.env.PORT || 3000
  */
 import cors from 'cors'
 const prodOrigins = [process.env.ORIGIN_1, process.env.ORIGIN_2]
-const devOrigin = ['http://localhost:3000']
+const devOrigin = ['http://localhost:5173', ]
 const allowedOrigins = process.env.NODE_ENV === 'production' ? prodOrigins : devOrigin
 app.use(cors({
-    origin: (origin, callback) => {
-        if (allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
