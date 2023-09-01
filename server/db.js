@@ -9,7 +9,7 @@ async function connectToDatabase() {
         })
         console.log("[mongodb]: Connected to Database")
     } catch (error) {
-        console.log(error.message)
+        console.log(`[mongodb - Error]: ${error.message}`)
     }
 }
 export default connectToDatabase

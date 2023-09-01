@@ -22,7 +22,9 @@ const errorTypeMap = {
  * @param {Function} next Next Middleware Function
  */
 function errorHandler(error, req, res, next) {
-    console.log(`[server]: Request: ${req.path} - [error]: ${error.message}`);
+    if (process.env.NODE_ENV === 'development') {
+        console.log(`[server]: Request: ${req.path} - [error]: ${error.message}`);
+    }
 
     const errorType = error.code || error.name;
     const errorInfo = errorTypeMap[errorType] || { status: 500, message: "Internal Server Error" };
