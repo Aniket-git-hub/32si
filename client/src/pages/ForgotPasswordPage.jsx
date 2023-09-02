@@ -3,7 +3,7 @@ import { useFormValidation } from "../hooks/useFormValidation"
 import VerifyOtp from "../components/VerifyOtp"
 import { useAuth } from "../hooks/useAuth"
 import { forgotPassword } from "../api/auth"
-import { Button, FormControl, FormLabel, Input, FormHelperText, FormErrorMessage, Heading, Container, Card, CardBody, VStack, Center } from '@chakra-ui/react'
+import { Button, FormControl, FormLabel, Link, Input, FormHelperText, FormErrorMessage, Heading, Container, Card, CardBody, VStack, Center } from '@chakra-ui/react'
 
 export default function ForgotPasswordPage() {
     const initialState = { email: '' }
@@ -13,11 +13,12 @@ export default function ForgotPasswordPage() {
 
     const submit = async (values) => {
         try {
+            setEmail(values.email)
+            console.log(email)
             await forgotPassword(values)
             setVerifyOTP(true)
             setCountdown(120)
-            setEmail(values.email)
-            return { title: `Email sent`, message: `OTP sent to ${email}` }
+            return { title: `Email sent`, message: `OTP sent : ${ email }` }
         } catch (error) {
             throw error
         }
@@ -55,7 +56,8 @@ export default function ForgotPasswordPage() {
                             <VStack>
                                 <Button type="submit" colorScheme='purple' isLoading={isSubmitting} loadingText="Sending..." disabled={isSubmitting}>
                                         {verifyOTP ? `Resend OTP (${countdown})` : 'Send OTP'}
-                                </Button>
+                                    </Button>
+                                    <p> back to  <Link href="/login">login</Link></p>
                             </VStack>
                         </Center>
                         </form>

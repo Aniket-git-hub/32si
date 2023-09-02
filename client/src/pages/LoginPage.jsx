@@ -56,7 +56,7 @@ export default function LoginPage() {
             </Flex>
             <Center>
               <VStack>
-                <Button type="submit" colorScheme='purple' isLoading={isSubmitting} loadingText="logging.." disabled={isSubmitting}>
+                <Button type="submit" colorScheme='purple' isLoading={isSubmitting} loadingText="logging..." disabled={isSubmitting}>
                   Login
                 </Button>
                 <p>Don't have an account? <Link href="/register">Create</Link> </p>

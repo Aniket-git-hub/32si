@@ -1,24 +1,28 @@
-import { useAuth } from "../hooks/useAuth"
-import { Box, Heading, Text, Button, Icon, Flex, Spacer, Avatar, HStack } from "@chakra-ui/react"
-import { StarIcon } from "@chakra-ui/icons"
+import TopNavBar from "../components/TopNavBar";
+import GameBoard from "../components/GameBoard";
+import { Grid, GridItem, Center } from "@chakra-ui/react";
 
 export default function HomePage() {
-  const { user, remove } = useAuth()
-  const { username, name, email } = user
-  const handleLogout = () => {
-    remove()
-  }
   return (
-    <Flex as="nav" bg="gray.100" p=".5rem" minW="100vw" justifyContent="space-between" alignItems="center">
-      <Heading size="lg">32 Beads</Heading>
-      <Spacer></Spacer>
-      <HStack>
-        <Avatar size="sm" name={name} src='' />
-        <Text> sample@gamil.com</Text>
-        <Button size="sm" variant="outline" colorScheme="purple" onClick={handleLogout}>
-          logout
-        </Button>
-      </HStack>
-    </Flex>
-  )
+    <>
+      <Grid templateColumns="repeat(10, 1fr)" bg="gray.50">
+        <GridItem as="aside" colSpan={2} bg="purple.400" minHeight="100vh">
+          <span>hello</span>
+        </GridItem>
+        <GridItem as="main" colSpan={8}>
+          <TopNavBar />
+          <Grid templateColumns="repeat(4, 1fr)">
+            <GridItem colSpan={3} bg="bodyColor" p={6}>
+              <Center>
+                <GameBoard />
+              </Center>
+            </GridItem>
+            <GridItem as="aside" colSpan={1} bg="purple.400" minHeight="100vh">
+              <span>hello</span>
+            </GridItem>
+          </Grid>
+        </GridItem>
+      </Grid>
+    </>
+  );
 }

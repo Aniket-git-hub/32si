@@ -4,10 +4,11 @@ import { resetPassword } from "../api/auth";
 import { Button, FormControl, FormLabel, Input, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Center} from '@chakra-ui/react'
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
 
 export default function ResetPasswordPage() {
     const initialState = { password: '', cpassword: '' }
-
+    const { setVerifyOTP } = useAuth()
     const location = useLocation()
     const navigate = useNavigate()
     const savePassword = async () => {
@@ -15,6 +16,7 @@ export default function ResetPasswordPage() {
             const email = location.state.email
             const response = await resetPassword({ password: values.password, email })
             const { message } = response.data
+            setVerifyOTP(false)
             navigate("/login", { replace: true })
             return { title: `Password Reset`, message: message }
         } catch (error) {
