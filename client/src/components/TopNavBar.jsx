@@ -1,5 +1,6 @@
-import { Box, Heading, Text, Button, Icon, Flex, Spacer, Avatar, HStack } from "@chakra-ui/react"
-import { ArrowForwardIcon, StarIcon } from "@chakra-ui/icons"
+import { Box, Heading, Text, Button, Icon, Flex, Spacer, Avatar, HStack, IconButton } from "@chakra-ui/react"
+import { ArrowForwardIcon, BellIcon, StarIcon } from "@chakra-ui/icons"
+import { FiBell } from 'react-icons/fi';
 import { useAuth } from "../hooks/useAuth"
 
 function TopNavBar() {
@@ -10,10 +11,9 @@ function TopNavBar() {
     }
 
     return (
-        <Flex as="nav" bg="gray.100" p=".5rem" justifyContent="space-between" alignItems="center">
-            <Heading size="lg">32 Beads</Heading>
-            <Spacer></Spacer>
+        <Flex as="nav" p=".5rem" pr="1rem" justifyContent="end" alignItems="center">
             <HStack>
+                <IconButton variant="ghost" size="lg" icon={<FiBell />} ></IconButton>
                 <Avatar size="sm" name={name} src='' />
                 <Text> sample@gamil.com</Text>
                 <Button rightIcon={<ArrowForwardIcon />} size="sm" variant="outline" colorScheme="purple" onClick={handleLogout}>
