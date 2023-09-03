@@ -1,18 +1,23 @@
-import { useEffect } from "react";
-
 function Spot(props) {
+  const relations = props.relations
+  
+  const handleClick = () => {
+    console.log(props)
+  }
+
   return (
     <circle
       style={{
-        display: props.nullSpot ? 'none' : 'block'
+        display: props.nullSpot ? 'none' : 'block', 
+        zIndex: 10,
       }}
-      onClick={() => console.log(props.boardPosition)}
+      onClick={handleClick}
       cx={props.position.x}
       cy={props.position.y}
       r={props.size}
-      stroke="black"
+      // stroke="black"
       strokeWidth="1"
-      fill="transparent"
+      fill="white"
     />
   );
 }
