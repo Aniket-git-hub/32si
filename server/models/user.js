@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose, { Schema } from "mongoose"
 const userSchema = mongoose.Schema({
     name: {
         type: String,
@@ -7,7 +7,7 @@ const userSchema = mongoose.Schema({
     username: {
         type: String,
         unique: true,
-        require:true,
+        require: true,
     },
     email: {
         type: String,
@@ -17,8 +17,33 @@ const userSchema = mongoose.Schema({
     password: {
         type: String,
         required: true,
+    },
+    profilePhoto: {
+        type: String,
+        default: "",
+    },
+    description: {
+        type: String,
+        default: "",
+        max: 500,
+    },
+    gamesPlayed: {
+        type: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'game'
+            }
+        ]
+    },
+    friends: {
+        type: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: 'user'
+            }
+        ]
     }
 })
 
-const user = mongoose.model('User', userSchema)
-export default user
+const USER = mongoose.model('user', userSchema)
+export default USER
