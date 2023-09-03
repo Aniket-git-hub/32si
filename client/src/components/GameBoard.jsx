@@ -113,36 +113,41 @@ function GameBoard(props) {
             { x: 0, y: 0 },
         ],
     ];
-    let board = [
+    const board = [
         [0, 0, 0, 0, 0],
-        [0, 1, 2, 1, 0],
-        [2, 2, 2, 2, 2],
-        [1, 1, 0, 1, 1],
-        [2, 2, 2, 2, 2],
-        [0, 1, 2, 1, 0],
         [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0]
     ];
-    const MARGIN = 10;
-    
-    console.log(props)
+    // console.table(sizes)
     return (
-        <div>
-            {board.map((row, i) => {
-                return row.map((spot, j) => {
-                    // calculate position and size of each spot based on i and j
-                    let position = sizes[i][j];
-            return (
-            <Spot
-                key={`${i}-${j}`}
-                relations={relations}
-                position={position}
-                    size={(size - (COLS + 1) * MARGIN) / COLS }
-                value={spot}
-            />
-            );
-        });
-      })}
-        </div>
+        <svg className="board">
+            {board.map((row, i) => (
+                row.map((col, j) => {
+                    return (
+                        <Spot
+                            key={j}
+                            position={{ x: `${sizes[i][j].x}px`, y: `${sizes[i][j].y}px` }}
+                            size="10px"
+                            value={board[i][j]}
+                            boardPosition={{ i, j }}
+                            nullSpot={(`${i}${j}` == '84') || (`${i}${j}` == '80') ||
+                                (`${i}${j}` == '74') || (`${i}${j}` == '70') ||
+                                (`${i}${j}` == '14') || (`${i}${j}` == '10') ||
+                                (`${i}${j}` == '00') || (`${i}${j}` == '04')
+                                ? true : false
+                            }
+                        />
+                    );
+                })
+            ))}
+
+        </svg>
     );
 }
 

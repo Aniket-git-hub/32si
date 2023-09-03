@@ -1,28 +1,19 @@
+import { useEffect } from "react";
+
 function Spot(props) {
-  // props: relations (object), position (object), size (number), value (number)
-  // value: 0 = empty, 1 = arrow, 2 = bead
   return (
-    <div
-      className="spot"
+    <circle
       style={{
-        left: props.position.x,
-        top: props.position.y,
-        width: props.size,
-        height: props.size,
+        display: props.nullSpot ? 'none' : 'block'
       }}
-      onClick={() => {
-        console.log(props)
-      }}
-    >
-      {props.value === 1 && (
-        // render an arrow based on the relations object
-        <div className="arrow">red</div>
-      )}
-      {props.value === 2 && (
-        // render a bead based on the color
-        <div className="bead">blue</div>
-      )}
-    </div>
+      onClick={() => console.log(props.boardPosition)}
+      cx={props.position.x}
+      cy={props.position.y}
+      r={props.size}
+      stroke="black"
+      strokeWidth="1"
+      fill="transparent"
+    />
   );
 }
 
