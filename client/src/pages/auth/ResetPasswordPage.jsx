@@ -1,10 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useFormValidation } from "../hooks/useFormValidation";
-import { resetPassword } from "../api/auth";
+import { useFormValidation } from "../../hooks/useFormValidation";
+import { resetPassword } from "../../api/auth";
 import { Button, FormControl, FormLabel, Input, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Center} from '@chakra-ui/react'
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function ResetPasswordPage() {
     const initialState = { password: '', cpassword: '' }

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
-import { useFormValidation } from "../hooks/useFormValidation"
-import VerifyOtp from "../components/VerifyOtp"
-import { useAuth } from "../hooks/useAuth"
-import { forgotPassword } from "../api/auth"
+import { useFormValidation } from "../../hooks/useFormValidation"
+import VerifyOtp from "../../components/VerifyOtp"
+import { useAuth } from "../../hooks/useAuth"
+import { forgotPassword } from "../../api/auth"
 import { Button, FormControl, FormLabel, Link, Input, FormHelperText, FormErrorMessage, Heading, Container, Card, CardBody, VStack, Center } from '@chakra-ui/react'
 
 export default function ForgotPasswordPage() {

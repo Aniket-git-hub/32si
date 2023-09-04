@@ -1,28 +1,27 @@
 import { Button, FormControl, FormLabel, Input, Link, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Flex, VStack, Center } from '@chakra-ui/react'
-import { registerUser } from '../api/auth';
-import { useAuth } from '../hooks/useAuth';
-import { useFormValidation } from '../hooks/useFormValidation';
-import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import { loginUser } from '../../api/auth';
+import { useAuth } from '../../hooks/useAuth';
+import { useFormValidation } from '../../hooks/useFormValidation';
 import { useState } from 'react';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 
-
-export default function RegisterPage() {
-  const initialState = { name: '', username: '', email: '', password: '' }
+export default function LoginPage() {
+  const initialState = { email: '', password: '' }
 
   const { save } = useAuth()
-  
-  const register = async (values) => {
+
+  const login = async (values) => {
     try {
-      const response = await registerUser(values)
-      const { user, accessToken } = response.data 
+      const response = await loginUser(values)
+      const {user, accessToken} = response.data 
       save(user, accessToken)
-      return { title:`Registration Successful`, message:`Welcome ${user.name && user.name} to 32 Beads Community.`}
+      return { message: `Welcome back ${ user.name && user.name }`, title:`Login Successful`}
     } catch (error) {
       throw error
     }
   }
 
-  const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, register)
+  const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, login)
 
   const [showPassword, setShowPassword] = useState(false)
 
@@ -31,21 +30,9 @@ export default function RegisterPage() {
       <Card borderBottom="4px" borderBottomColor="purple.500">
         <CardBody>
           <Center>
-            <Heading mb="20px">Create 32 Beads Account</Heading>
+            <Heading mb="30px">32 Beads Login</Heading>
           </Center>
           <form onSubmit={handleSubmit}>
-            <FormControl isInvalid={errors.name} isRequired mb=".8rem">
-              <FormLabel>Name</FormLabel>
-              <Input type='text' name="name" value={values.name} onChange={handleChange} />
-              <FormErrorMessage>{ errors.name}</FormErrorMessage>
-            </FormControl>
-            
-            <FormControl isInvalid={errors.username} isRequired mb=".8rem">
-              <FormLabel>Username</FormLabel>
-              <Input type='text' name="username" value={values.username} onChange={handleChange} />
-              <FormErrorMessage>{ errors.username}</FormErrorMessage>
-            </FormControl>
-            
             <FormControl isInvalid={errors.email} isRequired mb=".8rem">
               <FormLabel>Email</FormLabel>
               <Input type='email' name="email" value={values.email} onChange={handleChange} />
@@ -64,13 +51,15 @@ export default function RegisterPage() {
               </InputGroup>
               <FormErrorMessage>{errors.password}</FormErrorMessage>
             </FormControl>
-        
-            <Center mt="2rem">
+            <Flex justifyContent="end">
+              <Link href="/forgot-password">Forgot password</Link>
+            </Flex>
+            <Center>
               <VStack>
-                <Button type="submit" colorScheme='purple' isLoading={isSubmitting} loadingText="registering.." disabled={isSubmitting}>
-                  Register
+                <Button type="submit" colorScheme='purple' isLoading={isSubmitting} loadingText="logging..." disabled={isSubmitting}>
+                  Login
                 </Button>
-                <p>Have an account? <Link href="/login">Login</Link> </p>
+                <p>Don't have an account? <Link href="/register">Create</Link> </p>
               </VStack>
             </Center>
           </form>
