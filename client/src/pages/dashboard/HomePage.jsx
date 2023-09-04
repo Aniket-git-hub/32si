@@ -5,5 +5,5 @@ export default function HomePage() {
     <Center bg="bodyColor" borderRadius={10} p={6}>
       <GameBoard />
     </Center>
-  );
+  )
 }

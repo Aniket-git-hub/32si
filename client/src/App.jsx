@@ -11,6 +11,7 @@ import Stats from './pages/dashboard/stats';
 import Feedback from './pages/dashboard/feedback';
 import RootLayout from './layouts/RootLayout'
 import HomePage from './pages/dashboard/HomePage';
+import AboutUs from './pages/dashboard/AboutUs';
 
 function App() {
   const { isAuthenticated, verifyOTP } = useAuth()
@@ -21,6 +22,7 @@ function App() {
         <Route path="settings" element={ <Settings />} />
         <Route path="stats" element={ <Stats />} />
         <Route path="feedback" element={ <Feedback />} />
+        <Route path="about-us" element={ <AboutUs />} />
       </Route>
       <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate replace to="/" />} />
       <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate replace to="/" />} />

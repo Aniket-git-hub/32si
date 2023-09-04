@@ -12,8 +12,9 @@ import {
   VStack,
   Divider,
   HStack,
+  Link
 } from "@chakra-ui/react";
-import { Link, Navigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 function LeftSidePanel() {
   const sideBarListItems = [
@@ -36,7 +37,7 @@ function LeftSidePanel() {
                 _hover={{ bg: "gray.100" }}
                 borderRadius={5}
               >
-                <Link to={item.path}>
+                <Link as={NavLink} to={item.path} _activeLink={{ fontWeight: "bold", fontSize: "lg" }} _hover={{}}>
                   <HStack px={5}>
                     {item.icon}
                     <Text py={2} borderRadius={5}>
@@ -48,8 +49,8 @@ function LeftSidePanel() {
             );
           })}
           <Divider orientation="horizontal" />
-          <ListItem my={2}>
-            <Link to="/about-us">
+          <ListItem my={2} _hover={{ bg: "gray.100" }} borderRadius={5}>
+            <Link as={NavLink} to="/about-us" _activeLink={{ fontWeight: "bold", fontSize: "lg" }} _hover={{}}>
               <HStack px={5}>
                 <SiAboutdotme size="20" />
                 <Text py={2} borderRadius={5}>
@@ -58,8 +59,8 @@ function LeftSidePanel() {
               </HStack>
             </Link>
           </ListItem>
-          <ListItem my={2}>
-            <Link to="/feedback">
+          <ListItem my={2} _hover={{ bg: "gray.100" }} borderRadius={5}>
+            <Link as={NavLink} to="/feedback" _activeLink={{fontWeight: "bold", fontSize: "lg" }} _hover={{}}>
               <HStack px={5}>
                 <MdOutlineFeedback size="20" />
                 <Text py={2} borderRadius={5}>
