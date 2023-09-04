@@ -13,7 +13,7 @@ function TopNavBar() {
     return (
         <Flex as="nav" p=".5rem" pr="1rem" justifyContent="end" alignItems="center">
             <HStack>
-                <IconButton variant="ghost" size="lg" icon={<FiBell />} ></IconButton>
+                <IconButton variant="ghost" size="sm" icon={<FiBell size="19"/>} ></IconButton>
                 <Avatar size="sm" name={name} src='' />
                 <Text> sample@gamil.com</Text>
                 <Button rightIcon={<ArrowForwardIcon />} size="sm" variant="outline" colorScheme="purple" onClick={handleLogout}>
