@@ -37,7 +37,7 @@ function TopNavBar() {
                             bg=""
                             borderColor="gray.200"
                         >
-                            <Link as={NavLink} to="/profile/" _hover={{}} >
+                            <Link as={NavLink} to={`/profile/@${username}`} _hover={{}} >
                                 <MenuItem>
                                     Profile
                                 </MenuItem>
