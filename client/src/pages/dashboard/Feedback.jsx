@@ -25,7 +25,7 @@ import {
   MdOutlineEmail,
   MdPhone,
 } from "react-icons/md";
-import { BsGithub, BsDiscord, BsPerson, BsInstagram, BsX, BsLinkedin } from "react-icons/bs";
+import { BsGithub, BsPerson, BsInstagram, BsLinkedin } from "react-icons/bs";
 import { useFormValidation } from "../../hooks/useFormValidation";
 
 export default function Feedback() {

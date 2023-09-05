@@ -49,7 +49,6 @@ export default function LoginPage() {
                 </InputRightElement>
                 <Input type={showPassword ? "text" : "password"} name="password" value={values.password} onChange={handleChange} />
               </InputGroup>
-              <FormErrorMessage>{errors.password}</FormErrorMessage>
             </FormControl>
             <Flex justifyContent="end">
               <Link href="/forgot-password">Forgot password</Link>
