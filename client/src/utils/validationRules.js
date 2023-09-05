@@ -27,5 +27,9 @@ export const validationRules = {
         validate: (value, { password }) => value === password,
         error: 'Confirm password does not match'
     },
+    message: {
+        validate: (value) => value.trim() !== '',
+        error: 'message is required'
+    }
     
 }
