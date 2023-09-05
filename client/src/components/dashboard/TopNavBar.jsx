@@ -1,7 +1,7 @@
 import { Box, Heading, Text, Button, Icon, Flex, Spacer, Avatar, HStack, IconButton } from "@chakra-ui/react"
 import { ArrowForwardIcon, BellIcon, StarIcon } from "@chakra-ui/icons"
 import { FiBell } from 'react-icons/fi';
-import { useAuth } from "../hooks/useAuth"
+import { useAuth } from "../../hooks/useAuth"
 
 function TopNavBar() {
     const { user, remove, setVerifyOTP } = useAuth()

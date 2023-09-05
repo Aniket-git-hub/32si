@@ -1,7 +1,7 @@
-import TopNavBar from "../components/TopNavBar";
+import TopNavBar from "../components/dashboard/TopNavBar";
 import { Grid, GridItem, Center } from "@chakra-ui/react";
-import LeftSidePanel from "../components/LeftSidePanel";
-import RightSidePanel from "../components/RightSidePanel";
+import LeftSidePanel from "../components/dashboard/LeftSidePanel";
+import RightSidePanel from "../components/dashboard/RightSidePanel";
 import { Outlet } from "react-router-dom"
 
 export default function RootLayout() {

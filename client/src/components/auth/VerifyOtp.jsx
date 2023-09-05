@@ -1,5 +1,5 @@
-import { verifyOtp } from "../api/auth"
-import { useFormValidation } from "../hooks/useFormValidation"
+import { verifyOtp } from "../../api/auth"
+import { useFormValidation } from "../../hooks/useFormValidation"
 import { useNavigate } from 'react-router-dom'
 import { Box, Button, FormControl, FormLabel, Input, FormHelperText, FormErrorMessage, Heading, VStack, Center, useToast } from '@chakra-ui/react'
 
