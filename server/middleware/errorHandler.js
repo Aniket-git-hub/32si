@@ -1,8 +1,8 @@
 import { MongooseError } from "mongoose"
 
 const errorTypeMap = {
-    "MongooseError.ValidationError": { status: 400, message: (error) => `Oops! There seems to be a validation error: ${error.message}` },
-    "MongooseError.CastError": { status: 404, message: "Uh-oh! The resource you're looking for cannot be found." },
+    "ValidationError": { status: 400, message: (error) => `Oops! There seems to be a validation error: ${error.message}` },
+    "CastError": { status: 404, message: "Uh-oh! The resource you're looking for cannot be found." },
     "11000": { status: 409, message: "Hold on! It looks like there's a duplicate key error." },
     "JsonWebTokenError": { status: 401, message: "Hmm... The token provided seems to be invalid." },
     "SyntaxError": { status: 400, message: (error) => `Oops! There seems to be a syntax error: ${error.message}` },

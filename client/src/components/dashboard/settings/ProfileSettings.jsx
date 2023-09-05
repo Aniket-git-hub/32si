@@ -58,6 +58,7 @@ export default function ProfileSettings() {
                         <FormControl mt={5}>
                             <Button type='submit' variant="outline" colorScheme='purple' name='submit'>Save</Button>
                         </FormControl>
+                        
                     </form>
                 </Stack>
             </Flex>
