@@ -34,7 +34,7 @@ export const userRegistrationInputsValidationRules = [
     ...commonRules.name,
     body('username')
         .notEmpty().withMessage("Oops! You forgot to enter your username.")
-        .isLength({ max: 10 }).withMessage("Hold on! Your username should be no more than 15 characters.")
+        .isLength({ max: 25 }).withMessage("Hold on! Your username should be no more than 25 characters.")
         .isAlphanumeric().withMessage("Hmm... Your username should only contain letters and numbers.")
         .trim(),
     ...commonRules.email,

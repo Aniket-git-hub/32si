@@ -5,8 +5,8 @@ async function getAllUser(req, res, next) {
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.limit) || 10
         let skips = (page - 1) * 10
-        const users = USER.find({}).skip(skips).limit(limit).exec()
-        const count = USER.countDocuments({})
+        const users = await USER.find({}).skip(skips).limit(limit).exec()
+        const count = await USER.countDocuments({})
         res.status(200).json({
             users,
             total: count,
