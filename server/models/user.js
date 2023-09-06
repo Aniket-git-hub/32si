@@ -22,7 +22,7 @@ const userSchema = mongoose.Schema({
         type: String,
         default: "",
     },
-    description: {
+    bio: {
         type: String,
         default: "",
         max: 500,
@@ -42,8 +42,22 @@ const userSchema = mongoose.Schema({
                 ref: 'user'
             }
         ]
+    },
+    location: {
+        name: {
+            type: String,
+        },
+        type: {
+            type: String,
+            enum: ["Point"],
+        },
+        coordinates: {
+            type: [Number],
+        }
     }
 })
+
+userSchema.index({ location: "2dsphere"})
 
 const USER = mongoose.model('user', userSchema)
 export default USER
