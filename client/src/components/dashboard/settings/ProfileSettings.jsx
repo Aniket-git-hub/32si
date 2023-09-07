@@ -19,13 +19,16 @@ import { useEffect } from "react";
 import useDebounce from "../../../hooks/useDebounce.jsx";
 import getPlaces from "../../../api/getPlaces";
 import ComboBox from '../../utils/comboBox'
+import { updateUser } from "../../../api/user";
 export default function ProfileSettings() {
     const initialState = { name: "", username: "", email: "", bio: "" };
     const [editProfile, setEditProfile] = useState(false);
 
-    const updateProfile = (values) => {
+    const updateProfile = async (values) => {
         try{
             console.log(values);
+            const response = await updateUser(values)
+            console.log(response)
             setEditProfile(false);
             return { title: "Success", message: "Profile Updated Successfully" };
         } catch (error) {
