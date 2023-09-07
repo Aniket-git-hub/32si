@@ -51,18 +51,14 @@ export default function ProfileSettings() {
 
     const [comboBoxInput, setComboBoxInput] = useState('')
     const [places, setPlaces] = useState([])
-    const [loadingPlaces, setLoadingPlaces] = useState(false)
     const debouncedValue = useDebounce(comboBoxInput.trim())
     useEffect(() => {
         if (editProfile && debouncedValue != '') {
            (async () => {
                try {
-                    setLoadingPlaces(true)
                     const res = await getPlaces(debouncedValue)       
                     setPlaces(res.data.map(item => ({ name: item.name, coordinates: [item.lat, item.lon], type: 'Point' })))
-                    setLoadingPlaces(true) 
                 } catch (error) { 
-                   setLoadingPlaces(false)
                     console.log(error)
                 }
             })()
@@ -170,7 +166,6 @@ export default function ProfileSettings() {
                             name="location"
                             value={values.location?.name}
                             handleSelection={locationSelected}
-                            isLoading={loadingPlaces}
                         />
                         <FormControl mt={5} isDisabled={!editProfile}>
                             <Flex justifyContent={"space-between"}>
