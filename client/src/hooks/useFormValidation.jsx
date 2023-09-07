@@ -103,7 +103,7 @@ export function useFormValidation(initialState, submit) {
     setSubmitting(true);
   };
 
-  return { values, errors, handleChange, handleSubmit, isSubmitting };
+  return { values, setValues, errors, handleChange, handleSubmit, isSubmitting };
 }
 
 function validate(values) {
