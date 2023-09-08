@@ -6,9 +6,9 @@ import Error404Page from './pages/auth/Error404Page';
 import { useAuth } from './hooks/useAuth';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
-import Settings from './pages/dashboard/settings';
-import Stats from './pages/dashboard/stats';
-import Feedback from './pages/dashboard/feedback';
+import Settings from './pages/dashboard/Settings';
+import Stats from './pages/dashboard/Stats';
+import Feedback from './pages/dashboard/Feedback';
 import RootLayout from './layouts/RootLayout'
 import HomePage from './pages/dashboard/HomePage';
 import AboutUs from './pages/dashboard/AboutUs';
