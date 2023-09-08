@@ -30,9 +30,11 @@ async function login(req, res, next) {
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'strict',
-            secure: process.env.NODE_ENV === 'development' ? false : true,
-            maxAge: 24 * 60 * 60 * 1000
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production' ? true : false,
+            maxAge: 24 * 60 * 60 * 1000, 
+            domain: process.env.NODE_ENV === 'production' ? process.env.ORIGIN_2 : 'localhost',
+            path: "/",
         })
 
         const { password, ...rest } = user._doc

@@ -1,6 +1,6 @@
 import instance from "../config/axios.config"
 
-const handleRequest = async (endpoint, data, method) => {
+const handleRequest = async (endpoint, {accessToken, ...data}, method) => {
     try {
         let response;
         switch (method) {
@@ -11,7 +11,14 @@ const handleRequest = async (endpoint, data, method) => {
                 response = await instance.post(endpoint, data);
                 break;
             case "PUT":
-                response = await instance.put(endpoint, data);
+                const token = `Bearer ${accessToken}` 
+                console.log(token)
+                response = await instance.put("/user", data, { 
+                    headers: {
+                        Authorization: token,
+                    },
+                    withCredentials: true
+                }); 
                 break;
             case "DELETE":
                 response = await instance.delete(endpoint);

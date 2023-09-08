@@ -1,10 +1,14 @@
 import DOMPurify from 'dompurify';
 
 export function useSanitizeValues(values) {
-    const sanitizedValues = Object.keys(values).reduce((acc, key) => {
-        acc[key] = DOMPurify.sanitize(values[key])
-        return acc
-    }, {});
-
-    return sanitizedValues
+    const sanitizedValues = Object.fromEntries(
+        Object.entries(values).map(([key, value]) => {
+            if (typeof value === 'string') {
+                return [key, DOMPurify.sanitize(value)];
+            } else {
+                return [key, value];
+            }
+        })
+    );
+    return sanitizedValues;
 }

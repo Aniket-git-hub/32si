@@ -2,7 +2,13 @@ import  instance  from "../config/axios.config"
 
 const handleRequest = async (url, data) => {
     try {
-        const response = await instance.post(url, data)
+        const response = await instance.post(url, data, {
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json"
+            },
+            withCredentials: true
+        })
         if (response.status === 200 || response.status === 201) {
             return response
         } 

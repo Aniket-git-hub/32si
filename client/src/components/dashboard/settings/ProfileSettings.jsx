@@ -18,17 +18,30 @@ import { useState } from "react";
 import { useEffect } from "react";
 import useDebounce from "../../../hooks/useDebounce.jsx";
 import getPlaces from "../../../api/getPlaces";
-import ComboBox from '../../utils/comboBox'
+import ComboBox from "../../utils/comboBox";
 import { updateUser } from "../../../api/user";
 export default function ProfileSettings() {
-    const initialState = { name: "", username: "", email: "", bio: "" };
+    const { user, save} = useAuth();
+    const initialState = {
+        name: user?.name || "",
+        username: user?.username || "",
+        email: user?.email || "",
+        bio: user?.bio || "",
+        location: user?.location || ""
+    };
     const [editProfile, setEditProfile] = useState(false);
-
     const updateProfile = async (values) => {
-        try{
-            console.log(values);
-            const response = await updateUser(values)
-            console.log(response)
+        try {
+            const data = {
+                userId: user._id,
+                name: values.name,
+                username: values.username,
+                bio: values.bio,
+                location: values.location
+            };
+            const response = await updateUser(data)
+            response && save(response.data.user)
+            save(data)
             setEditProfile(false);
             return { title: "Success", message: "Profile Updated Successfully" };
         } catch (error) {
@@ -45,35 +58,54 @@ export default function ProfileSettings() {
         isSubmitting,
     } = useFormValidation(initialState, updateProfile);
 
-    const { user } = useAuth();
-
     useEffect(() => {
         setEditProfile(false);
-        setValues(user);
     }, [isSubmitting]);
 
-    const [comboBoxInput, setComboBoxInput] = useState('')
-    const [places, setPlaces] = useState([])
-    const debouncedValue = useDebounce(comboBoxInput.trim())
+    const [comboBoxInput, setComboBoxInput] = useState("");
+    const [places, setPlaces] = useState([]);
+    const debouncedValue = useDebounce(comboBoxInput.trim());
     useEffect(() => {
-        if (editProfile && debouncedValue != '') {
-           (async () => {
-               try {
-                    const res = await getPlaces(debouncedValue)       
-                    setPlaces(res.data.map(item => ({ name: item.name, coordinates: [item.lat, item.lon], type: 'Point' })))
-                } catch (error) { 
-                    console.log(error)
+        if (editProfile && debouncedValue != "") {
+            (async () => {
+                try {
+                    //   const res = await getPlaces(debouncedValue);
+                    //   setPlaces(
+                    //     res.data.map((item) => ({
+                    //       name: item.name,
+                    //       coordinates: [item.lat, item.lon],
+                    //       type: "Point",
+                    //     }))
+                    //   );
+                    setPlaces([
+                        {
+                            name: "Pune",
+                            coordinates: [78, 72]
+                        },
+                        {
+                            name: "Mumbai",
+                            coordinates: [78, 72]
+                        },
+                        {
+                            name: "Bhosari",
+                            coordinates: [78, 72]
+                        },
+                    ])
+                } catch (error) {
+                    console.log(error);
                 }
-            })()
+            })();
         }
-    }, [debouncedValue])
+    }, [debouncedValue]);
 
     const locationSelected = (selection) => {
+        console.log(selection);
         setValues({
             ...values,
-            location: selection
-        })
-    }
+            location: selection,
+        });
+        console.log(values)
+    };
 
     return (
         <Box
@@ -165,9 +197,10 @@ export default function ProfileSettings() {
                         <ComboBox
                             isDisabled={!editProfile}
                             places={places}
-                            handleInputValueChange={(selection) => setComboBoxInput(selection)}
-                            name="location"
-                            value={values.location?.name}
+                            handleInputValueChange={(selection) =>
+                                setComboBoxInput(selection)
+                            }
+                            value={values?.location.name}
                             handleSelection={locationSelected}
                         />
                         <FormControl mt={5} isDisabled={!editProfile}>
@@ -191,7 +224,7 @@ export default function ProfileSettings() {
                                     isLoading={isSubmitting}
                                 >
                                     Update
-                                </Button>   
+                                </Button>
                             </Flex>
                         </FormControl>
                     </form>

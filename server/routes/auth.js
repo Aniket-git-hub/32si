@@ -29,7 +29,7 @@ const loginRoute = process.env.NODE_ENV === 'production' ? process.env.LOGIN_USE
 router.post(loginRoute, uLIV, inputValidation, login)
 
 const refreshTokenRoute = process.env.NODE_ENV === 'production' ? process.env.REFRESH_TOKEN_ROUTE : "/token/refresh" 
-router.post(refreshTokenRoute, verifyJWT, refreshToken)
+router.get(refreshTokenRoute, verifyJWT, refreshToken)
 
 const forgotPasswordRoute = process.env.NODE_ENV === 'production' ? process.env.FORGOT_PASSWORD_ROUTE : "/forgot-password" 
 router.post(forgotPasswordRoute, fPEV, inputValidation, forgotPassword)
