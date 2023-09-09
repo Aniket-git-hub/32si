@@ -13,6 +13,7 @@ import RootLayout from './layouts/RootLayout'
 import HomePage from './pages/dashboard/HomePage';
 import AboutUs from './pages/dashboard/AboutUs';
 import Profile from './pages/dashboard/Profile';
+import Rivals from './pages/dashboard/Rivals';
 
 function App() {
   const { isAuthenticated, verifyOTP } = useAuth()
@@ -24,6 +25,7 @@ function App() {
         <Route path="stats" element={ <Stats />} />
         <Route path="feedback" element={ <Feedback />} />
         <Route path="about-us" element={ <AboutUs />} />
+        <Route path="rivals" element={ <Rivals />} />
         <Route path="profile/:username" element={ <Profile />} />
         <Route path="*" element={ <Error404Page />} />
       </Route>
