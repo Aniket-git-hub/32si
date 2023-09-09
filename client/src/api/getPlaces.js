@@ -1,10 +1,10 @@
 import { instance } from "../config/axios.config"
 
-const API_URL = import.meta.env.VITE_GEOCODING_URL
+const getEndpoint = (productionRoute, developmentRoute) => import.meta.env.VITE_ENV === 'production' ? import.meta.env[productionRoute] : developmentRoute
 
 export default async function getPlaces(data) {
     try {
-        const response = await instance.get(`${API_URL}/search?q=${data}&format=json`)
+        const response = await instance.get(`${getEndpoint('VITE_GET_PLACES_ROUTE', '/places/city/')}${data}`)
         if (response.status === 200) {
             return response
         }

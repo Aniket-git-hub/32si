@@ -66,28 +66,14 @@ export default function ProfileSettings() {
         if (editProfile && debouncedValue != "") {
             (async () => {
                 try {
-                    //   const res = await getPlaces(debouncedValue);
-                    //   setPlaces(
-                    //     res.data.map((item) => ({
-                    //       name: item.name,
-                    //       coordinates: [item.lat, item.lon],
-                    //       type: "Point",
-                    //     }))
-                    //   );
-                    setPlaces([
-                        {
-                            name: "Pune",
-                            coordinates: [78, 72]
-                        },
-                        {
-                            name: "Mumbai",
-                            coordinates: [78, 72]
-                        },
-                        {
-                            name: "Bhosari",
-                            coordinates: [78, 72]
-                        },
-                    ])
+                    const res = await getPlaces(debouncedValue);
+                      setPlaces(
+                        res.data.map((item) => ({
+                          name: item.name,
+                          coordinates: [item.lat, item.lng],
+                          type: "Point",
+                        }))
+                      );
                 } catch (error) {
                     console.log(error);
                 }
@@ -96,12 +82,10 @@ export default function ProfileSettings() {
     }, [debouncedValue]);
 
     const locationSelected = (selection) => {
-        console.log(selection);
         setValues({
             ...values,
             location: selection,
         });
-        console.log(values)
     };
 
     return (
