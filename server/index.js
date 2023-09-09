@@ -14,11 +14,12 @@ const devOrigin = ['http://localhost:5173',  ]
 const allowedOrigins = process.env.NODE_ENV === 'production' ? prodOrigins : devOrigin
 app.use(cors({
     origin: (origin, callback) => {
-        if (allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
+        callback(null, true)
+        // if (allowedOrigins.includes(origin)) {
+        //     callback(null, true);
+        // } else {
+        //     callback(new Error('Not allowed by CORS'));
+        // }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -55,6 +56,9 @@ app.use("/auth", authRoute)
 
 import userRoute from './routes/user.js'
 app.use("/user", userRoute)
+
+import placesRoute from './routes/places.js'
+app.use("/places", placesRoute)
 
 /**
  * Middleware to handle error
