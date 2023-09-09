@@ -1,4 +1,4 @@
-import instance from "../config/axios.config"
+import { instance } from "../config/axios.config"
 
 const API_URL = import.meta.env.VITE_GEOCODING_URL
 

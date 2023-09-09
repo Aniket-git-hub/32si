@@ -1,40 +1,36 @@
 import axios from 'axios'
+import { refreshToken } from '../api/auth'
 
 const API_URL = import.meta.env.VITE_ENV === 'production' ? import.meta.env.VITE_PROD_BASE_URL : 'http://localhost:3000/'
 
-const instance = axios.create({
+export const instance = axios.create({
     baseURL: API_URL, 
-  
 })
 
-instance.interceptors.response.use(
+export const interceptorsInstance = axios.create({
+    baseURL: API_URL,
+})
+
+const responseInterceptor = interceptorsInstance.interceptors.response.use(
     (response) => {
         return response
     },
     async (error) => {
         const config = error.config
         if (error.response && error.response.status === 401 && !config._retry) {
-            try {
-                const res = await instance.get("/auth/token/refresh", {
-                    withCredentials: true,
-                    headers: {
-                        "Content-Type":"application/json"
-                    }
-                })
-                config._retry = true
-                localStorage.setItem("accessToken", res?.data?.accessToken)
-                console.log(res)
-                config.headers['Authorization'] = `Bearer ${res?.data?.accessToken}`
-                return instance(config)
-            } catch (error) {
-                Promise.reject(error)
-            }
+            const response = await refreshToken()
+            localStorage.setItem("accessToken", response?.data?.accessToken)
+            config.headers['Authorization'] = `Bearer ${response?.data?.accessToken}`
+            config._retry = true
             return instance(config)
         }
         return Promise.reject(error)
     },
 )
 
+// const requestInterceptor = interceptorsInstance.interceptors.request.use()
 
-
-export default instance
+export const removeInterceptors = () => {
+    interceptorsInstance.interceptors.response.eject(responseInterceptor)
+    interceptorsInstance.interceptors.request.eject(responseInterceptor)
+}

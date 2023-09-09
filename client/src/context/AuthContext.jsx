@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
     if (user) setUser(user)
     if (token) {
       setAccessToken(token);
-      localStorage.setItem("token", token);
+      localStorage.setItem("accessToken", token);
     }
   };
 
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     setUser(null);
     setAccessToken("");
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
   };
 
   return (

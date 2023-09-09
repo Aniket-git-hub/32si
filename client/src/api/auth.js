@@ -1,4 +1,4 @@
-import  instance  from "../config/axios.config"
+import { instance } from "../config/axios.config"
 
 const handleRequest = async (url, data) => {
     try {
@@ -9,28 +9,20 @@ const handleRequest = async (url, data) => {
             },
             withCredentials: true
         })
-        if (response.status === 200 || response.status === 201) {
+        if ([200, 201].includes(response.status)) {
             return response
-        } 
+        }
     } catch (error) {
         throw error
     }
 }
 
-const env = import.meta.env.VITE_ENV
+const getEndpoint = (productionRoute, developmentRoute) => import.meta.env.VITE_ENV === 'production' ? import.meta.env[productionRoute] : developmentRoute
 
-const loginUserEndpoint = env === 'production' ? import.meta.env.VITE_LOGIN_USER_ROUTE : '/auth/login'
-export const loginUser = async (credentials) => handleRequest(loginUserEndpoint, credentials)
-
-const registerUserEndpoint = env === 'production' ? import.meta.env.VITE_REGISTER_USER_ROUTE : '/auth/register'
-export const registerUser = async (details) => handleRequest(registerUserEndpoint, details)
-
-const forgotPasswordEndpoint = env === 'production' ? import.meta.env.VITE_FORGOT_PASSWORD_ROUTE : '/auth/forgot-password'
-export const forgotPassword = async (credentials) => handleRequest(forgotPasswordEndpoint, credentials)
-
-const verifyOtpEndpoint = env === 'production' ? import.meta.env.VITE_VERIFY_OTP_ROUTE : '/auth/forgot-password/verify-otp'
-export const verifyOtp = async (credentials) => handleRequest(verifyOtpEndpoint, credentials)
-
-const resetPasswordEndpoint = env === 'production' ? import.meta.env.VITE_RESET_PASSWORD_ROUTE : '/auth/reset-password'
-export const resetPassword = async (credentials) => handleRequest(resetPasswordEndpoint, credentials)
-
+export const loginUser = async (credentials) => handleRequest(getEndpoint('VITE_LOGIN_USER_ROUTE', '/auth/login'), credentials)
+export const logoutUser = async () => handleRequest(getEndpoint('VITE_LOGOUT_USER_ROUTE', '/auth/logout'), {})
+export const registerUser = async (details) => handleRequest(getEndpoint('VITE_REGISTER_USER_ROUTE', '/auth/register'), details)
+export const forgotPassword = async (credentials) => handleRequest(getEndpoint('VITE_FORGOT_PASSWORD_ROUTE', '/auth/forgot-password'), credentials)
+export const verifyOtp = async (credentials) => handleRequest(getEndpoint('VITE_VERIFY_OTP_ROUTE', '/auth/forgot-password/verify-otp'), credentials)
+export const resetPassword = async (credentials) => handleRequest(getEndpoint('VITE_RESET_PASSWORD_ROUTE', '/auth/reset-password'), credentials)
+export const refreshToken = async () => handleRequest(getEndpoint('VITE_REFRESH_TOKEN_ROUTE', '/auth/token/refresh'), {})

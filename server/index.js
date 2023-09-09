@@ -14,8 +14,6 @@ const devOrigin = ['http://localhost:5173',  ]
 const allowedOrigins = process.env.NODE_ENV === 'production' ? prodOrigins : devOrigin
 app.use(cors({
     origin: (origin, callback) => {
-        // // console.log(origin)
-        // callback(null, true)
         if (allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {

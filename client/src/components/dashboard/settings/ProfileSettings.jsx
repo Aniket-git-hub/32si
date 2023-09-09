@@ -1,16 +1,4 @@
-import {
-    Box,
-    Heading,
-    Stack,
-    Flex,
-    Image,
-    Button,
-    FormControl,
-    InputGroup,
-    FormLabel,
-    Input,
-    FormErrorMessage,
-} from "@chakra-ui/react";
+import { Box, Heading, Stack, Flex, Image, Button, FormControl, InputGroup, FormLabel, Input, FormErrorMessage } from "@chakra-ui/react";
 import { useFormValidation } from "../../../hooks/useFormValidation";
 import { useAuth } from "../../../hooks/useAuth.jsx";
 import { FiEdit } from "react-icons/fi";
@@ -21,27 +9,36 @@ import getPlaces from "../../../api/getPlaces";
 import ComboBox from "../../utils/comboBox";
 import { updateUser } from "../../../api/user";
 export default function ProfileSettings() {
-    const { user, save} = useAuth();
-    const initialState = {
+    const { user, save } = useAuth();
+    let initialState = {
         name: user?.name || "",
         username: user?.username || "",
-        email: user?.email || "",
+        email: user?.email,
         bio: user?.bio || "",
         location: user?.location || ""
     };
     const [editProfile, setEditProfile] = useState(false);
     const updateProfile = async (values) => {
         try {
-            const data = {
+            const response = await updateUser({
                 userId: user._id,
                 name: values.name,
                 username: values.username,
                 bio: values.bio,
                 location: values.location
-            };
-            const response = await updateUser(data)
-            response && save(response.data.user)
-            save(data)
+            })
+
+            if (response) {
+                const updatedUser = { ...user, ...response.data.user };
+                save(updatedUser);
+                initialState = {
+                    name: updatedUser.name,
+                    username: updatedUser.username,
+                    email: updatedUser.email,
+                    bio: updatedUser.bio,
+                    location: updatedUser.location
+                };
+            }
             setEditProfile(false);
             return { title: "Success", message: "Profile Updated Successfully" };
         } catch (error) {
@@ -171,6 +168,7 @@ export default function ProfileSettings() {
                             isInvalid={errors.bio}
                             isReadOnly={!editProfile}
                             isDisabled={!editProfile}
+                            placeholder="Add bio"
                         >
                             <FormLabel>Bio</FormLabel>
                             <InputGroup>

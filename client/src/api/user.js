@@ -1,32 +1,33 @@
-import instance from "../config/axios.config"
+import { interceptorsInstance } from "../config/axios.config";
 
-const handleRequest = async (endpoint, {accessToken, ...data}, method) => {
+const handleRequest = async (endpoint, data, method) => {
     try {
         let response;
+        const accessToken = localStorage.getItem('accessToken');
+        const token = `Bearer ${accessToken}`
+        const config = {
+            headers: {
+                Authorization: token,
+            },
+            withCredentials: true
+        };
         switch (method) {
             case "GET":
-                response = await instance.get(endpoint);
+                response = await interceptorsInstance.get(endpoint, config);
                 break;
             case "POST":
-                response = await instance.post(endpoint, data);
+                response = await interceptorsInstance.post(endpoint, data, config);
                 break;
             case "PUT":
-                const token = `Bearer ${accessToken}` 
-                console.log(token)
-                response = await instance.put("/user", data, { 
-                    headers: {
-                        Authorization: token,
-                    },
-                    withCredentials: true
-                }); 
+                response = await interceptorsInstance.put(endpoint, data, config);
                 break;
             case "DELETE":
-                response = await instance.delete(endpoint);
+                response = await interceptorsInstance.delete(endpoint, config);
                 break;
             default:
                 throw new Error("Invalid method");
         }
-        if (response.status === 200 || response.status === 201) {
+        if (response.status === 200) {
             return response;
         }
     } catch (error) {
@@ -38,12 +39,3 @@ const env = import.meta.env.VITE_ENV
 
 const updateUserEndpoint = env === 'production' ? import.meta.env.VITE_UPDATE_USER_ENDPOINT : '/user/'
 export const updateUser = async (data) => handleRequest(updateUserEndpoint, data, "PUT")
-
-// const getUserEndpoint = env === "production" ? import.meta.env.VITE_GET_USER_ENDPOINT : "/user/";
-// export const getUser = async (id) => handleRequest(getUserEndpoint + id, null, "GET");
-
-// const getAllUsersEndpoint = env === "production" ? import.meta.env.VITE_GET_ALL_USERS_ENDPOINT : "/users/";
-// export const getAllUsers = async () => handleRequest(getAllUsersEndpoint, null, "GET");
-
-// const deleteUserEndpoint = env === "production" ? import.meta.env.VITE_DELETE_USER_ENDPOINT : "/user/";
-// export const deleteUser = async (id) => handleRequest(deleteUserEndpoint + id, null, "DELETE");

@@ -1,14 +1,28 @@
-import { Link, Box, Text, Button, Flex, Avatar, HStack, IconButton, Menu, MenuButton, VStack, MenuList, useColorMode, MenuItem, MenuDivider } from "@chakra-ui/react"
+import { Link, Box, Text, Button, Flex, Avatar, HStack, IconButton, Menu, MenuButton, VStack, MenuList, useColorMode, MenuItem, MenuDivider, useToast } from "@chakra-ui/react"
 import { ArrowForwardIcon } from "@chakra-ui/icons"
 import { FiAtSign, FiBell, FiChevronDown } from 'react-icons/fi';
 import { useAuth } from "../../hooks/useAuth"
 import { NavLink } from 'react-router-dom'
-
+import { logoutUser } from "../../api/auth"
 function TopNavBar() {
     const { user, remove } = useAuth()
     const { username, name, email } = user
-    const handleLogout = () => {
-        remove()
+    const alert = useToast()
+    const handleLogout = async () => {
+        try {
+            await logoutUser()
+            remove()
+            alert({
+                title: 'Logout Successful',
+                // description: "",
+                status: 'info',
+                duration: 2000,
+                isClosable: true,
+                position: 'top'
+            })
+        } catch (error) {
+            
+        }
     }
 
     return (
