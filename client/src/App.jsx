@@ -25,6 +25,7 @@ function App() {
         <Route path="feedback" element={ <Feedback />} />
         <Route path="about-us" element={ <AboutUs />} />
         <Route path="profile/:username" element={ <Profile />} />
+        <Route path="*" element={ <Error404Page />} />
       </Route>
       <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate replace to="/" />} />
       <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate replace to="/" />} />

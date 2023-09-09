@@ -5,7 +5,6 @@ import { useParams } from "react-router-dom";
 export default function Profile() {
     const { user } = useAuth()
     let { username } = useParams()
-    console.log(username)
     return ( 
         <Center py={6}>
             <Stack
@@ -39,12 +38,11 @@ export default function Profile() {
                         {user.name}
                     </Heading>
                     <Text fontWeight={600} color={'gray.500'} size="md" mb={4}>
-                        @{user.name}
+                        @{user.username}
                     </Text>
                     <Text textAlign={'center'}
                         color={'gray.600'} px={3}>
-                        Actress, musician, songwriter and artist.
-                        PM for work inquires or
+                        { user.bio }
                         <Text color={'blue.400'} >#tag</Text>
                         me in your posts
                     </Text>
@@ -91,7 +89,7 @@ export default function Profile() {
                                 bg: 'gray.300'
                             }}
                         >
-                            Message
+                            Challenge
                         </Button>
                         <Button
                             flex={1}
@@ -109,7 +107,7 @@ export default function Profile() {
                                 bg: 'gray.500'
                             }}
                         >
-                            Follow
+                            Connect
                         </Button>
                     </Stack>
                 </Stack>
