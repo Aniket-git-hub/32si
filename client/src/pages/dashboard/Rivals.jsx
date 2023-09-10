@@ -1,26 +1,31 @@
-import { Avatar, Button, Card, CardBody, CardHeader, Heading, Link, Text, Box, VStack, SimpleGrid, IconButton } from '@chakra-ui/react'
+import { Avatar, Button, Card, CardBody, CardHeader, Heading, Link, Text, Box, VStack, SimpleGrid, IconButton, Flex } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
-import { MdVerified } from 'react-icons/md'
+import { MdRefresh, MdVerified } from 'react-icons/md'
 import { getAllUsers } from '../../api/user'
 import useAllData from '../../hooks/useAllData'
 
 export default function Rivals() {
     const { rivals, setRivals } = useAllData()
+    const loadUsers = async () => {
+            try {
+                const response = await getAllUsers({ page: 1, limit: 10 })
+                console.log(response.data.users)
+                setRivals(response.data.users)
+            } catch (error) {
+                console.log(error)
+            }
+    }
     useEffect(() => {
         if (rivals.length === 0) {
-            (async () => {
-                try {
-                    const response = await getAllUsers({ page: 1, limit: 10 })
-                    setRivals(response.data.users)
-                } catch (error) {
-                    console.log(error)
-                }
-            })()
+            loadUsers()
         }
     }, [rivals, setRivals])
     return (
         <>
+            <Flex justifyContent={"space-between"}>
             <Heading size={"lg"}>Rivals</Heading>
+            <IconButton variant={"ghost"} _hover={{}} title='refresh' icon={<MdRefresh />} onClick={loadUsers} />
+            </Flex>
             <SimpleGrid minChildWidth={"250px"} spacing={"10px"} p={5}>
                 {rivals && rivals.map((item, index) => (
                     <Box my={2} key={`${index}${item.name}`}>
