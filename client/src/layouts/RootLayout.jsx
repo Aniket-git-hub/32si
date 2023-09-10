@@ -14,7 +14,13 @@ export default function RootLayout() {
                 <GridItem as="main" colSpan={8}>
                     <TopNavBar />
                     <Grid templateColumns="repeat(4, 1fr)">
-                        <GridItem colSpan={3} >
+                        <GridItem colSpan={3} h={{ lg: "90vh" }} overflowY={"scroll"} sx={
+                            {
+                                '::-webkit-scrollbar': {
+                                    display: 'none'
+                                }
+                            }
+                        }>
                             <Outlet />
                         </GridItem>
                         <GridItem as="aside" colSpan={1} >
