@@ -3,13 +3,15 @@ import { useEffect, useState } from 'react'
 import { MdRefresh, MdVerified } from 'react-icons/md'
 import { getAllUsers } from '../../api/user'
 import useAllData from '../../hooks/useAllData'
-
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../hooks/useAuth'
 export default function Rivals() {
+    const { user } = useAuth()
+    const navigate = useNavigate()
     const { rivals, setRivals } = useAllData()
     const loadUsers = async () => {
             try {
                 const response = await getAllUsers({ page: 1, limit: 10 })
-                console.log(response.data.users)
                 setRivals(response.data.users)
             } catch (error) {
                 console.log(error)
@@ -19,7 +21,7 @@ export default function Rivals() {
         if (rivals.length === 0) {
             loadUsers()
         }
-    }, [rivals, setRivals])
+    }, [])
     return (
         <>
             <Flex justifyContent={"space-between"}>
@@ -37,7 +39,7 @@ export default function Rivals() {
                                         <Button variant={"ghost"} _hover={{}} rightIcon={<MdVerified />} _active={{}}> {item.name}</Button>
                                     </Heading>
                                     <Text>{item.bio}</Text>
-                                    <Button variant={"ghost"}>View Profile</Button>
+                                    <Button variant={"ghost"} onClick={() => navigate(`/profile/@${item.username}`)}>View Profile</Button>
                                 </VStack>
                             </CardBody>
                         </Card>

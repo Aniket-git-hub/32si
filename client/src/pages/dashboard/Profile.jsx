@@ -1,11 +1,27 @@
-import { Center, Flex, Heading, Stack, Text, Badge, Button, Image, useColorMode } from "@chakra-ui/react";
+import { Center, Flex, Heading, Stack, Text, Badge, Button, Image } from "@chakra-ui/react";
 import { useAuth } from "../../hooks/useAuth";
 import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getAUser } from "../../api/user";
 
 export default function Profile() {
-    const { user } = useAuth()
     let { username } = useParams()
-    return ( 
+    const [profileUser, setProfileUser] = useState(null)
+    const loadProfileUserData = async () => {
+        try {
+            const response = await getAUser(username.replace(/@/g, ""))
+            setProfileUser(response.data.user)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    useEffect(() => {
+        if (!profileUser) {
+            loadProfileUserData()
+        }
+    }, [])
+
+    return (
         <Center py={6}>
             <Stack
                 borderWidth="1px"
@@ -35,16 +51,13 @@ export default function Profile() {
                 >
 
                     <Heading fontSize={'2xl'} fontFamily={'body'}>
-                        {user.name}
+                        {profileUser && profileUser.name}
                     </Heading>
                     <Text fontWeight={600} color={'gray.500'} size="md" mb={4}>
-                        @{user.username}
+                        @{profileUser && profileUser.username}
                     </Text>
-                    <Text textAlign={'center'}
-                        color={'gray.600'} px={3}>
-                        { user.bio }
-                        <Text color={'blue.400'} >#tag</Text>
-                        me in your posts
+                    <Text textAlign={'center'} color={'gray.600'} px={3}>
+                        {profileUser && profileUser.bio}
                     </Text>
                     <Stack align={'center'} justify={'center'} direction={'row'} mt={6}>
                         <Badge

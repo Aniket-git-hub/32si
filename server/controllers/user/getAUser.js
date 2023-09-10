@@ -1,9 +1,9 @@
 import USER from "../../models/user.js"
 
 async function getAUser(req, res, next) {
-    const userId = req.params.userId
+    const username = req.params.username;
     try {
-        const dbUser = await USER.findById(userId)
+        const dbUser = await USER.findOne({ username: username });
         const { password, ...rest } = dbUser._doc
         res.status(200).json({user: rest})
     } catch (error) {

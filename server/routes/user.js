@@ -11,7 +11,7 @@ const router = express.Router()
 
 const getRoute = (productionRoute, developmentRoute) => process.env.NODE_ENV === 'production' ? process.env[productionRoute] : developmentRoute
 
-router.get(getRoute('GET_USER_ROUTE', '/a/:userId'), verifyJWT, getAUser)
+router.get(getRoute('GET_USER_ROUTE', '/a/:username'), verifyJWT, getAUser)
 router.put(getRoute('UPDATE_USER_ROUTE', '/'), verifyJWT, updateUser)
 router.delete(getRoute('DELETE_USER_ROUTE', '/'), verifyJWT, deleteUser)
 router.get(getRoute('GET_ALL_USER_ROUTE', '/users'),verifyJWT, getAllUser)
