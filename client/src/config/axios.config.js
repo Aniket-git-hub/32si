@@ -18,11 +18,17 @@ const responseInterceptor = interceptorsInstance.interceptors.response.use(
     async (error) => {
         const config = error.config
         if (error.response && error.response.status === 401 && !config._retry) {
-            const response = await refreshToken()
-            localStorage.setItem("accessToken", response?.data?.accessToken)
-            config.headers['Authorization'] = `Bearer ${response?.data?.accessToken}`
-            config._retry = true
-            return instance(config)
+            try {
+                const response = await refreshToken()
+                localStorage.setItem("accessToken", response?.data?.accessToken)
+                config.headers['Authorization'] = `Bearer ${response?.data?.accessToken}`
+                config._retry = true
+                return instance(config)
+            } catch (error) {
+                localStorage.removeItem("accessToken")
+                localStorage.removeItem("user")
+                localStorage.removeItem("isAuthenticated")
+            }
         }
         return Promise.reject(error)
     },
