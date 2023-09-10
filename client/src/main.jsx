@@ -4,6 +4,7 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
+import { AllDataContextProvider } from './context/AllDataContext.jsx'
 
 const theme = extendTheme({
   colors: {
@@ -13,12 +14,14 @@ const theme = extendTheme({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+    <ChakraProvider theme={theme}>
     <AuthProvider>
-      <ChakraProvider theme={theme}>
+      <AllDataContextProvider>
         <BrowserRouter>
           <App />
         </BrowserRouter>
-      </ChakraProvider>
+      </AllDataContextProvider>
     </AuthProvider>
+      </ChakraProvider>
   </React.StrictMode>,
 )

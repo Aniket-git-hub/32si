@@ -2,32 +2,29 @@ import { Avatar, Button, Card, CardBody, CardHeader, Heading, Link, Text, Box, V
 import { useEffect, useState } from 'react'
 import { MdVerified } from 'react-icons/md'
 import { getAllUsers } from '../../api/user'
+import useAllData from '../../hooks/useAllData'
+
 export default function Rivals() {
-    const [list, setList] = useState([
-        { name: "Aniket Singh", bio: "the quick brown fox jumped over the lazy dog." },
-        { name: "Aniket Singh", bio: "the quick brown fox jumped over the lazy dog." },
-        { name: "Aniket Singh", bio: "the quick brown fox jumped over the lazy dog." },
-        { name: "Aniket Singh", bio: "the quick brown fox jumped over the lazy dog." },
-        { name: "Aniket Singh", bio: "the quick brown fox jumped over the lazy dog." },
-        { name: "Aniket Singh", bio: "the quick brown fox jumped over the lazy dog." },
-    ])
+    const { rivals, setRivals } = useAllData()
     useEffect(() => {
-        (async () => {
+        if (rivals.length === 0) {
+            (async () => {
                 try {
                     const response = await getAllUsers({ page: 1, limit: 10 })
-                    setList(response.data.users)
+                    setRivals(response.data.users)
                 } catch (error) {
                     console.log(error)
                 }
             })()
-    }, [])
+        }
+    }, [rivals, setRivals])
     return (
         <>
             <Heading size={"lg"}>Rivals</Heading>
             <SimpleGrid minChildWidth={"250px"} spacing={"10px"} p={5}>
-                {list.map((item, index) => (
-                    <Box my={2}>
-                        <Card w={"250px"} key={`${index}${item.name}`}>
+                {rivals && rivals.map((item, index) => (
+                    <Box my={2} key={`${index}${item.name}`}>
+                        <Card w={"250px"} >
                             <CardBody>
                                 <VStack>
                                     <Avatar size={"xl"} src='https://source.unsplash.com/random/200x200/?profile' />
