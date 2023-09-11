@@ -14,12 +14,15 @@ const devOrigin = ['http://localhost:5173',  ]
 const allowedOrigins = process.env.NODE_ENV === 'production' ? prodOrigins : devOrigin
 app.use(cors({
     origin: (origin, callback) => {
-        callback(null, true)
-        // if (allowedOrigins.includes(origin)) {
-        //     callback(null, true);
-        // } else {
-        //     callback(new Error('Not allowed by CORS'));
-        // }
+        if (process.env.NODE_ENV === "production") {
+            if (allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        } else {
+            callback(null, true)
+        }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
