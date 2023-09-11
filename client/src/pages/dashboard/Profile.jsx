@@ -1,25 +1,61 @@
 import { Center, Flex, Heading, Stack, Text, Badge, Button, Image } from "@chakra-ui/react";
 import { useAuth } from "../../hooks/useAuth";
+import { useAllData } from "../../hooks/useAllData";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getAUser } from "../../api/user";
+import { connectUser, disconnectUser, getAUser } from "../../api/user";
 
 export default function Profile() {
+    const { user, setUser } = useAuth()
     let { username } = useParams()
     const [profileUser, setProfileUser] = useState(null)
+    const [isFriend, setIsFriend] = useState(false) 
+    const [isConnecting, setIsConnecting] = useState(false) 
+    const [isDisconnecting, setIsDisconnecting] = useState(false) 
+    const [requestSent, setRequestSent] = useState(false) 
+
     const loadProfileUserData = async () => {
         try {
             const response = await getAUser(username.replace(/@/g, ""))
             setProfileUser(response.data.user)
+            setIsFriend(response.data.user.friends?.includes(user._id))
+            setRequestSent(response.data.user.connectionRequests.includes(user._id))
         } catch (error) {
             console.log(error)
         }
     }
+
     useEffect(() => {
         if (!profileUser) {
             loadProfileUserData()
         }
     }, [])
+    
+
+    const handleConnectUser = async (userId) => {
+        try {
+            setIsConnecting(true)
+            const response = await connectUser(userId); 
+            setProfileUser(response.data.requestedUser)
+            setIsConnecting(false)
+            setRequestSent(true)
+        } catch (error) {
+            setIsConnecting(false)
+            setRequestSent(false)
+        }
+    }
+    
+    const handleDisconnectUser = async (userId) => {
+        try {
+            setIsDisconnecting(true)
+            const response = await disconnectUser(userId)
+            setProfileUser(response.data.requestedUser)
+            setUser(response.data.user)
+            setIsDisconnecting(false)
+        } catch (error) {
+            setIsDisconnecting(false)
+        }
+    }
 
     return (
         <Center py={6}>
@@ -108,19 +144,14 @@ export default function Profile() {
                             flex={1}
                             fontSize={'sm'}
                             rounded={'full'}
-                            bg={'blue.400'}
+                            colorScheme="purple"
                             color={'white'}
-                            boxShadow={
-                                '0px 1px 25px -5px rgb(66 153 225 / 48%), 0 10px 10px -5px rgb(66 153 225 / 43%)'
-                            }
-                            _hover={{
-                                bg: 'blue.500'
-                            }}
-                            _focus={{
-                                bg: 'gray.500'
-                            }}
+                            onClick={() => !isFriend ? handleConnectUser(profileUser._id) : handleDisconnectUser(profileUser._id)}
+                            loadingText={isConnecting ? 'Requesting...' : 'disconnecting...'}
+                            isLoading={isConnecting || isDisconnecting}
+                            isDisabled={ requestSent || isConnecting || isDisconnecting}
                         >
-                            Connect
+                            {!isFriend ? ( requestSent ? 'Request Sent': 'Connect') : 'Disconnect'}
                         </Button>
                     </Stack>
                 </Stack>

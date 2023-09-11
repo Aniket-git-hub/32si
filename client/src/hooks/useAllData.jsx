@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { AllDataContext } from '../context/AllDataContext';
 
-export default function useAllData() {
+export const useAllData = () => {
     return useContext(AllDataContext);
 }

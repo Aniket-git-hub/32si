@@ -14,9 +14,45 @@ import HomePage from './pages/dashboard/HomePage';
 import AboutUs from './pages/dashboard/AboutUs';
 import Profile from './pages/dashboard/Profile';
 import Rivals from './pages/dashboard/Rivals';
+import { useAllData } from './hooks/useAllData';
+import { useEffect } from 'react';
+import { Button } from '@chakra-ui/react';
+import { acceptConnection } from './api/user';
 
 function App() {
-  const { isAuthenticated, verifyOTP } = useAuth()
+  const { user, setUser, isAuthenticated, verifyOTP } = useAuth()
+  const { notifications, setNotifications } = useAllData()
+
+  const handleAcceptConnection = async (userId, notificationKey) => {
+    try {
+      const response = await acceptConnection(userId)
+      setNotifications(prev => prev.filter(notification => notification.key !== notificationKey));
+      setUser(response.data.user)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  
+  useEffect(() => {
+    if (user && user.connectionRequests.length !== 0) {
+      user.connectionRequests.forEach((item) => {
+        const notificationExists = notifications.some(notification => notification.key === `connectionRequest-${item}`);
+
+        if (!notificationExists) {
+          setNotifications(prev => [
+            ...prev,
+            {
+              key: `connectionRequest-${item}`,
+              message: `${item} wants to connect with you`,
+              button: <Button colorScheme="purple" variant={"outline"} onClick={ (event) => handleAcceptConnection(item, `connectionRequest-${item}`)}  >Accept</Button>
+            }
+          ]);
+        }
+      });
+    }
+  }, [user]);
+
+
   return (
     <Routes>
       <Route path="/" exact element={isAuthenticated ? <RootLayout /> : <Navigate replace to="/login" />}>

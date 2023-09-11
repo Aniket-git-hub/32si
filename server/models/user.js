@@ -35,14 +35,12 @@ const userSchema = mongoose.Schema({
             }
         ]
     },
-    friends: {
-        type: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: 'user'
-            }
-        ]
-    },
+    friends: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'user'
+        }
+    ],
     location: {
         name: {
             type: String,
@@ -54,7 +52,13 @@ const userSchema = mongoose.Schema({
         coordinates: {
             type: [Number],
         }
-    }
+    },
+    connectionRequests: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'user'
+        }
+    ]
 })
 
 userSchema.index({ location: "2dsphere"})
