@@ -22,6 +22,9 @@ export default function Rivals() {
             loadUsers()
         }
     }, [])
+    
+    
+
     return (
         <>
             <Flex justifyContent={"space-between"}>

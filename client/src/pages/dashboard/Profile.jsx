@@ -1,4 +1,4 @@
-import { Center, Flex, Heading, Stack, Text, Badge, Button, Image } from "@chakra-ui/react";
+import { Center, Flex, Heading, Stack, Text, Badge, Button, Image, Box, SkeletonCircle, SkeletonText, Skeleton, HStack, VStack } from "@chakra-ui/react";
 import { useAuth } from "../../hooks/useAuth";
 import { useAllData } from "../../hooks/useAllData";
 import { useParams } from "react-router-dom";
@@ -9,16 +9,16 @@ export default function Profile() {
     const { user, setUser } = useAuth()
     let { username } = useParams()
     const [profileUser, setProfileUser] = useState(null)
-    const [isFriend, setIsFriend] = useState(false) 
-    const [isConnecting, setIsConnecting] = useState(false) 
-    const [isDisconnecting, setIsDisconnecting] = useState(false) 
-    const [requestSent, setRequestSent] = useState(false) 
+    const [isFriend, setIsFriend] = useState(false)
+    const [isConnecting, setIsConnecting] = useState(false)
+    const [isDisconnecting, setIsDisconnecting] = useState(false)
+    const [requestSent, setRequestSent] = useState(false)
 
     const loadProfileUserData = async () => {
         try {
             const response = await getAUser(username.replace(/@/g, ""))
             setProfileUser(response.data.user)
-            setIsFriend(response.data.user.friends?.includes(user._id))
+            setIsFriend(response.data.user.friends?.map(friend => friend._id).includes(user._id))
             setRequestSent(response.data.user.connectionRequests.includes(user._id))
         } catch (error) {
             console.log(error)
@@ -30,12 +30,12 @@ export default function Profile() {
             loadProfileUserData()
         }
     }, [])
-    
+
 
     const handleConnectUser = async (userId) => {
         try {
             setIsConnecting(true)
-            const response = await connectUser(userId); 
+            const response = await connectUser(userId);
             setProfileUser(response.data.requestedUser)
             setIsConnecting(false)
             setRequestSent(true)
@@ -44,7 +44,7 @@ export default function Profile() {
             setRequestSent(false)
         }
     }
-    
+
     const handleDisconnectUser = async (userId) => {
         try {
             setIsDisconnecting(true)
@@ -57,8 +57,19 @@ export default function Profile() {
         }
     }
 
+    if (!profileUser) {
+        return (
+            <Center>
+                <Box padding='6' boxShadow='lg' width={"250px"} bg='white'>
+                    <Skeleton h={"300px"} width={"250px"}> </Skeleton>
+                </Box>
+            </Center>
+        )
+    }
+
     return (
         <Center py={6}>
+
             <Stack
                 borderWidth="1px"
                 borderRadius="lg"
@@ -149,9 +160,10 @@ export default function Profile() {
                             onClick={() => !isFriend ? handleConnectUser(profileUser._id) : handleDisconnectUser(profileUser._id)}
                             loadingText={isConnecting ? 'Requesting...' : 'disconnecting...'}
                             isLoading={isConnecting || isDisconnecting}
-                            isDisabled={ requestSent || isConnecting || isDisconnecting}
+                            isDisabled={requestSent || isConnecting || isDisconnecting}
                         >
-                            {!isFriend ? ( requestSent ? 'Request Sent': 'Connect') : 'Disconnect'}
+                            {!isFriend ? (requestSent ? 'Request Sent' : 'Connect') : 'Disconnect'}
+                            {/* { isFriend ? 'true' : 'false'}  */}
                         </Button>
                     </Stack>
                 </Stack>
