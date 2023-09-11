@@ -6,7 +6,7 @@ async function updateUser(req, res, next) {
         const savedUser = await USER.findByIdAndUpdate(userId, otherData, {
             new: true,
             runValidators:true,
-        })
+        }).populate("friends")
         const { password, ...rest } = savedUser._doc
         res.status(200).json({
             message: "User updated successfully",

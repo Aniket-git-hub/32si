@@ -50,7 +50,7 @@ function App() {
         }
       });
     }
-  }, [user]);
+  }, [user])
 
 
   return (

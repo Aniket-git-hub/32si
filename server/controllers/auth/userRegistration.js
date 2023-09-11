@@ -18,7 +18,7 @@ async function register(req, res, next) {
         password: bcrypt.hashSync(password, 12)
     })
     try {
-        const savedUser = await newUser.save()
+        const savedUser = await newUser.save().populate("friends")
 
         const { accessToken, refreshToken } = generateToken({
             id: savedUser._id,
@@ -41,7 +41,7 @@ async function register(req, res, next) {
             throw createError("SendingEmail", "Email Not Sent", error)
         }
 
-        const { password, ...rest } = savedUser._doc
+        const { password, ...rest } = savedUser.populate("friends").execPopulate()._doc
         res.status(201).json({
             message: "New User Created Successfully",
             accessToken,

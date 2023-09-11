@@ -14,7 +14,7 @@ async function disconnectUser(req, res, next) {
         requestedUser.friends = requestedUser.friends.filter(id => id.toString() !== currentUserId)
     
         const savedCurrentUser = await currentUser.save()
-        const { password, ...restCurrentUser } = savedCurrentUser._doc
+        const { password, ...restCurrentUser } = savedCurrentUser.populate("friends").execPopulate()._doc
         const savedRequestedUser = await requestedUser.save()
         const { password: Rpassword, ...restRequestedUser } = savedRequestedUser._doc
     

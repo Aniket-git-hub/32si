@@ -12,7 +12,7 @@ import createError from '../../utils/createError.js'
 async function login(req, res, next) {
     try {
         const { email, password:pass } = req.body
-        const user = await User.findOne({ email })
+        const user = await User.findOne({ email }).populate("friends")
         if (!user) {
             throw createError("AuthError", "Invalid Email")
         }
