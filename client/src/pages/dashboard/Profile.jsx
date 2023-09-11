@@ -13,6 +13,7 @@ export default function Profile() {
     const [isConnecting, setIsConnecting] = useState(false)
     const [isDisconnecting, setIsDisconnecting] = useState(false)
     const [requestSent, setRequestSent] = useState(false)
+    const [myProfile, setMyProfile] = useState(false)
 
     const loadProfileUserData = async () => {
         try {
@@ -20,16 +21,17 @@ export default function Profile() {
             setProfileUser(response.data.user)
             setIsFriend(response.data.user.friends?.map(friend => friend._id).includes(user._id))
             setRequestSent(response.data.user.connectionRequests.includes(user._id))
+            setMyProfile(user._id === response.data.user._id)
         } catch (error) {
             console.log(error)
         }
     }
 
     useEffect(() => {
-        if (!profileUser) {
+        if (profileUser?.username != username || !profileUser) {
             loadProfileUserData()
         }
-    }, [])
+    }, [username])
 
 
     const handleConnectUser = async (userId) => {
@@ -148,6 +150,7 @@ export default function Profile() {
                             _focus={{
                                 bg: 'gray.300'
                             }}
+                            isDisabled={myProfile}
                         >
                             Challenge
                         </Button>
@@ -160,7 +163,7 @@ export default function Profile() {
                             onClick={() => !isFriend ? handleConnectUser(profileUser._id) : handleDisconnectUser(profileUser._id)}
                             loadingText={isConnecting ? 'Requesting...' : 'disconnecting...'}
                             isLoading={isConnecting || isDisconnecting}
-                            isDisabled={requestSent || isConnecting || isDisconnecting}
+                            isDisabled={requestSent || isConnecting || isDisconnecting || myProfile}
                         >
                             {!isFriend ? (requestSent ? 'Request Sent' : 'Connect') : 'Disconnect'}
                             {/* { isFriend ? 'true' : 'false'}  */}

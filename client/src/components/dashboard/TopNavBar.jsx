@@ -38,7 +38,7 @@ function TopNavBar() {
                         <Badge variant={"subtle"} colorScheme="green">New</Badge>
                     </Button>
                     <Flex alignItems={'center'}>
-                        <Menu>
+                        <Menu >
                             <MenuButton transition={'all .3s'} _focus={{ boxShadow: 'none' }}>
                                 <HStack>
                                     <Avatar size={'sm'} src="https://source.unsplash.com/random/200x200/?gril" />
@@ -56,7 +56,7 @@ function TopNavBar() {
                                 </HStack>
                             </MenuButton>
                             <MenuList
-                                bg=""
+                                bg="white"
                                 borderColor="gray.200"
                             >
                                 <Link as={NavLink} to={`/profile/@${username}`} _hover={{}} >
