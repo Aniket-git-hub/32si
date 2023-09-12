@@ -1,9 +1,13 @@
-import { Center, Flex, Heading, Stack, Text, Badge, Button, Image, Box, SkeletonCircle, SkeletonText, Skeleton, HStack, VStack } from "@chakra-ui/react";
+import { Center, Flex, Heading, Stack, Text, Badge, Button, Image, Box, SkeletonCircle, SkeletonText, Skeleton, HStack, VStack, IconButton } from "@chakra-ui/react";
 import { useAuth } from "../../hooks/useAuth";
 import { useAllData } from "../../hooks/useAllData";
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { connectUser, disconnectUser, getAUser } from "../../api/user";
+import { MdAssistantNavigation, MdLocationCity, MdPeople, MdPeopleAlt, MdPlace, MdPlayCircle } from "react-icons/md"
+import { AtSignIcon } from "@chakra-ui/icons"
+import { HiOutlineUserGroup, HiOutlineRectangleGroup, HiUser } from "react-icons/hi2";
+import { BsPeople } from "react-icons/bs";
 
 export default function Profile() {
     const { user, setUser } = useAuth()
@@ -14,10 +18,11 @@ export default function Profile() {
     const [isDisconnecting, setIsDisconnecting] = useState(false)
     const [requestSent, setRequestSent] = useState(false)
     const [myProfile, setMyProfile] = useState(false)
+    const controllerRef = useRef(null)
 
-    const loadProfileUserData = async () => {
+    const loadProfileUserData = async (signal) => {
         try {
-            const response = await getAUser(username.replace(/@/g, ""))
+            const response = await getAUser(username.replace(/@/g, ""), signal)
             setProfileUser(response.data.user)
             setIsFriend(response.data.user.friends?.map(friend => friend._id).includes(user._id))
             setRequestSent(response.data.user.connectionRequests.includes(user._id))
@@ -28,8 +33,19 @@ export default function Profile() {
     }
 
     useEffect(() => {
+        if (controllerRef.current) {
+            controllerRef.current.abort()
+        }
+
+        controllerRef.current = new AbortController()
         if (profileUser?.username != username || !profileUser) {
             loadProfileUserData()
+        }
+
+        return () => {
+            if (controllerRef.current) {
+                controllerRef.current.abort()
+            }
         }
     }, [username])
 
@@ -109,45 +125,52 @@ export default function Profile() {
                         {profileUser && profileUser.name}
                     </Heading>
                     <Text fontWeight={600} color={'gray.500'} size="md" mb={4}>
-                        @{profileUser && profileUser.username}
+                        <AtSignIcon />    {profileUser && profileUser.username}
                     </Text>
                     <Text textAlign={'center'} color={'gray.600'} px={3}>
-                        {profileUser && profileUser.bio}
+                        {profileUser.bio ? profileUser.bio : 'no bio'}
                     </Text>
-                    <Stack align={'center'} justify={'center'} direction={'row'} mt={6}>
-                        <Badge
+                    <HStack >
+                        <MdPlace />
+                        <Text textAlign={'center'} color={'gray.600'} >
+                            {profileUser.location.name ? profileUser.location.name: 'Earth'}
+                        </Text>
+                    </HStack>
+                    <Stack align={'center'} justify={'center'} direction={'row'} mt={1}>
+                        <HStack
                             px={2}
                             py={1}
                             bg={'gray.200'}
                             fontWeight={'400'}
+                            borderRadius={5}
                         >
-                            #art
+                            <HiOutlineRectangleGroup />
+                            <Text>
+                                {profileUser && profileUser?.gamesPlayed.length}
 
-                        </Badge>
-                        <Badge
+                            </Text>
+                        </HStack>
+                        <HStack
                             px={2}
                             py={1}
                             bg={'gray.200'}
                             fontWeight={'400'}
+                            borderRadius={5}
                         >
-                            #photography
-                        </Badge>
-                        <Badge
-                            px={2}
-                            py={1}
-                            bg={'gray.200'}
-                            fontWeight={'400'}
-                        >
-                            #music
-                        </Badge>
+                            <BsPeople />
+                            <Text>
+                                {profileUser && profileUser?.friends.length}
+                            </Text>
+                        </HStack>
                     </Stack>
                     <Stack
                         width={'100%'}
-                        mt={'2rem'}
+                        mt={'1rem'}
                         direction={'row'}
                         padding={2}
                         justifyContent={'space-between'}
                         alignItems={'center'}
+                        hidden={myProfile}
                     >
                         <Button
                             flex={1}
@@ -169,7 +192,7 @@ export default function Profile() {
                             onClick={() => !isFriend ? handleConnectUser(profileUser._id) : handleDisconnectUser(profileUser._id)}
                             loadingText={isConnecting ? 'Requesting...' : 'disconnecting...'}
                             isLoading={isConnecting || isDisconnecting}
-                            isDisabled={requestSent || isConnecting || isDisconnecting || myProfile}
+                            isDisabled={requestSent || isConnecting || isDisconnecting }
                         >
                             {!isFriend ? (requestSent ? 'Request Sent' : 'Connect') : 'Disconnect'}
                         </Button>
