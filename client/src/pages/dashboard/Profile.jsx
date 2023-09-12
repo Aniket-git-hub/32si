@@ -62,9 +62,14 @@ export default function Profile() {
     if (!profileUser) {
         return (
             <Center>
-                <Box padding='6' boxShadow='lg' width={"250px"} bg='white'>
-                    <Skeleton h={"300px"} width={"250px"}> </Skeleton>
-                </Box>
+                <Flex padding={2} mt={5} boxShadow='lg' bg='white' borderRadius={5}>
+                    <Box padding='6' width={"300px"} bg='white' borderRadius={5}>
+                        <Skeleton h={"300px"} width={"250px"}> </Skeleton>
+                    </Box>
+                    <Box padding='6' width={"300px"} height={"300px"} bg='white' borderRadius={5}>
+                        <SkeletonText noOfLines={5} spacing={10}></SkeletonText>
+                    </Box>
+                </Flex>
             </Center>
         )
     }
