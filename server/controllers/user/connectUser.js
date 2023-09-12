@@ -5,10 +5,14 @@ async function connectUser(req, res, next) {
         const requestedUserId = req.params.userId
         const currentUserId = req.user.id
 
-        const currentUser = await USER.findById(currentUserId)
-        const requestedUser = await USER.findById(requestedUserId)
+        const [currentUser, requestedUser] = await Promise.all([
+            USER.findById(currentUserId),
+            USER.findById(requestedUserId)
+        ])
 
-        if (currentUser.friends.includes(requestedUserId)) throw Error("You are Already Friends")
+        if (currentUser.friends.includes(requestedUserId) || requestedUser.connectionRequests.includes(currentUserId)) {
+            throw new Error("You are already friends or a connection request has already been sent")
+        }
 
         requestedUser.connectionRequests.push(currentUserId)
 
@@ -16,13 +20,13 @@ async function connectUser(req, res, next) {
         const { password: Rpassword, ...restRequestedUser } = savedRequestedUser._doc
 
         res.json({
-            requestedUser: restRequestedUser, 
+            requestedUser: restRequestedUser,
             message: 'Connection request sent'
         })
-        
+
     } catch (error) {
         next(error)
     }
-}   
+}
 
 export default connectUser
