@@ -53,6 +53,7 @@ export default function Profile() {
             const response = await disconnectUser(userId)
             setProfileUser(response.data.requestedUser)
             setUser(response.data.user)
+            setIsFriend(response.data.requestedUser.friends?.map(friend => friend._id).includes(user._id))
             setIsDisconnecting(false)
         } catch (error) {
             setIsDisconnecting(false)
@@ -171,7 +172,6 @@ export default function Profile() {
                             isDisabled={requestSent || isConnecting || isDisconnecting || myProfile}
                         >
                             {!isFriend ? (requestSent ? 'Request Sent' : 'Connect') : 'Disconnect'}
-                            {/* { isFriend ? 'true' : 'false'}  */}
                         </Button>
                     </Stack>
                 </Stack>

@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         isAuthenticated,
         user,
+        setUser,
         verifyOTP,
         setVerifyOTP,
         save,

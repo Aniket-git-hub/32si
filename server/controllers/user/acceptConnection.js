@@ -10,13 +10,13 @@ async function acceptConnection(req, res, next) {
             USER.findById(requestedUserId)
         ])
 
-        if (currentUser.friends.includes(requestedUserId) || !requestedUser.connectionRequests.includes(currentUserId)) {
+        if (!currentUser.connectionRequests.includes(requestedUserId)) {
             throw new Error("You are already friends or a connection request has not been sent")
         }
 
-        const index = requestedUser.connectionRequests.indexOf(currentUserId)
+        const index = currentUser.connectionRequests.indexOf(requestedUserId)
         if (index > -1) {
-            requestedUser.connectionRequests.splice(index, 1)
+            currentUser.connectionRequests.splice(index, 1)
         }
 
         currentUser.friends.push(requestedUser)

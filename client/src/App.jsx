@@ -26,25 +26,24 @@ function App() {
   const handleAcceptConnection = async (userId, notificationKey) => {
     try {
       const response = await acceptConnection(userId)
-      setNotifications(prev => prev.filter(notification => notification.key !== notificationKey));
       setUser(response.data.user)
+      setNotifications(prev => prev.filter(notification => notification.key !== notificationKey));
     } catch (error) {
       console.log(error)
     }
   }
-  
+
   useEffect(() => {
-    if (user && user.connectionRequests.length !== 0) {
+    if (user && user.connectionRequests?.length !== 0) {
       user.connectionRequests.forEach((item) => {
         const notificationExists = notifications.some(notification => notification.key === `connectionRequest-${item}`);
-
         if (!notificationExists) {
           setNotifications(prev => [
             ...prev,
             {
               key: `connectionRequest-${item}`,
               message: `${item} wants to connect with you`,
-              button: <Button colorScheme="purple" variant={"outline"} onClick={ (event) => handleAcceptConnection(item, `connectionRequest-${item}`)}  >Accept</Button>
+              button: <Button colorScheme="purple" variant={"outline"} onClick={(event) => handleAcceptConnection(item, `connectionRequest-${item}`)}  >Accept</Button>
             }
           ]);
         }
@@ -56,20 +55,20 @@ function App() {
   return (
     <Routes>
       <Route path="/" exact element={isAuthenticated ? <RootLayout /> : <Navigate replace to="/login" />}>
-        <Route index element={ <HomePage />} />
-        <Route path="settings" element={ <Settings />} />
-        <Route path="stats" element={ <Stats />} />
-        <Route path="feedback" element={ <Feedback />} />
-        <Route path="about-us" element={ <AboutUs />} />
-        <Route path="rivals" element={ <Rivals />} />
-        <Route path="profile/:username" element={ <Profile />} />
-        <Route path="*" element={ <Error404Page />} />
+        <Route index element={<HomePage />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="stats" element={<Stats />} />
+        <Route path="feedback" element={<Feedback />} />
+        <Route path="about-us" element={<AboutUs />} />
+        <Route path="rivals" element={<Rivals />} />
+        <Route path="profile/:username" element={<Profile />} />
+        <Route path="*" element={<Error404Page />} />
       </Route>
       <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate replace to="/" />} />
       <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate replace to="/" />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage verifyOTP={verifyOTP} />} />
       <Route path="/reset-password" element={verifyOTP ? <ResetPasswordPage /> : <Error404Page />} />
-      <Route path="*" element={ <Error404Page />} />
+      <Route path="*" element={<Error404Page />} />
     </Routes>
   )
 }
