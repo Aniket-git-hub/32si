@@ -67,7 +67,6 @@ app.use("/places", placesRoute)
  * Middleware to handle error
  */
 import errorHandler from './middleware/errorHandler.js'
-import verifyJWT from './middleware/verifyJWT.js'
 app.use(errorHandler)
 // fallback default error handler
 app.use(function (err, req, res, next) {
