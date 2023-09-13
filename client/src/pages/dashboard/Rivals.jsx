@@ -35,7 +35,7 @@ export default function Rivals() {
     if (rivals.length === 0) {
         return (
             <Center>
-                <HStack minChildWidth={"200px"} spacing={"10px"} p={5}>
+                <HStack spacing={"10px"} p={5}>
                     <Box my={2} boxShadow={"lg"}  p={4  } bg={"white"} borderRadius={5}>
                         <Skeleton width={"200px"} height={"250px"}></Skeleton>
                     </Box>
