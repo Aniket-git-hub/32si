@@ -18,10 +18,12 @@ import { useAllData } from './hooks/useAllData';
 import { useEffect } from 'react';
 import { Button } from '@chakra-ui/react';
 import { acceptConnection } from './api/user';
+import useSocket from './hooks/useSocket';
 
 function App() {
   const { user, setUser, isAuthenticated, verifyOTP } = useAuth()
   const { notifications, setNotifications } = useAllData()
+  const { setData } = useSocket()
 
   const handleAcceptConnection = async (userId, notificationKey) => {
     try {
@@ -49,7 +51,9 @@ function App() {
         }
       });
     }
+    setData({user})
   }, [user])
+
 
 
   return (

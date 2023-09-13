@@ -76,7 +76,13 @@ app.use(function (err, req, res, next) {
 });
 
 
-app.listen(PORT, () => console.log(`[server]: running on port: ${PORT} | http://localhost:${PORT}/`))
+import { createServer } from 'http'
+import { initializeSocketIO } from './initializeSocket.js'
+const server = createServer(app)
+initializeSocketIO(server)
+
+
+server.listen(PORT, () => console.log(`[server]: running on port: ${PORT} | http://localhost:${PORT}/`))
 
 /**
  * export for testing purpose
