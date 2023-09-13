@@ -23,7 +23,7 @@ import useSocket from './hooks/useSocket';
 function App() {
   const { user, setUser, isAuthenticated, verifyOTP } = useAuth()
   const { notifications, setNotifications } = useAllData()
-  const { setData } = useSocket()
+  const { socket } = useSocket()
 
   const handleAcceptConnection = async (userId, notificationKey) => {
     try {
@@ -51,9 +51,16 @@ function App() {
         }
       });
     }
-    setData({user})
   }, [user])
 
+  useEffect(() => {
+    if (socket != null && user != null) {
+      socket.emit("userConnected", user._id, user.friends)
+      socket.on("friendsOnline", (data) => {
+        console.log(data)
+      })
+    }
+  }, [socket])
 
 
   return (

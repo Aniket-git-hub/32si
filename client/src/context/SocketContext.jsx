@@ -1,41 +1,40 @@
-import { createContext, useEffect, useRef, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import { useAuth } from '../hooks/useAuth';
+import { getEndpoint } from '../utils/Helper';
 
 export const SocketContext = createContext();
 
 export const SocketProvider = ({ children }) => {
-    const [data, setData] = useState(null)
-    const socketRef = useRef()
-    const { accessToken } = useAuth()
+    const [socket, setSocket] = useState(null)
+    const { accessToken, user } = useAuth()
 
     useEffect(() => {
-        if (data?.user) {
-            console.log(accessToken)
-            socketRef.current = io("http://localhost:3000/", {
+        if (user != null) {
+            const newSocket = io(getEndpoint("VITE_SOCKET_BASE_URL", "http://localhost:3000/"), {
                 query: { token: accessToken },
-                transports: ['websocket', 'polling', 'flashsocket'] 
-            })
+                transports: ['websocket', 'polling', 'flashsocket']
+            });
 
-            socketRef.current.on("connect", () => {
-                console.log("connected to socket")
-            })
+            newSocket.on("connect", () => {
+                console.log("connected");
+            });
 
-            socketRef.current.on("disconnect", () => {
-                console.log("disconnected from socket")
-            })
-        }
+            newSocket.on("disconnect", () => {
+                console.log("disconnected");
+            });
 
-        return () => {
-            if (socketRef.current) {
-                socketRef.current.disconnect()
+            setSocket(newSocket)
+
+            return () => {
+                newSocket.disconnect()
             }
         }
-    }, [data])
+    }, [user])
 
     return (
-        <SocketContext.Provider value={{ socket: socketRef.current, setData }}>
+        <SocketContext.Provider value={{ socket }}>
             {children}
         </SocketContext.Provider>
-    )
-}
+    );
+};

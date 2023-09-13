@@ -1,4 +1,7 @@
 export const userEventsHandler = (socket, users) => {
+    function addUser(socketId, userId) {
+        users[userId] = { socketId: socketId, friendsList: [] }
+    }
 
     socket.on('userConnected', (userId, friendsList) => {
         addUser(socket.id, userId)
@@ -27,6 +30,3 @@ export const userEventsHandler = (socket, users) => {
     
 }
 
-function addUser(socketId, userId) {
-    users[userId] = { socketId: socketId, friendsList: [] }
-}

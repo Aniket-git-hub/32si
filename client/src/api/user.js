@@ -1,4 +1,5 @@
 import { interceptorsInstance } from "../config/axios.config";
+import { getEndpoint } from "../utils/Helper";
 
 const handleRequest = async (endpoint, data, method, signal) => {
     try {
@@ -34,7 +35,6 @@ const handleRequest = async (endpoint, data, method, signal) => {
     }
 }
 
-const getEndpoint = (productionRoute, developmentRoute) => import.meta.env.VITE_ENV === 'production' ? import.meta.env[productionRoute] : developmentRoute
 
 export const updateUser = async (data, signal) => handleRequest(getEndpoint('VITE_UPDATE_USER_ROUTE', '/user/'), data, "PUT", signal)
 export const getAllUsers = async (data, signal) => handleRequest(getEndpoint('VITE_ALL_USERS_ROUTE', '/user/users'), data, "GET", signal)

@@ -1,4 +1,5 @@
 import { instance } from "../config/axios.config"
+import { getEndpoint } from "../utils/Helper"
 
 const handleRequest = async (url, data) => {
     try {
@@ -17,7 +18,6 @@ const handleRequest = async (url, data) => {
     }
 }
 
-const getEndpoint = (productionRoute, developmentRoute) => import.meta.env.VITE_ENV === 'production' ? import.meta.env[productionRoute] : developmentRoute
 
 export const loginUser = async (credentials) => handleRequest(getEndpoint('VITE_LOGIN_USER_ROUTE', '/auth/login'), credentials)
 export const logoutUser = async () => handleRequest(getEndpoint('VITE_LOGOUT_USER_ROUTE', '/auth/logout'), {})

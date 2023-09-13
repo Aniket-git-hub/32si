@@ -1,6 +1,5 @@
 import { instance } from "../config/axios.config"
-
-const getEndpoint = (productionRoute, developmentRoute) => import.meta.env.VITE_ENV === 'production' ? import.meta.env[productionRoute] : developmentRoute
+import { getEndpoint } from "../utils/Helper"
 
 export default async function getPlaces(data) {
     try {
