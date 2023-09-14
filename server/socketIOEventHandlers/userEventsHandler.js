@@ -1,32 +1,35 @@
+import { getIO } from "../initializeSocket.js"
+import { devPrint } from "../utils/Helper.js"
+
 export const userEventsHandler = (socket, users) => {
-    function addUser(socketId, userId) {
-        users[userId] = { socketId: socketId, friendsList: [] }
+    const io = getIO()
+
+    const addUser = (socketId, userId) => {
+        users.set(userId, { socketId: socketId, friendsList: [] })
+    }
+    const removeUser = (userId) => {
+        users.delete(userId)
     }
 
     socket.on('userConnected', (userId, friendsList) => {
-        addUser(socket.id, userId)
-        users[userId].friendsList = friendsList
-
-        let onlineFriends = friendsList.filter(friendId => users[friendId])
+        socket.userId = userId
+        users.get(userId).friendsList = friendsList
+        let onlineFriends = friendsList.filter(friendId => users.has(friendId))
         socket.emit('friendsOnline', onlineFriends)
-
         onlineFriends.forEach(friendId => {
-            io.to(users[friendId].socketId).emit('friendConnected', userId)
+            io.to(users.get(friendId).socketId).emit('friendConnected', userId)
         })
     })
 
     socket.on('disconnect', () => {
         const userId = socket.userId
-        if (users[userId]) {
-            users[userId].friendsList.forEach(friendId => {
-                if (users[friendId]) {
-                    io.to(users[friendId].socketId).emit('friendDisconnected', userId)
+        if (users.has(userId)) {
+            users.get(userId).friendsList.forEach(friendId => {
+                if (users.has(friendId)) {
+                    io.to(users.get(friendId).socketId).emit('friendDisconnected', userId)
                 }
             });
-            delete users[userId]
+            removeUser(userId)
         }
     })
-
-    
 }
-

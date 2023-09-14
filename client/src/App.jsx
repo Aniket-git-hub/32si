@@ -18,11 +18,11 @@ import { useAllData } from './hooks/useAllData';
 import { useEffect } from 'react';
 import { Button } from '@chakra-ui/react';
 import { acceptConnection } from './api/user';
-import useSocket from './hooks/useSocket';
+import useSocket from './hooks/useSocket'
 
 function App() {
   const { user, setUser, isAuthenticated, verifyOTP } = useAuth()
-  const { notifications, setNotifications } = useAllData()
+  const { notifications, setNotifications, setOnlineFriends } = useAllData()
   const { socket } = useSocket()
 
   const handleAcceptConnection = async (userId, notificationKey) => {
@@ -55,9 +55,11 @@ function App() {
 
   useEffect(() => {
     if (socket != null && user != null) {
-      socket.emit("userConnected", user._id, user.friends)
-      socket.on("friendsOnline", (data) => {
-        console.log(data)
+      socket.emit("userConnected", user._id, user.friends.map(f => f._id))
+      socket.on("friendsOnline", (data) => setOnlineFriends(data))
+      socket.on("friendConnected", (data) => setOnlineFriends(prev => [...prev, data]))
+      socket.on("friendDisconnected", (data) => {
+        setOnlineFriends(prev => prev.filter(f => f !== data))
       })
     }
   }, [socket])

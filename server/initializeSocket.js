@@ -4,7 +4,7 @@ import { userEventsHandler } from './socketIOEventHandlers/userEventsHandler.js'
 import jwt from 'jsonwebtoken'
 
 let io
-let users = {}
+let users = new Map()
 
 export const initializeSocketIO = (server) => {
     io = new Server(server)
@@ -15,8 +15,8 @@ export const initializeSocketIO = (server) => {
                 jwt.verify(socket.handshake.query.token, process.env.JWT_ACCESS_TOKEN_SECRET, function (err, decoded) {
                     if (err) {
                         console.log(err)
-                        return next(new Error('Authentication error'))  
-                    } 
+                        return next(new Error('Authentication error'))
+                    }
                     socket.decoded = decoded
                     next()
                 })
@@ -29,7 +29,6 @@ export const initializeSocketIO = (server) => {
             next(new Error('Authentication error'))
         }
     }).on('connection', (socket) => {
-        console.log("hello connection made")
         userEventsHandler(socket, users)
         chatEventHandler(socket, users)
     })
