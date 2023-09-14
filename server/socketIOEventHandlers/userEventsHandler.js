@@ -13,9 +13,11 @@ export const userEventsHandler = (socket, users) => {
 
     socket.on('userConnected', (userId, friendsList) => {
         socket.userId = userId
+        addUser(socket.id, userId)
         users.get(userId).friendsList = friendsList
         let onlineFriends = friendsList.filter(friendId => users.has(friendId))
         socket.emit('friendsOnline', onlineFriends)
+
         onlineFriends.forEach(friendId => {
             io.to(users.get(friendId).socketId).emit('friendConnected', userId)
         })

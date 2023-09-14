@@ -8,17 +8,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.getItem("isAuthenticated") === "true"
   );
   const [verifyOTP, setVerifyOTP] = useState(false);
-  const [accessToken, setAccessToken] = useState("");
+  const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken"));
 
   useEffect(() => {
     localStorage.setItem("user", JSON.stringify(user));
     localStorage.setItem("isAuthenticated", String(isAuthenticated));
     localStorage.setItem("verifyOTP", String(verifyOTP));
   }, [user, isAuthenticated, verifyOTP]);
-
-  useEffect(() => {
-    localStorage.setItem("accessToken", accessToken);
-  }, [accessToken]);
 
   const save = (user, token) => {
     setIsAuthenticated(true);
