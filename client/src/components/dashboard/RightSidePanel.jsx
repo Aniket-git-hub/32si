@@ -19,7 +19,7 @@ function RightSidePanel() {
           </InputLeftElement>
           <Input type='tel' placeholder='Search People' />
         </InputGroup>
-        <Heading size={"md"}> Friends </Heading>
+        <Heading size={"md"}> Allies </Heading>
         <List>
           {user.friends && user.friends.map(friend => (
             <ListItem key={friend._id} _hover={{ bg: "gray.100", cursor: "pointer" }} px={3} py={2} borderRadius={5}
@@ -28,11 +28,11 @@ function RightSidePanel() {
               <HStack>
                 <Avatar src={friend?.profilePicture} size={"sm"} name={friend?.name}>
                   {onlineFriends?.includes(friend._id) && (
-                    <AvatarBadge boxSize='1.25em' bg='green.500' ></AvatarBadge>
+                    <AvatarBadge boxSize='1.25em' bg='green.500' title={`${friend.username} is online`} ></AvatarBadge>
                   )}
                 </Avatar>
                 <Center>
-                  <Text>@{friend?.username}</Text>
+                  <Text>  {friend?.username}</Text>
                 </Center>
               </HStack>
             </ListItem>

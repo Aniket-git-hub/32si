@@ -1,9 +1,9 @@
 import USER from "../../models/user.js"
 
-async function getAUser(req, res, next) {
-    const username = req.params.username;
+async function getAUserById(req, res, next) {
+    const userId = req.params.userId
     try {
-        const dbUser = await USER.findOne({ username: username }).populate("friends")
+        const dbUser = await USER.findById(userId)
         const { password, ...rest } = dbUser._doc
         res.status(200).json({ user: rest })
     } catch (error) {
@@ -11,4 +11,4 @@ async function getAUser(req, res, next) {
     }
 }
 
-export default getAUser
+export default getAUserById

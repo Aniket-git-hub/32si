@@ -12,9 +12,6 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (user != null) {
-            console.log(" state variable", accessToken)
-            console.log("Trying to Connect with token => ", localStorage.getItem("accessToken"))
-
             const newSocket = io(getEndpoint("VITE_SOCKET_BASE_URL", "http://localhost:3000/"), {
                 query: { token: accessToken },
                 transports: ['websocket', 'polling', 'flashsocket']
@@ -22,7 +19,6 @@ export const SocketProvider = ({ children }) => {
 
             let retries = 0;
             const maxRetries = 10;
-
             newSocket.on("connect_error", async (error) => {
                 if (error.message == "Invalid Token" && retries < maxRetries) {
                     try {
@@ -30,7 +26,6 @@ export const SocketProvider = ({ children }) => {
                         localStorage.setItem("accessToken", response.data.accessToken)
                         setAccessToken(response.data.accessToken)
                         retries++;
-
                         setTimeout(() => {
                             newSocket.io.opts.query = { token: response.data.accessToken }
                             newSocket.connect();
@@ -40,7 +35,6 @@ export const SocketProvider = ({ children }) => {
                     }
                 }
             })
-
 
             newSocket.on("connect", () => {
                 retries = 0;

@@ -55,13 +55,13 @@ const userSchema = mongoose.Schema({
     },
     connectionRequests: [
         {
-            type: Schema.Types.ObjectId,
+            type: String,
             ref: 'user'
         }
     ]
 })
 
-userSchema.index({ location: "2dsphere"})
+userSchema.index({ location: "2dsphere" })
 
 const USER = mongoose.model('user', userSchema)
 export default USER

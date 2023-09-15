@@ -16,50 +16,31 @@ import Profile from './pages/dashboard/Profile';
 import Rivals from './pages/dashboard/Rivals';
 import { useAllData } from './hooks/useAllData';
 import { useEffect } from 'react';
-import { Button } from '@chakra-ui/react';
-import { acceptConnection } from './api/user';
 import useSocket from './hooks/useSocket'
 
 function App() {
-  const { user, setUser, isAuthenticated, verifyOTP } = useAuth()
-  const { notifications, setNotifications, setOnlineFriends } = useAllData()
+  const { user, isAuthenticated, verifyOTP } = useAuth()
+  const { setOnlineFriends, setNotifications } = useAllData()
   const { socket } = useSocket()
-
-  const handleAcceptConnection = async (userId, notificationKey) => {
-    try {
-      const response = await acceptConnection(userId)
-      setUser(response.data.user)
-      setNotifications(prev => prev.filter(notification => notification.key !== notificationKey));
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  useEffect(() => {
-    if (user && user.connectionRequests?.length !== 0) {
-      user.connectionRequests.forEach((item) => {
-        const notificationExists = notifications.some(notification => notification.key === `connectionRequest-${item}`);
-        if (!notificationExists) {
-          setNotifications(prev => [
-            ...prev,
-            {
-              key: `connectionRequest-${item}`,
-              message: `${item} wants to connect with you`,
-              button: <Button colorScheme="purple" variant={"outline"} onClick={(event) => handleAcceptConnection(item, `connectionRequest-${item}`)}  >Accept</Button>
-            }
-          ]);
-        }
-      });
-    }
-  }, [user])
 
   useEffect(() => {
     if (socket != null && user != null) {
       socket.emit("userConnected", user._id, user.friends.map(f => f._id))
       socket.on("friendsOnline", (data) => setOnlineFriends(data))
       socket.on("friendConnected", (data) => setOnlineFriends(prev => [...prev, data]))
-      socket.on("friendDisconnected", (data) => {
-        setOnlineFriends(prev => prev.filter(f => f !== data))
+      socket.on("friendDisconnected", (data) => setOnlineFriends(prev => prev.filter(f => f !== data)))
+      socket.on("connectionRequest", ({ message, userFrom }) => {
+        setNotifications(prev => [...prev, {
+          key: userFrom.username,
+          message,
+        }])
+      })
+      socket.on("connectionRequestAccepted", ({ message, userFrom }) => {
+        setNotifications(prev => [...prev, {
+          key: userFrom.username,
+          message,
+        }])
+        console.log(userFrom)
       })
     }
   }, [socket])

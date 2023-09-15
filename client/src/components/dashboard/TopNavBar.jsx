@@ -2,14 +2,17 @@ import { Link, Box, Text, Button, Flex, Avatar, HStack, IconButton, Menu, MenuBu
 import { ArrowForwardIcon } from "@chakra-ui/icons"
 import { FiAtSign, FiBell, FiChevronDown } from 'react-icons/fi';
 import { useAuth } from "../../hooks/useAuth"
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { logoutUser } from "../../api/auth"
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAllData } from "../../hooks/useAllData";
+import { acceptConnection, getAUserById } from "../../api/user";
 function TopNavBar() {
-    const { user, remove } = useAuth()
+    const { user, setUser, remove } = useAuth()
     const { username, name, email } = user
     const alert = useToast()
+    const navigate = useNavigate()
+
     const handleLogout = async () => {
         try {
             await logoutUser()
@@ -27,14 +30,36 @@ function TopNavBar() {
         }
     }
     const { isOpen, onOpen, onClose } = useDisclosure()
-    const { notifications } = useAllData()
+    const { notifications, setNotifications } = useAllData()
 
+    const handleVisitProfile = async (username) => {
+        onClose()
+        navigate(`/profile/@${username}`)
+    }
+
+    useEffect(() => {
+        if (user.connectionRequests?.length !== 0) {
+            console.log(user.connectionRequests)
+            user.connectionRequests.forEach(username => {
+                let notificationsExist = notifications.some(n => n.key === username)
+                if (!notificationsExist) {
+                    setNotifications(prev => [
+                        ...prev,
+                        {
+                            key: username,
+                            message: `${username} wants to connect with you`,
+                        }
+                    ])
+                }
+            })
+        }
+    }, [])
 
     return (
         <>
             <Flex as="nav" p=".5rem" pr="1rem" justifyContent="end" alignItems="center">
                 <HStack spacing={{ base: 0, md: 6 }}>
-                    <Button variant="ghost" size="sm" leftIcon={<FiBell size="20" />}  onClick={() => onOpen()} >
+                    <Button variant="ghost" size="sm" leftIcon={<FiBell size="20" />} onClick={() => onOpen()} >
                         <Badge variant={"subtle"} colorScheme="green">New</Badge>
                     </Button>
                     <Flex alignItems={'center'}>
@@ -90,15 +115,18 @@ function TopNavBar() {
                     <ModalBody>
                         <List spacing={3}>
                             {notifications && notifications.map((item, index) => (
-                                <ListItem key={`${item.message}${index}`} _hover={ { bg: "purple.50"}} borderRadius={5} p={3}>
+                                <ListItem key={`${item.message}${index}`} _hover={{ bg: "purple.50" }} borderRadius={5} p={3}>
                                     <HStack>
                                         <Text>
                                             {item.message}
                                         </Text>
-                                        {item?.button}
+                                        <Button
+                                            onClick={(e) => handleVisitProfile(item.key)}
+                                            variant={"outline"}
+                                            colorScheme="purple">Visit Profile</Button>
                                     </HStack>
                                 </ListItem>
-                            )) }
+                            ))}
                         </List>
                     </ModalBody>
                     <ModalFooter>

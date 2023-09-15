@@ -34,4 +34,16 @@ export const userEventsHandler = (socket, users) => {
             removeUser(userId)
         }
     })
+
+    socket.on('connectionRequest', ({ userTo, ...rest }) => {
+        if (users.has(userTo._id)) {
+            io.to(users.get(userTo._id).socketId).emit("connectionRequest", { userTo, ...rest })
+        }
+    })
+
+    socket.on('connectionRequestAccepted', ({ userTo, ...rest }) => {
+        if (users.has(userTo._id)) {
+            io.to(users.get(userTo._id).socketId).emit("connectionRequestAccepted", { userTo, ...rest })
+        }
+    })
 }

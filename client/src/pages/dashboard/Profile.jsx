@@ -3,29 +3,32 @@ import { useAuth } from "../../hooks/useAuth";
 import { useAllData } from "../../hooks/useAllData";
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { connectUser, disconnectUser, getAUser } from "../../api/user";
+import { acceptConnection, connectUser, disconnectUser, getAUserByUsername } from "../../api/user";
 import { MdAssistantNavigation, MdLocationCity, MdPeople, MdPeopleAlt, MdPlace, MdPlayCircle } from "react-icons/md"
 import { AtSignIcon } from "@chakra-ui/icons"
 import { HiOutlineUserGroup, HiOutlineRectangleGroup, HiUser } from "react-icons/hi2";
 import { BsPeople } from "react-icons/bs";
+import useSocket from "../../hooks/useSocket";
 
 export default function Profile() {
+    const { socket } = useSocket()
     const { user, setUser } = useAuth()
     let { username } = useParams()
     const [profileUser, setProfileUser] = useState(null)
     const [isFriend, setIsFriend] = useState(false)
     const [isConnecting, setIsConnecting] = useState(false)
     const [isDisconnecting, setIsDisconnecting] = useState(false)
+    const [isAccepting, setAccepting] = useState(false)
     const [requestSent, setRequestSent] = useState(false)
     const [myProfile, setMyProfile] = useState(false)
     const controllerRef = useRef(null)
 
     const loadProfileUserData = async (signal) => {
         try {
-            const response = await getAUser(username.replace(/@/g, ""), signal)
+            const response = await getAUserByUsername(username.replace(/@/g, ""), signal)
             setProfileUser(response.data.user)
             setIsFriend(response.data.user.friends?.map(friend => friend._id).includes(user._id))
-            setRequestSent(response.data.user.connectionRequests.includes(user._id))
+            setRequestSent(response.data.user.connectionRequests.includes(user.username))
             setMyProfile(user._id === response.data.user._id)
         } catch (error) {
             console.log(error)
@@ -39,7 +42,7 @@ export default function Profile() {
 
         controllerRef.current = new AbortController()
         if (profileUser?.username != username || !profileUser) {
-            loadProfileUserData()
+            loadProfileUserData(controllerRef.current.signal)
         }
 
         return () => {
@@ -49,17 +52,41 @@ export default function Profile() {
         }
     }, [username])
 
+    useEffect(() => {
+        if (socket != null) {
+            socket.on("connectionRequest", ({ userFrom, userTo }) => {
+                console.log("form connection request in profile.jsx")
+                setUser(userTo)
+                if (profileUser._id === userFrom._id) {
+                    setProfileUser(userFrom)
+                }
+            })
+            socket.on("connectionRequestAccepted", ({ userFrom, userTo }) => {
+                console.log("form connection request in profile.jsx")
+                setUser(userTo)
+                if (profileUser._id === userFrom._id) {
+                    setProfileUser(userFrom)
+                }
+            })
+        }
+    }, [socket])
 
-    const handleConnectUser = async (userId) => {
+
+    const handleConnectUser = async ({ username, userId }) => {
         try {
             setIsConnecting(true)
-            const response = await connectUser(userId);
+            const response = await connectUser(username);
             setProfileUser(response.data.requestedUser)
-            setIsConnecting(false)
             setRequestSent(true)
+            socket.emit("connectionRequest", {
+                userFrom: user,
+                userTo: profileUser,
+                message: `${user.username} wants to connect with you.`
+            })
         } catch (error) {
-            setIsConnecting(false)
             setRequestSent(false)
+        } finally {
+            setIsConnecting(false)
         }
     }
 
@@ -67,14 +94,35 @@ export default function Profile() {
         try {
             setIsDisconnecting(true)
             const response = await disconnectUser(userId)
-            setProfileUser(response.data.requestedUser)
             setUser(response.data.user)
-            setIsFriend(response.data.requestedUser.friends?.map(friend => friend._id).includes(user._id))
-            setIsDisconnecting(false)
+            setProfileUser(response.data.requestedUser)
+            setIsFriend(response.data.requestedUser.friends.includes(user._id))
         } catch (error) {
+            console.log(error)
+        } finally {
             setIsDisconnecting(false)
         }
     }
+
+    const handleAcceptConnection = async (userId) => {
+        try {
+            setAccepting(true)
+            const response = await acceptConnection(userId)
+            setUser(response.data.user)
+            setProfileUser(response.data.requestedUser)
+            setIsFriend(response.data.requestedUser.friends.includes(user._id))
+            socket.emit("connectionRequestAccepted", {
+                userFrom: user,
+                userTo: profileUser,
+                message: `${user.username} is your allie from now.`
+            })
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setAccepting(false)
+        }
+    }
+
 
     if (!profileUser) {
         return (
@@ -133,7 +181,7 @@ export default function Profile() {
                     <HStack >
                         <MdPlace />
                         <Text textAlign={'center'} color={'gray.600'} >
-                            {profileUser.location.name ? profileUser.location.name: 'Earth'}
+                            {profileUser.location.name ? profileUser.location.name : 'Earth'}
                         </Text>
                     </HStack>
                     <Stack align={'center'} justify={'center'} direction={'row'} mt={1}>
@@ -183,19 +231,36 @@ export default function Profile() {
                         >
                             Challenge
                         </Button>
-                        <Button
-                            flex={1}
-                            fontSize={'sm'}
-                            rounded={'full'}
-                            colorScheme="purple"
-                            color={'white'}
-                            onClick={() => !isFriend ? handleConnectUser(profileUser._id) : handleDisconnectUser(profileUser._id)}
-                            loadingText={isConnecting ? 'Requesting...' : 'disconnecting...'}
-                            isLoading={isConnecting || isDisconnecting}
-                            isDisabled={requestSent || isConnecting || isDisconnecting }
-                        >
-                            {!isFriend ? (requestSent ? 'Request Sent' : 'Connect') : 'Disconnect'}
-                        </Button>
+                        {
+                            user.connectionRequests.includes(profileUser.username) ? (
+                                <Button
+                                    flex={1}
+                                    fontSize={'sm'}
+                                    rounded={'full'}
+                                    colorScheme="purple"
+                                    color={'white'}
+                                    onClick={() => handleAcceptConnection(profileUser._id)}
+                                    isLoading={isAccepting}
+                                    loadingText=""
+                                    isDisabled={isAccepting}
+                                > Accept</Button>
+                            ) : (
+                                <Button
+                                    flex={1}
+                                    fontSize={'sm'}
+                                    rounded={'full'}
+                                    colorScheme="purple"
+                                    color={'white'}
+                                    onClick={() => !isFriend ? handleConnectUser({ username: profileUser.username, userId: profileUser._id }) : handleDisconnectUser(profileUser._id)}
+                                    loadingText=""
+                                    isLoading={isConnecting || isDisconnecting}
+                                    isDisabled={requestSent || isConnecting || isDisconnecting}
+                                >
+                                    {!isFriend ? (requestSent ? 'Request Sent' : 'Connect') : 'Disconnect'}
+                                </Button>
+                            )
+                        }
+
                     </Stack>
                 </Stack>
             </Stack>

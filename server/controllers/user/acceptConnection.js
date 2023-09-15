@@ -10,16 +10,20 @@ async function acceptConnection(req, res, next) {
             USER.findById(requestedUserId)
         ])
 
-        if (!currentUser.connectionRequests.includes(requestedUserId)) {
+        if (!requestedUser) {
+            throw new Error("Requested user not found")
+        }
+
+        if (!currentUser.connectionRequests.includes(requestedUser.username)) {
             throw new Error("You are already friends or a connection request has not been sent")
         }
 
-        const index = currentUser.connectionRequests.indexOf(requestedUserId)
+        const index = currentUser.connectionRequests.indexOf(requestedUser.username)
         if (index > -1) {
             currentUser.connectionRequests.splice(index, 1)
         }
 
-        currentUser.friends.push(requestedUser)
+        currentUser.friends.push(requestedUser._id)
         requestedUser.friends.push(currentUserId)
 
         const [savedCurrentUser, savedRequestedUser] = await Promise.all([
