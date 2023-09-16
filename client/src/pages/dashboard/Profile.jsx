@@ -112,6 +112,14 @@ export default function Profile() {
     }
 
 
+    const handleNewChallenge = () => {
+        socket.emit("newChallenge", {
+            userTo: profileUser,
+            message: `${user.username} has challenged you for a game.`
+        })
+    }
+
+
     if (!profileUser) {
         return (
             <Center>
@@ -209,6 +217,7 @@ export default function Profile() {
                         hidden={myProfile}
                     >
                         <Button
+                            onClick={handleNewChallenge}
                             flex={1}
                             fontSize={'sm'}
                             rounded={'full'}
