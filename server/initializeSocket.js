@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import { chatEventHandler } from './socketIOEventHandlers/chatEventHandler.js';
+import { gameEventHandler } from './socketIOEventHandlers/gameEventHandler.js';
 import { userEventsHandler } from './socketIOEventHandlers/userEventsHandler.js';
 import jwt from 'jsonwebtoken'
 import createError from './utils/createError.js';
@@ -25,7 +25,7 @@ export const initializeSocketIO = (server) => {
         }
     }).on('connection', (socket) => {
         userEventsHandler(socket, users)
-        chatEventHandler(socket, users)
+        gameEventHandler(socket, users)
     })
 }
 
