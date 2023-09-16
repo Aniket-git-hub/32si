@@ -1,15 +1,13 @@
-import { Center, Flex, Heading, Stack, Text, Badge, Button, Image, Box, SkeletonCircle, SkeletonText, Skeleton, HStack, VStack, IconButton } from "@chakra-ui/react";
+import { Center, Flex, Heading, Stack, Text, Button, Image, Box, SkeletonText, Skeleton, HStack, } from "@chakra-ui/react";
 import { useAuth } from "../../hooks/useAuth";
-import { useAllData } from "../../hooks/useAllData";
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { acceptConnection, connectUser, disconnectUser, getAUserByUsername } from "../../api/user";
-import { MdAssistantNavigation, MdLocationCity, MdPeople, MdPeopleAlt, MdPlace, MdPlayCircle } from "react-icons/md"
+import { MdPlace } from "react-icons/md"
 import { AtSignIcon } from "@chakra-ui/icons"
-import { HiOutlineUserGroup, HiOutlineRectangleGroup, HiUser } from "react-icons/hi2";
+import { HiOutlineRectangleGroup } from "react-icons/hi2";
 import { BsPeople } from "react-icons/bs";
 import useSocket from "../../hooks/useSocket";
-import { useTransform } from "framer-motion";
 
 export default function Profile() {
     const { socket } = useSocket()
@@ -55,27 +53,18 @@ export default function Profile() {
     }, [username])
 
     useEffect(() => {
-        console.log(socket)
-        if (socket != null) {
-            socket.on("connectionRequest", (data) => {
-                console.log(data)
-            })
-            socket.on("connectionRequestAccepted", ({ userFrom, userTo }) => {
-                if (username === `@${userFrom.username}`) {
-                    setProfileUser(userFrom)
-                    setIsFriend(userFrom.friends.map(friend => friend._id).includes(user._id))
-                    requestSent(false)
-                }
-            })
+        if (socket) {
+            socket.on("connectionRequest", () => loadProfileUserData(controllerRef.current.signal));
+            socket.on("connectionRequestAccepted", () => loadProfileUserData(controllerRef.current.signal));
         }
-    }, [socket])
+    }, []);
 
 
-    const handleConnectUser = async ({ username, userId }) => {
+    const handleConnectUser = async ({ username }) => {
         try {
             setIsConnecting(true)
-            // const response = await connectUser(username);
-            // setProfileUser(response.data.requestedUser)
+            const response = await connectUser(username);
+            setProfileUser(response.data.requestedUser)
             setRequestSent(true)
             socket.emit("connectionRequest", {
                 userFrom: user,

@@ -24,7 +24,7 @@ function App() {
   const { socket } = useSocket()
 
   useEffect(() => {
-    if (socket != null && user != null) {
+    if (socket && user != null) {
       socket.emit("userConnected", user._id, user.friends.map(f => f._id))
       socket.on("friendsOnline", (data) => setOnlineFriends(data))
       socket.on("friendConnected", (data) => setOnlineFriends(prev => [...prev, data]))
@@ -41,7 +41,7 @@ function App() {
         setNotifications(prev => [...prev, {
           key: userFrom.username,
           message,
-          action: { redirect: userFrom },
+          action: { redirect: userFrom.username },
         }])
         setUser(userTo)
       })
