@@ -9,6 +9,7 @@ import { useAllData } from "../../hooks/useAllData";
 import { acceptConnection, getAUserById } from "../../api/user";
 function TopNavBar() {
     const { user, setUser, remove } = useAuth()
+    const { resetData } = useAllData()
     const { username, name, email } = user
     const alert = useToast()
     const navigate = useNavigate()
@@ -17,6 +18,7 @@ function TopNavBar() {
         try {
             await logoutUser()
             remove()
+            resetData()
             alert({
                 title: 'Logout Successful',
                 // description: "",
@@ -36,22 +38,34 @@ function TopNavBar() {
         onClose()
         navigate(`/profile/@${username}`)
     }
+    const handleClickOnNotificationItem = (action) => {
+        if (action.redirect) {
+            console.log(action.redirect)
+            onClose()
+            navigate(`/profile/@${action.redirect}`)
+        }
+    }
 
     useEffect(() => {
         if (user.connectionRequests?.length !== 0) {
-            console.log(user.connectionRequests)
+            console.log("mounting")
             user.connectionRequests.forEach(username => {
                 let notificationsExist = notifications.some(n => n.key === username)
+                console.log(notificationsExist)
                 if (!notificationsExist) {
                     setNotifications(prev => [
                         ...prev,
                         {
                             key: username,
                             message: `${username} wants to connect with you`,
+                            action: { redirect: username }
                         }
                     ])
                 }
             })
+        }
+        return () => {
+            setNotifications([])
         }
     }, [])
 
@@ -115,7 +129,12 @@ function TopNavBar() {
                     <ModalBody>
                         <List spacing={3}>
                             {notifications && notifications.map((item, index) => (
-                                <ListItem key={`${item.message}${index}`} _hover={{ bg: "purple.50" }} borderRadius={5} p={3}>
+                                <ListItem
+                                    onClick={(e) => handleClickOnNotificationItem(item?.action)}
+                                    key={`${item.message}${index}`}
+                                    _hover={{ bg: "purple.50" }}
+                                    borderRadius={5} p={3}
+                                >
                                     <HStack>
                                         <Text>
                                             {item.message}

@@ -32,7 +32,7 @@ async function acceptConnection(req, res, next) {
         ])
 
         let populatedCurrentUser = await USER.findById(savedCurrentUser._id).populate('friends')
-        let populatedRequestedUser = await USER.findById(savedRequestedUser._id)
+        let populatedRequestedUser = await USER.findById(savedRequestedUser._id).populate('friends')
 
         const { password, ...restCurrentUser } = populatedCurrentUser._doc
         const { password: Rpassword, ...restRequestedUser } = populatedRequestedUser._doc

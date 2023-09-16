@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken"));
 
   useEffect(() => {
+    console.log("setting user")
     localStorage.setItem("user", JSON.stringify(user));
     localStorage.setItem("isAuthenticated", String(isAuthenticated));
     localStorage.setItem("verifyOTP", String(verifyOTP));

@@ -51,7 +51,7 @@ export const SocketProvider = ({ children }) => {
                 newSocket.disconnect()
             }
         }
-    }, [user])
+    }, [user?._id])
 
     return (
         <SocketContext.Provider value={{ socket }}>

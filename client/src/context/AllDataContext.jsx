@@ -9,6 +9,14 @@ export const AllDataContextProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [onlineFriends, setOnlineFriends] = useState([]);
 
+  const resetData = () => {
+    setRivals([]);
+    setFriends([]);
+    setGames([]);
+    setNotifications([]);
+    setOnlineFriends([]);
+  };
+
   return (
     <AllDataContext.Provider
       value={{
@@ -22,6 +30,7 @@ export const AllDataContextProvider = ({ children }) => {
         setNotifications,
         onlineFriends,
         setOnlineFriends,
+        resetData,
       }}
     >
       {children}

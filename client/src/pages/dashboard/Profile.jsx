@@ -9,6 +9,7 @@ import { AtSignIcon } from "@chakra-ui/icons"
 import { HiOutlineUserGroup, HiOutlineRectangleGroup, HiUser } from "react-icons/hi2";
 import { BsPeople } from "react-icons/bs";
 import useSocket from "../../hooks/useSocket";
+import { useTransform } from "framer-motion";
 
 export default function Profile() {
     const { socket } = useSocket()
@@ -42,6 +43,7 @@ export default function Profile() {
 
         controllerRef.current = new AbortController()
         if (profileUser?.username != username || !profileUser) {
+            console.log("loading the profile user")
             loadProfileUserData(controllerRef.current.signal)
         }
 
@@ -53,19 +55,16 @@ export default function Profile() {
     }, [username])
 
     useEffect(() => {
+        console.log(socket)
         if (socket != null) {
-            socket.on("connectionRequest", ({ userFrom, userTo }) => {
-                console.log("form connection request in profile.jsx")
-                setUser(userTo)
-                if (profileUser._id === userFrom._id) {
-                    setProfileUser(userFrom)
-                }
+            socket.on("connectionRequest", (data) => {
+                console.log(data)
             })
             socket.on("connectionRequestAccepted", ({ userFrom, userTo }) => {
-                console.log("form connection request in profile.jsx")
-                setUser(userTo)
-                if (profileUser._id === userFrom._id) {
+                if (username === `@${userFrom.username}`) {
                     setProfileUser(userFrom)
+                    setIsFriend(userFrom.friends.map(friend => friend._id).includes(user._id))
+                    requestSent(false)
                 }
             })
         }
@@ -75,8 +74,8 @@ export default function Profile() {
     const handleConnectUser = async ({ username, userId }) => {
         try {
             setIsConnecting(true)
-            const response = await connectUser(username);
-            setProfileUser(response.data.requestedUser)
+            // const response = await connectUser(username);
+            // setProfileUser(response.data.requestedUser)
             setRequestSent(true)
             socket.emit("connectionRequest", {
                 userFrom: user,
@@ -110,10 +109,10 @@ export default function Profile() {
             const response = await acceptConnection(userId)
             setUser(response.data.user)
             setProfileUser(response.data.requestedUser)
-            setIsFriend(response.data.requestedUser.friends.includes(user._id))
+            setIsFriend(response.data.requestedUser.friends.map(friend => friend._id).includes(user._id))
             socket.emit("connectionRequestAccepted", {
-                userFrom: user,
-                userTo: profileUser,
+                userFrom: response.data.user,
+                userTo: response.data.requestedUser,
                 message: `${user.username} is your allie from now.`
             })
         } catch (error) {

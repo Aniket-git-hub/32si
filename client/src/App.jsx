@@ -19,7 +19,7 @@ import { useEffect } from 'react';
 import useSocket from './hooks/useSocket'
 
 function App() {
-  const { user, isAuthenticated, verifyOTP } = useAuth()
+  const { user, setUser, isAuthenticated, verifyOTP } = useAuth()
   const { setOnlineFriends, setNotifications } = useAllData()
   const { socket } = useSocket()
 
@@ -29,18 +29,21 @@ function App() {
       socket.on("friendsOnline", (data) => setOnlineFriends(data))
       socket.on("friendConnected", (data) => setOnlineFriends(prev => [...prev, data]))
       socket.on("friendDisconnected", (data) => setOnlineFriends(prev => prev.filter(f => f !== data)))
-      socket.on("connectionRequest", ({ message, userFrom }) => {
+      socket.on("connectionRequest", ({ message, userTo, userFrom }) => {
         setNotifications(prev => [...prev, {
           key: userFrom.username,
           message,
+          action: { redirect: userFrom.username },
         }])
+        setUser(userTo)
       })
-      socket.on("connectionRequestAccepted", ({ message, userFrom }) => {
+      socket.on("connectionRequestAccepted", ({ message, userTo, userFrom }) => {
         setNotifications(prev => [...prev, {
           key: userFrom.username,
           message,
+          action: { redirect: userFrom },
         }])
-        console.log(userFrom)
+        setUser(userTo)
       })
     }
   }, [socket])
