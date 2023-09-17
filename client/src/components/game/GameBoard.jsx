@@ -1,6 +1,6 @@
 import Spot from "./Spot";
 
-function GameBoard(props) {
+function GameBoard() {
     const relations = {
         "01": ["02", "11"],
         "02": ["01", "03", "12"],
@@ -108,7 +108,7 @@ function GameBoard(props) {
             { x: 0, y: 0 },
         ],
     ];
-    const board = [
+    const boardSpots = [
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
@@ -120,15 +120,27 @@ function GameBoard(props) {
         [0, 0, 0, 0, 0]
     ];
 
+    const boardInitialState = [
+        [0, 1, 1, 1, 0],
+        [0, 1, 1, 1, 0],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 0],
+        [2, 2, 2, 2, 2],
+        [2, 2, 2, 2, 2],
+        [0, 2, 2, 2, 0],
+        [0, 2, 2, 2, 0]
+    ];
+
     return (
         <svg className="board">
-            
-            {Object.entries(relations).map((row, index) =>{
+
+            {Object.entries(relations).map((row, index) => {
                 const [i, j] = row[0].split("")
                 let from = sizes[i][j]
-                return row[1].map((e, indexTwo)   => {
+                return row[1].map((e, indexTwo) => {
                     const [k, l] = e.split("")
-                    let to = sizes[k][l]  
+                    let to = sizes[k][l]
                     return (
                         <line
                             key={`${index + indexTwo}`}
@@ -143,14 +155,14 @@ function GameBoard(props) {
                 })
             })}
 
-            {board.map((row, i) => (
+            {boardSpots.map((row, i) => (
                 row.map((col, j) => {
                     return (
                         <Spot
                             key={j}
                             position={{ x: `${sizes[i][j].x}px`, y: `${sizes[i][j].y}px` }}
                             size="10px"
-                            value={board[i][j]}
+                            value={boardSpots[i][j]}
                             boardPosition={{ i, j }}
                             nullSpot={(`${i}${j}` == '84') || (`${i}${j}` == '80') ||
                                 (`${i}${j}` == '74') || (`${i}${j}` == '70') ||
@@ -163,7 +175,6 @@ function GameBoard(props) {
                     );
                 })
             ))}
-
 
         </svg>
     );
