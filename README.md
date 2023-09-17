@@ -1,3 +1,5 @@
+![Dashboard](/dashboard.png)
+
 # 32 Beads Board Game 🎲
 
 ## Table of Contents
