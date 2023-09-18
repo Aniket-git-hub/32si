@@ -1,6 +1,7 @@
 import Spot from "./Spot";
+import Piece from "./Piece";
 
-function GameBoard() {
+const GameBoard = () => {
     const relations = {
         "01": ["02", "11"],
         "02": ["01", "03", "12"],
@@ -156,24 +157,30 @@ function GameBoard() {
             })}
 
             {boardSpots.map((row, i) => (
-                row.map((col, j) => {
-                    return (
+                row.map((col, j) => (
+                    <>
                         <Spot
                             key={j}
                             position={{ x: `${sizes[i][j].x}px`, y: `${sizes[i][j].y}px` }}
-                            size="10px"
-                            value={boardSpots[i][j]}
+                            size="12px"
                             boardPosition={{ i, j }}
                             nullSpot={(`${i}${j}` == '84') || (`${i}${j}` == '80') ||
                                 (`${i}${j}` == '74') || (`${i}${j}` == '70') ||
                                 (`${i}${j}` == '14') || (`${i}${j}` == '10') ||
                                 (`${i}${j}` == '00') || (`${i}${j}` == '04')
-                                ? true : false
-                            }
+                                ? true : false}
                             relations={relations[`${i}${j}`]}
-                        />
-                    );
-                })
+                        >
+
+                            <Piece
+                                position={{ x: `${sizes[i][j].x}px`, y: `${sizes[i][j].y}px` }}
+                                size="10px"
+                                value={boardInitialState[i][j]} />
+
+                        </Spot>
+
+                    </>
+                ))
             ))}
 
         </svg>

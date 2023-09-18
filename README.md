@@ -44,7 +44,8 @@ We are planning to add more features in the coming days, including an AI opponen
 ## Tech Stack 💻
 
 - Frontend: React
-- Backend: Node.js, MongoDB
+- Backend: Node.js
+- Database: MongoDB
 - Hosting: Vercel (frontend), Render.com (backend)
 
 ## License 📄
