@@ -133,6 +133,10 @@ const GameBoard = () => {
         [0, 2, 2, 2, 0]
     ];
 
+    const spotOnClickHandler = ({ relations, boardPosition }) => {
+        console.log(boardPosition, relations)
+    }
+
     return (
         <svg className="board">
 
@@ -170,6 +174,7 @@ const GameBoard = () => {
                                 (`${i}${j}` == '00') || (`${i}${j}` == '04')
                                 ? true : false}
                             relations={relations[`${i}${j}`]}
+                            onClick={spotOnClickHandler}
                         >
 
                             <Piece

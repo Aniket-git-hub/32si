@@ -1,28 +1,26 @@
-const Spot = (props) => {
-  const relations = props.relations
+import { useState } from "react";
 
-  const handleClick = () => {
-    console.log(props)
-  }
+const Spot = ({ nullSpot, onClick, size, position, children, relations, boardPosition }) => {
+  const [piece, setPiece] = useState(null)
 
   return (
-    <g onClick={handleClick}>
+    <g onClick={() => onClick({ nullSpot, size, position, children, relations, boardPosition, piece, setPiece })}>
       <circle
         style={{
-          display: props.nullSpot ? 'none' : 'block',
+          display: nullSpot ? 'none' : 'block',
           zIndex: 10,
-          cursor: "pointer"
+          cursor: "pointer",
         }}
-        cx={props.position.x}
-        cy={props.position.y}
-        r={props.size}
+        cx={position?.x}
+        cy={position?.y}
+        r={size}
         // stroke="black"
         strokeWidth="1"
         fill="white"
       />
-      {props?.children}
+      {piece}
     </g>
-  );
+  )
 }
 
 export default Spot;
