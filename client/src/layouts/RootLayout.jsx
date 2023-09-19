@@ -7,14 +7,14 @@ import { Outlet } from "react-router-dom"
 export default function RootLayout() {
     return (
         <>
-            <Grid templateColumns="repeat(10, 1fr)">
+            <Grid templateColumns="repeat(12, 1fr)">
                 <GridItem as="aside" colSpan={2} >
                     <LeftSidePanel />
                 </GridItem>
-                <GridItem as="main" colSpan={8}>
+                <GridItem as="main" colSpan={10}>
                     <TopNavBar />
-                    <Grid templateColumns="repeat(4, 1fr)">
-                        <GridItem colSpan={3} h={{ lg: "90vh" }} overflowY={"scroll"} sx={
+                    <Grid templateColumns="repeat(5, 1fr)">
+                        <GridItem colSpan={4} h={{ lg: "90vh" }} overflowY={"scroll"} sx={
                             {
                                 '::-webkit-scrollbar': {
                                     display: 'none'
