@@ -1,10 +1,13 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 
-const Spot = ({ nullSpot, onClick, size, position, children, relations, boardPosition }) => {
-  const [piece, setPiece] = useState(null)
+const Spot = ({ nullSpot, onClick, size, position, piece, relations, boardPosition }) => {
+  const [renderPiece, setRenderPiece] = useState(piece)
+  const [isPossibleMove, setIsPossibleMove] = useState(false)
+
 
   return (
-    <g onClick={() => onClick({ nullSpot, size, position, children, relations, boardPosition, piece, setPiece })}>
+    <g onClick={() => onClick({ nullSpot, size, position, relations, boardPosition, piece, setRenderPiece, isPossibleMove, setIsPossibleMove })}>
       <circle
         style={{
           display: nullSpot ? 'none' : 'block',
@@ -16,9 +19,9 @@ const Spot = ({ nullSpot, onClick, size, position, children, relations, boardPos
         r={size}
         // stroke="black"
         strokeWidth="1"
-        fill="white"
+        fill={!isPossibleMove ? "white" : "black"}
       />
-      {piece}
+      {renderPiece && renderPiece}
     </g>
   )
 }

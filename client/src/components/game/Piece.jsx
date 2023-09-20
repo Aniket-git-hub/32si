@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 const Piece = (props) => {
   if (props.value !== 1 && props.value !== 2) {
     return null;
