@@ -1,3 +1,5 @@
+![Dashboard](/dashboard.png)
+
 # 32 Beads Board Game 🎲
 
 ## Table of Contents
@@ -50,7 +52,7 @@ We are planning to add more features in the coming days, including an AI opponen
 
 ## License 📄
 
-This project is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License]. You are free to use, modify, and distribute this software for non-commercial purposes with proper attribution.
+\-
 
 ## Disclaimer ⚠️
 
