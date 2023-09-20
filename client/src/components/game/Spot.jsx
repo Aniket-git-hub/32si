@@ -4,10 +4,14 @@ import { useState } from "react";
 const Spot = ({ nullSpot, onClick, size, position, piece, relations, boardPosition }) => {
   const [renderPiece, setRenderPiece] = useState(piece)
   const [isPossibleMove, setIsPossibleMove] = useState(false)
+  const [addAnimation, setAddAnimation] = useState(false)
 
 
   return (
-    <g onClick={() => onClick({ nullSpot, size, position, relations, boardPosition, piece, setRenderPiece, isPossibleMove, setIsPossibleMove })}>
+    <g onClick={() => {
+      setAddAnimation(!addAnimation)
+      onClick({ nullSpot, size, position, relations, boardPosition, piece, setRenderPiece, isPossibleMove, setIsPossibleMove })
+    }}>
       <circle
         style={{
           display: nullSpot ? 'none' : 'block',
@@ -19,7 +23,7 @@ const Spot = ({ nullSpot, onClick, size, position, piece, relations, boardPositi
         r={size}
         // stroke="black"
         strokeWidth="1"
-        fill={!isPossibleMove ? "white" : "black"}
+        fill={!isPossibleMove ? "white" : "lightgreen"}
       />
       {renderPiece && renderPiece}
     </g>

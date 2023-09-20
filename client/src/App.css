@@ -17,3 +17,56 @@
     min-height: 620px;
     min-width: 430px;
 }
+
+@keyframes breathe {
+    0% {
+        r: 11;
+    }
+
+    50% {
+        r: 14;
+    }
+
+    100% {
+        r: 11;
+    }
+}
+
+@keyframes rotate {
+    50% {
+        transform: rotate(180deg);
+    }
+}
+
+@keyframes colorChange {
+    0% {
+        fill: red;
+    }
+
+    25% {
+        fill: yellow;
+    }
+
+    50% {
+        fill: green;
+    }
+
+    75% {
+        fill: blue;
+    }
+
+    100% {
+        fill: red;
+    }
+}
+
+.breathing-circle {
+    animation: breathe 1s infinite ease-in-out;
+}
+
+.rotating-circle {
+    stroke: rgb(45, 45, 45);
+    stroke-width: 4;
+    stroke-dasharray: 10, 10;
+
+}
