@@ -1,8 +1,8 @@
-import transporter from "../config/mailer.config.ts"
-import otpEmailTemplate from "./emailTemplates/otpEmailTemplate.ts"
-import passwordResetInitiatedTemplate from "./emailTemplates/passwordResetInitiatedTemplate.ts"
-import passwordResetSuccessfulTemplate from "./emailTemplates/passwordResetSuccessfulTemplate.ts"
-import registrationSuccessfulTemplate from "./emailTemplates/registrationSuccessfulTemplate.ts";
+import transporter from "../config/mailer.config"
+import otpEmailTemplate from "./emailTemplates/otpEmailTemplate"
+import passwordResetInitiatedTemplate from "./emailTemplates/passwordResetInitiatedTemplate"
+import passwordResetSuccessfulTemplate from "./emailTemplates/passwordResetSuccessfulTemplate"
+import registrationSuccessfulTemplate from "./emailTemplates/registrationSuccessfulTemplate";
 
 interface EmailResponse {
   success: boolean;

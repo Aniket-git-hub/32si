@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { MongooseError } from "mongoose";
+import { MongoError } from 'mongodb';
 
 interface ErrorInfo {
     status: number;
@@ -30,8 +31,12 @@ function errorHandler(error: Error, req: Request, res: Response, next: NextFunct
         console.log(`[server]: Request: ${req.path} - [error]: ${error.message}`);
     }
 
-    const errorType = (error as MongooseError).code || error.name;
-    const errorInfo = errorTypeMap[errorType] || { status: 500, message: "Internal Server Error" };
+    let errorInfo;
+    const errorType = (error instanceof MongoError) ? error.code : error.name;
+    if (errorType) {
+        errorInfo = errorTypeMap[errorType];
+    }
+    errorInfo = errorInfo || { status: 500, message: "Internal Server Error" };
 
     res.status(errorInfo.status).json({
         message: typeof errorInfo.message === 'function' ? errorInfo.message(error) : errorInfo.message

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import OTP from "../../models/otp.ts"
+import OTP from "../../models/otp"
 import bcrypt from "bcryptjs"
 
 interface Otp {

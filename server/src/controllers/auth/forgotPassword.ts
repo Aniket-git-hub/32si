@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import USER from '../../models/user.ts'
-import OTP from '../../models/otp.ts'
-import { sendOTPEmail, sendPasswordResetInitiatedEmail } from '../../utils/sendEmail.ts'
+import USER from '../../models/user'
+import OTP from '../../models/otp'
+import { sendOTPEmail, sendPasswordResetInitiatedEmail } from '../../utils/sendEmail'
 import bcrypt from 'bcryptjs'
-import CustomError from '../../utils/createError.ts';
+import CustomError from '../../utils/createError';
 
 interface User {
     email: string;

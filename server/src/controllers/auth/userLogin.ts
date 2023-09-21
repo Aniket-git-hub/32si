@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from 'bcryptjs';
-import User from "../../models/user.ts";
-import generateToken from "../../utils/generateToken.ts";
-import CustomError from "../../utils/createError.ts";
+import User from "../../models/user";
+import generateToken from "../../utils/generateToken";
+import CustomError from "../../utils/createError";
 
 interface UserDoc {
     _id: string;

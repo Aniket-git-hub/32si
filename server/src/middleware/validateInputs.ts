@@ -1,5 +1,6 @@
 import { body, validationResult } from 'express-validator'
-import createError from '../utils/createError.js'
+import { NextFunction, Request, Response } from 'express'
+import CustomError from '../utils/createError'
 
 // Common validation rules
 const commonRules = {
@@ -67,7 +68,7 @@ export const forgotPasswordOtpValidationRules = [
     body('otp')
         .isString().withMessage('OTP should be string')
         .isLength({ min: 6, max: 6 }).withMessage('OTP should be 6 digits long')
-        
+
 ]
 
 export const resetPasswordValidationRules = [
@@ -81,14 +82,14 @@ export const resetPasswordValidationRules = [
  * bad request as the data sent to the server failed validation. else next() middleware is called
  * @param {Request} req Express.js Request Object
  * @param {Response} res Express.js Response Object
- * @param {Function} next Next Middleware Function
+ * @param {NextFunction} next Next Middleware Function
  * @returns {Response} Response to client 
  */
 
-export function inputValidation(req, res, next) {
+export function inputValidation(req: Request, res: Response, next: NextFunction) {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-        let err = createError("ValidationError", "Validation Error")
+        let err = new CustomError("ValidationError", "Validation Error")
         err.errors = errors.array().map(obj => obj.msg)
         next(err)
     }

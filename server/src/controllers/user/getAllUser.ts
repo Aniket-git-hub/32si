@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import USER from '../../models/user.ts'
-import mongoose from 'mongoose';
+import USER from '../../models/user'
 
 /**
  * @description  controller to get all users.
@@ -14,14 +13,14 @@ async function getAllUser(req: Request, res: Response, next: NextFunction) {
         const limit: number = parseInt(req.query.limit as string) || 10
         let skips: number = (page - 1) * 10
 
-        // Get the current user's friends
         const currentUser = await USER.findById(req.user.id);
+        if (!currentUser) throw new Error("currentUser not found")
         const friends = currentUser.friends;
 
-        let pipeline;
+        let pipeline: any[] = [];
 
         if (currentUser.location && currentUser.location.type === 'Point') {
-            pipeline = [
+            pipeline.push(
                 {
                     $geoNear: {
                         near: currentUser.location,
@@ -39,9 +38,9 @@ async function getAllUser(req: Request, res: Response, next: NextFunction) {
                 },
                 { $skip: skips },
                 { $limit: limit }
-            ];
+            );
         } else {
-            pipeline = [
+            pipeline.push(
                 { $match: { _id: { $nin: [...friends, currentUser._id] } } },
                 {
                     $addFields: {
@@ -52,7 +51,7 @@ async function getAllUser(req: Request, res: Response, next: NextFunction) {
                 { $sample: { size: limit } },
                 { $skip: skips },
                 { $limit: limit }
-            ];
+            );
         }
 
         let users = await USER.aggregate(pipeline);
@@ -86,4 +85,4 @@ async function getAllUser(req: Request, res: Response, next: NextFunction) {
     }
 }
 
-export default getAllUser
+export default getAllUser;

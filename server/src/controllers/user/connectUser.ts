@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import USER from '../../models/user.ts'
+import USER from '../../models/user'
+import { ObjectId } from 'mongoose';
 
 /**
  * @description  controller to connect a user.
@@ -17,11 +18,11 @@ async function connectUser(req: Request, res: Response, next: NextFunction) {
             USER.findOne({ username: requestedUsername })
         ])
 
-        if (!requestedUser) {
-            throw new Error("Requested user not found")
+        if (!requestedUser || !currentUser) {
+            throw new Error(" user not found")
         }
 
-        const requestedUserId: string = requestedUser._id
+        const requestedUserId: ObjectId = requestedUser._id
 
         if (currentUser.friends.includes(requestedUserId) || requestedUser.connectionRequests.includes(currentUser.username)) {
             throw new Error("You are already friends or a connection request has already been sent")
@@ -30,7 +31,7 @@ async function connectUser(req: Request, res: Response, next: NextFunction) {
         requestedUser.connectionRequests.push(currentUser.username)
 
         const savedRequestedUser = await requestedUser.save()
-        const { password: Rpassword, ...restRequestedUser } = savedRequestedUser._doc
+        const { password: Rpassword, ...restRequestedUser } = savedRequestedUser.toObject()
 
         res.json({
             requestedUser: restRequestedUser,

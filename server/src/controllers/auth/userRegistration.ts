@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs'
-import User from "../../models/user.js"
-import generateToken from "../../utils/generateToken.js"
-import { sendRegistrationSuccessfulEmail } from '../../utils/sendEmail.js'
+import User from "../../models/user"
+import generateToken from "../../utils/generateToken"
+import { sendRegistrationSuccessfulEmail } from '../../utils/sendEmail'
 import { Request, Response, NextFunction } from 'express';
-import CustomError from '../../utils/createError.js';
+import CustomError from '../../utils/createError';
 
 interface User {
     name: string;
@@ -27,7 +27,8 @@ async function register(req: Request, res: Response, next: NextFunction) {
         password: bcrypt.hashSync(password, 12)
     })
     try {
-        const savedUser = await newUser.save().populate("friends")
+
+        const savedUser = await newUser.save()
 
         const { accessToken, refreshToken } = generateToken({
             id: savedUser._id,
@@ -50,7 +51,12 @@ async function register(req: Request, res: Response, next: NextFunction) {
             throw new CustomError("SendingEmail", "Email Not Sent", error as Error)
         }
 
-        const { password, ...rest } = savedUser.populate("friends").execPopulate()._doc
+        const populatedUser = await User.findById(savedUser._id).populate('friends');
+        if (!populatedUser) {
+            throw new Error("populatedUser doesn't exist")
+        }
+
+        const { password, ...rest } = populatedUser;
         res.status(201).json({
             message: "New User Created Successfully",
             accessToken,

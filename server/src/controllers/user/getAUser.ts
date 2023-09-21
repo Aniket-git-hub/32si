@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import USER from '../../models/user.ts'
+import USER from '../../models/user'
 
 /**
  * @description  controller to get a user.
@@ -10,9 +10,12 @@ import USER from '../../models/user.ts'
 async function getAUser(req: Request, res: Response, next: NextFunction) {
     const username: string = req.params.username;
     try {
-        const dbUser = await USER.findOne({ username: username }).populate("friends")
-        const { password, ...rest } = dbUser._doc
-        res.status(200).json({ user: rest })
+        const dbUser = await USER.findOne({ username: username }).populate("friends");
+        if (!dbUser) throw new Error("dbUser not found");
+        const userObject = dbUser.toObject();
+        const { password, ...rest } = userObject;
+        res.status(200).json({ user: rest });
+
     } catch (error) {
         next(error)
     }

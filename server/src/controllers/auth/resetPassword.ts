@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import USER from '../../models/user.js'
+import USER from '../../models/user'
 import bcrypt from 'bcryptjs'
-import { sendPasswordResetSuccessfulEmail } from '../../utils/sendEmail.ts'
-import CustomError from '../../utils/createError.ts';
+import { sendPasswordResetSuccessfulEmail } from '../../utils/sendEmail'
+import CustomError from '../../utils/createError';
 
 interface User {
     email: string;

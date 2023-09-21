@@ -1,7 +1,7 @@
 import "dotenv/config"
 
-import express, { NextFunction, Request, Response, } from "express"
-const app: express.Application = express()
+import express, { Application, NextFunction, Request, Response, } from "express"
+const app: Application = express()
 const PORT: string | number = process.env.PORT || 3000
 
 /**
@@ -48,7 +48,7 @@ app.use(cookieParser())
  * Database Connection
  * using mongoose
  */
-import connectToDatabase from "./db.js"
+import connectToDatabase from "./db"
 connectToDatabase()
 
 /**
@@ -59,19 +59,19 @@ connectToDatabase()
  */
 app.get("/", (req, res: express.Response) => res.send("Hello world!"))
 
-import authRoute from "./routes/auth.js"
+import authRoute from "./routes/auth"
 app.use("/auth", authRoute)
 
-import userRoute from "./routes/user.js"
+import userRoute from "./routes/user"
 app.use("/user", userRoute)
 
-import placesRoute from "./routes/places.js"
+import placesRoute from "./routes/places"
 app.use("/places", placesRoute)
 
 /**
  * Middleware to handle error
  */
-import errorHandler from "./middleware/errorHandler.js"
+import errorHandler from "./middleware/errorHandler"
 app.use(errorHandler)
 // fallback default error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
@@ -80,7 +80,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 import { createServer } from "http"
-import { initializeSocketIO } from "./initializeSocket.ts"
+import { initializeSocketIO } from "./initializeSocket"
 const server = createServer(app)
 initializeSocketIO(server)
 

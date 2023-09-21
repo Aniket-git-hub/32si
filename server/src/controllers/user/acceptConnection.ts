@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import USER from '../../models/user.ts'
+import USER from '../../models/user'
+import mongoose from 'mongoose';
 
 /**
  * @description  controller to accept a connection request.
@@ -31,7 +32,8 @@ async function acceptConnection(req: Request, res: Response, next: NextFunction)
         }
 
         currentUser.friends.push(requestedUser._id)
-        requestedUser.friends.push(currentUserId)
+        const id = new mongoose.Schema.Types.ObjectId(currentUserId)
+        requestedUser.friends.push(id)
 
         const [savedCurrentUser, savedRequestedUser] = await Promise.all([
             currentUser.save(),
@@ -41,15 +43,16 @@ async function acceptConnection(req: Request, res: Response, next: NextFunction)
         let populatedCurrentUser = await USER.findById(savedCurrentUser._id).populate('friends')
         let populatedRequestedUser = await USER.findById(savedRequestedUser._id).populate('friends')
 
-        const { password, ...restCurrentUser } = populatedCurrentUser._doc
-        const { password: Rpassword, ...restRequestedUser } = populatedRequestedUser._doc
+        if (populatedCurrentUser && populatedRequestedUser) {
+            const { password, ...restCurrentUser } = populatedCurrentUser?.toObject()
+            const { password: Rpassword, ...restRequestedUser } = populatedRequestedUser?.toObject()
 
-        res.json({
-            message: 'Connected successfully',
-            user: restCurrentUser,
-            requestedUser: restRequestedUser
-        })
-
+            res.json({
+                message: 'Connected successfully',
+                user: restCurrentUser,
+                requestedUser: restRequestedUser
+            })
+        }
     } catch (error) {
         next(error)
     }

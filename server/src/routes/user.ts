@@ -1,13 +1,13 @@
 import express, { Router } from "express";
-import verifyJWT from "../middleware/verifyJWT.js";
-import getAUser from "../controllers/user/getAUser.js";
-import updateUser from "../controllers/user/updateUser.js";
-import deleteUser from "../controllers/user/deleteUser.js";
-import getAllUser from "../controllers/user/getAllUser.js";
-import connectUser from "../controllers/user/connectUser.js";
-import disconnectUser from "../controllers/user/disconnectUser.ts";
-import acceptConnection from "../controllers/user/acceptConnection.js";
-import getAUserById from "../controllers/user/getAUserById.js";
+import verifyJWT from "../middleware/verifyJWT";
+import getAUser from "../controllers/user/getAUser";
+import updateUser from "../controllers/user/updateUser";
+import deleteUser from "../controllers/user/deleteUser";
+import getAllUser from "../controllers/user/getAllUser";
+import connectUser from "../controllers/user/connectUser";
+import disconnectUser from "../controllers/user/disconnectUser";
+import acceptConnection from "../controllers/user/acceptConnection";
+import getAUserById from "../controllers/user/getAUserById";
 
 const router: Router = express.Router();
 

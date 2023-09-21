@@ -8,16 +8,16 @@ import {
     forgotPasswordEmailValidationRules as fPEV,
     forgotPasswordOtpValidationRules as fPOV,
     resetPasswordValidationRules as rPV
-} from './../middleware/validateInputs.ts';
+} from './../middleware/validateInputs';
 
-import register from "./../controllers/auth/userRegistration.ts";
-import login from "./../controllers/auth/userLogin.ts";
-import verifyJWT from "./../middleware/verifyJWT.ts";
-import refreshToken from "./../controllers/auth/refreshToken.ts";
-import forgotPassword from "./../controllers/auth/forgotPassword.ts";
-import forgotPasswordVerifyOtp from "./../controllers/auth/forgotPasswordVerifyOtp.ts";
-import resetPassword from "./../controllers/auth/resetPassword.ts";
-import logout from "./../controllers/auth/userLogout.ts";
+import register from "./../controllers/auth/userRegistration";
+import login from "./../controllers/auth/userLogin";
+import verifyJWT from "./../middleware/verifyJWT";
+import refreshToken from "./../controllers/auth/refreshToken";
+import forgotPassword from "./../controllers/auth/forgotPassword";
+import forgotPasswordVerifyOtp from "./../controllers/auth/forgotPasswordVerifyOtp";
+import resetPassword from "./../controllers/auth/resetPassword";
+import logout from "./../controllers/auth/userLogout";
 
 const getRoute = (productionRoute: string, developmentRoute: string): string => process.env.NODE_ENV === 'production' ? process.env[productionRoute]! : developmentRoute;
 

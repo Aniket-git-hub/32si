@@ -1,4 +1,4 @@
-import { getIO } from "../initializeSocket.ts"
+import { getIO } from "../initializeSocket"
 import { Server, Socket } from 'socket.io';
 
 interface User {

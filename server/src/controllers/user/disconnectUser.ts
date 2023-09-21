@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import USER from '../../models/user.ts'
-import CustomError from '../../utils/createError.ts';
-import { ObjectId, Types } from 'mongoose';
+import USER from '../../models/user'
+import CustomError from '../../utils/createError';
+import mongoose, { ObjectId, Types } from 'mongoose';
 
 /**
  * @description  controller to disconnect a user.
@@ -23,7 +23,8 @@ async function disconnectUser(req: Request, res: Response, next: NextFunction) {
             throw new CustomError("UserError", "user not found")
         }
 
-        if (!currentUser.friends.includes(requestedUserId)) {
+        const id = new mongoose.Schema.Types.ObjectId(requestedUserId);
+        if (!currentUser.friends.includes(id)) {
             throw new Error("You are not friends with this user")
         }
 
@@ -38,8 +39,8 @@ async function disconnectUser(req: Request, res: Response, next: NextFunction) {
         let populatedCurrentUser = await USER.findById(savedCurrentUser._id).populate('friends')
 
         if (!populatedCurrentUser) throw new Error("populated current user is wrong")
-        const { password, ...restCurrentUser } = populatedCurrentUser._doc
-        const { password: Rpassword, ...restRequestedUser } = requestedUser._doc
+        const { password, ...restCurrentUser } = populatedCurrentUser.toObject()
+        const { password: Rpassword, ...restRequestedUser } = requestedUser.toObject()
 
         res.json({
             user: restCurrentUser,

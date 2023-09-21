@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import generateToken from "../../utils/generateToken.ts"
+import generateToken from "../../utils/generateToken"
 
 interface User {
     id: string;

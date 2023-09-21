@@ -1,9 +1,14 @@
 import jwt from 'jsonwebtoken'
-import createError from '../utils/createError.js'
+import { NextFunction, Request, Response } from 'express'
+import CustomError from '../utils/createError'
 
-function verifyJWT(req, res, next) {
-    let token
-    let secret
+function verifyJWT(req: Request, res: Response, next: NextFunction) {
+    let token: string
+    let secret: string
+
+    if (!process.env.JWT_ACCESS_TOKEN_SECRET || !process.env.JWT_REFRESH_TOKEN_SECRET) {
+        throw new Error('JWT secret not set');
+    }
 
     if (req.headers.authorization) {
         token = req.headers.authorization.split(" ")[1]
@@ -12,7 +17,7 @@ function verifyJWT(req, res, next) {
         token = req.cookies.refreshToken
         secret = process.env.JWT_REFRESH_TOKEN_SECRET
     } else {
-        return next(createError("JsonWebTokenError",'No token provided'))
+        return next(new CustomError("JsonWebTokenError", 'No token provided'))
     }
 
     try {
@@ -20,8 +25,8 @@ function verifyJWT(req, res, next) {
         req.user = decoded
         next()
 
-    } catch (error) {
-        next(createError("JsonWebTokenError",'Invalid token', error))
+    } catch (error: any) {
+        next(new CustomError("JsonWebTokenError", 'Invalid token', error))
     }
 }
 

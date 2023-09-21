@@ -1,13 +1,16 @@
 import express from "express";
 const router = express.Router()
 
-import cities from 'cities.json' assert { type: 'json' };
+interface City {
+    name: string;
+    // other properties...
+}
+
+const cities: City[] = require('cities.json');
 
 router.get('/city/:name', (req, res) => {
-
-    const name = req.params.name
-    
-    const matches = cities.filter(city => city.name.toLowerCase().startsWith(name.toLowerCase()));
+    const name = req.params.name;
+    const matches = cities.filter((city: City) => city.name.toLowerCase().startsWith(name.toLowerCase()));
     if (matches) {
         res.json(matches);
     } else {

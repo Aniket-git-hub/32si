@@ -1,4 +1,4 @@
-import { getIO } from "../initializeSocket.ts"
+import { getIO } from "../initializeSocket"
 import { Server, Socket } from 'socket.io';
 
 interface User {
@@ -11,19 +11,25 @@ export const gameEventHandler = (socket: Socket, users: Map<string, User>) => {
 
     socket.on("newChallenge", ({ userTo, ...rest }: { userTo: User; rest: any; }) => {
         if (users.has(userTo._id)) {
-            io.to(users.get(userTo._id).socketId).emit("newChallenge", {
-                userTo,
-                ...rest,
-            })
+            const user = users.get(userTo._id)
+            if (user) {
+                io.to(user.socketId).emit("newChallenge", {
+                    userTo,
+                    ...rest,
+                })
+            }
         }
     })
 
     socket.on("challengeAccepted", ({ userTo, ...rest }: { userTo: User; rest: any; }) => {
         if (users.has(userTo._id)) {
-            io.to(users.get(userTo._id).socketId).emit("challengeAccepted", {
-                userTo,
-                ...rest,
-            })
+            const user = users.get(userTo._id)
+            if (user) {
+                io.to(user.socketId).emit("challengeAccepted", {
+                    userTo,
+                    ...rest,
+                })
+            }
         }
     })
 }
