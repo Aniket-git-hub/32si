@@ -1,14 +1,18 @@
-import { Server, Socket } from "socket.io";
-import { gameEventHandler } from "./socketIOEventHandlers/gameEventHandler.js";
-import { userEventsHandler } from "./socketIOEventHandlers/userEventsHandler.js";
+import { Server as IOServer, Socket as IOSocket } from "socket.io";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import CustomError from "./utils/createError.js";
+import CustomError from "./utils/createError";
+import { userEventsHandler } from "./socketIOEventHandlers/userEventsHandler";
+import { gameEventHandler } from "./socketIOEventHandlers/gameEventHandler";
 
-let io: Server;
+interface Socket extends IOSocket {
+    userId?: string;
+}
+
+let io: IOServer;
 let users = new Map<string, any>();
 
 export const initializeSocketIO = (server: any) => {
-    io = new Server(server);
+    io = new IOServer(server);
 
     io.use(async (socket: Socket, next: (err?: any) => void) => {
         if (socket.handshake.query && socket.handshake.query.token) {
@@ -29,7 +33,7 @@ export const initializeSocketIO = (server: any) => {
     });
 };
 
-export const getIO = (): Server => {
+export const getIO = (): IOServer => {
     if (!io) {
         throw new Error("Socket.io not initialized!");
     }

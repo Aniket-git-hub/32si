@@ -1,10 +1,15 @@
 import { getIO } from "../initializeSocket"
-import { Server, Socket } from 'socket.io';
+import { Socket as IOSocket, Server } from 'socket.io';
+import CustomError from "../utils/createError";
 
 interface User {
     socketId: string;
     friendsList: string[];
 }
+interface Socket extends IOSocket {
+    userId?: string;
+}
+
 
 export const userEventsHandler = (socket: Socket, users: Map<string, User>) => {
     const io: Server = getIO()
@@ -35,6 +40,7 @@ export const userEventsHandler = (socket: Socket, users: Map<string, User>) => {
 
     socket.on('disconnect', () => {
         const userId = socket.userId
+        if (!userId) throw new CustomError("socketError", "userId not found")
         if (users.has(userId)) {
             const user = users.get(userId)
             if (user) {
