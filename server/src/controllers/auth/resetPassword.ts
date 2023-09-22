@@ -4,11 +4,6 @@ import bcrypt from 'bcryptjs'
 import { sendPasswordResetSuccessfulEmail } from '../../utils/sendEmail'
 import CustomError from '../../utils/createError';
 
-interface User {
-    email: string;
-    password: string;
-}
-
 /**
  * @description  controller to reset the user password.
  * @param {Request} req Express Request Object
@@ -16,8 +11,8 @@ interface User {
  * @param {NextFunction} next Next middleware function.
  */
 async function resetPassword(req: Request, res: Response, next: NextFunction) {
-    const { email, password }: User = req.body
     try {
+        const { email, password } = req.body
         const user = await USER.findOne({ email })
         if (!user) {
             throw new CustomError("AuthError", "Invalid Email")

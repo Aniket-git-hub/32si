@@ -1,46 +1,31 @@
 import { Request, Response, NextFunction } from 'express';
 import USER from '../../models/user'
-import { ObjectId } from 'mongoose';
 
-/**
- * @description  controller to connect a user.
- * @param {Request} req Express Request Object
- * @param {Response} res Express Response Object
- * @param {NextFunction} next Next middleware function.
- */
 async function connectUser(req: Request, res: Response, next: NextFunction) {
     try {
         const requestedUsername: string = req.params.username
-        const currentUserId: string = req.user.id
+        const currentUser = req.user
 
-        const [currentUser, requestedUser] = await Promise.all([
-            USER.findById(currentUserId),
-            USER.findOne({ username: requestedUsername })
-        ])
+        const requestedUser = await USER.findOneAndUpdate(
+            { username: requestedUsername, connectionRequests: { $ne: currentUser.username } },
+            { $addToSet: { connectionRequests: currentUser.username } },
+            { new: true }
+        );
 
-        if (!requestedUser || !currentUser) {
-            throw new Error(" user not found")
+        if (!requestedUser) {
+            throw new Error("User not found or a connection request has already been sent");
         }
 
-        const requestedUserId: ObjectId = requestedUser._id
-
-        if (currentUser.friends.includes(requestedUserId) || requestedUser.connectionRequests.includes(currentUser.username)) {
-            throw new Error("You are already friends or a connection request has already been sent")
-        }
-
-        requestedUser.connectionRequests.push(currentUser.username)
-
-        const savedRequestedUser = await requestedUser.save()
-        const { password: Rpassword, ...restRequestedUser } = savedRequestedUser.toObject()
+        const { password, ...restRequestedUser } = requestedUser.toObject();
 
         res.json({
             requestedUser: restRequestedUser,
             message: 'Connection request sent'
-        })
+        });
 
     } catch (error) {
-        next(error)
+        next(error);
     }
 }
 
-export default connectUser
+export default connectUser;

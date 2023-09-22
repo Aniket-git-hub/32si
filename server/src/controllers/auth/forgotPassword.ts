@@ -5,10 +5,6 @@ import { sendOTPEmail, sendPasswordResetInitiatedEmail } from '../../utils/sendE
 import bcrypt from 'bcryptjs'
 import CustomError from '../../utils/createError';
 
-interface User {
-    email: string;
-}
-
 /**
  * @description  controller to handle forgot password.
  * @param {Request} req Express Request Object
@@ -17,8 +13,7 @@ interface User {
  */
 async function forgotPassword(req: Request, res: Response, next: NextFunction) {
     try {
-        const { email }: User = req.body
-
+        const { email } = req.body
         const savedUser = await USER.findOne({ email })
         if (!savedUser) {
             throw new CustomError("AuthError", "Invalid Email")
@@ -41,9 +36,7 @@ async function forgotPassword(req: Request, res: Response, next: NextFunction) {
             throw new CustomError("SendingEmail", "Email Not Sent", otpError as Error)
         }
 
-        res.json({
-            message: "Otp Sent Successfully",
-        })
+        res.json({ message: "Otp Sent Successfully" })
 
     } catch (error) {
         next(error)

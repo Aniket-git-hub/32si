@@ -1,17 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from 'bcryptjs';
-import User from "../../models/user";
+import USER from "../../models/user";
 import generateToken from "../../utils/generateToken";
 import CustomError from "../../utils/createError";
-
-interface UserDoc {
-    _id: string;
-    name: string;
-    username: string;
-    email: string;
-    password: string;
-    friends: any[];
-}
 
 /**
  * @description  controller to login the user.
@@ -20,15 +11,12 @@ interface UserDoc {
  * @param {NextFunction} next Next middleware function.
  */
 async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const { email, password: pass } = req.body;
     try {
-        const { email, password: pass } = req.body;
-        const user = await User.findOne({ email }).populate("friends") as UserDoc;
-        if (!user) {
-            throw new CustomError("AuthError", "Invalid Email");
-        }
+        const user = await USER.findOne({ email }).populate("friends");
 
-        if (!bcrypt.compareSync(pass, user.password)) {
-            throw new CustomError("AuthError", "Invalid Password");
+        if (!user || !bcrypt.compareSync(pass, user.password)) {
+            throw new CustomError("AuthError", "Invalid Email or Password");
         }
 
         const { accessToken, refreshToken } = generateToken({
@@ -47,7 +35,7 @@ async function login(req: Request, res: Response, next: NextFunction): Promise<v
             path: "/",
         });
 
-        const { password, ...rest } = user;
+        const { password, ...rest } = user.toObject();
         res.status(200).json({
             message: "User logged in successfully",
             accessToken,

@@ -1,4 +1,5 @@
 import transporter from "../config/mailer.config"
+import accountDeletionEmailTemplate from "./emailTemplates/accountDeletionTemplate";
 import otpEmailTemplate from "./emailTemplates/otpEmailTemplate"
 import passwordResetInitiatedTemplate from "./emailTemplates/passwordResetInitiatedTemplate"
 import passwordResetSuccessfulTemplate from "./emailTemplates/passwordResetSuccessfulTemplate"
@@ -28,3 +29,4 @@ export const sendOTPEmail = (receiverEmail: string, name: string, otp: number) =
 export const sendPasswordResetInitiatedEmail = (receiverEmail: string, name: string) => sendEmail(receiverEmail, 'Password Reset Initiated', passwordResetInitiatedTemplate(name))
 export const sendPasswordResetSuccessfulEmail = (receiverEmail: string, name: string) => sendEmail(receiverEmail, 'Password Reset Successful', passwordResetSuccessfulTemplate(name))
 export const sendRegistrationSuccessfulEmail = (receiverEmail: string, name: string) => sendEmail(receiverEmail, 'Welcome to B2 Beads Board Game!', registrationSuccessfulTemplate(name))
+export const sendAccountDeletionEmail = (receiverEmail: string, name: string) => sendEmail(receiverEmail, ' Your Account Deletion Request', accountDeletionEmailTemplate(name))

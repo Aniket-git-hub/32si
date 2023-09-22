@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-
 /**
  * @description  controller to log out the user.
  * @param {Request} req Express Request Object

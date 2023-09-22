@@ -1,16 +1,9 @@
 import bcrypt from 'bcryptjs'
-import User from "../../models/user"
+import USER from "../../models/user"
 import generateToken from "../../utils/generateToken"
 import { sendRegistrationSuccessfulEmail } from '../../utils/sendEmail'
 import { Request, Response, NextFunction } from 'express';
 import CustomError from '../../utils/createError';
-
-interface User {
-    name: string;
-    username: string;
-    email: string;
-    password: string;
-}
 
 /**
  * @description  controller to register the user.
@@ -19,14 +12,15 @@ interface User {
  * @param {NextFunction} next Next middleware function.
  */
 async function register(req: Request, res: Response, next: NextFunction) {
-    const { name, username, email, password }: User = req.body
-    const newUser = new User({
-        name,
-        username,
-        email,
-        password: bcrypt.hashSync(password, 12)
-    })
     try {
+
+        const { name, username, email, password: pass } = req.body
+        const newUser = new USER({
+            name,
+            username,
+            email,
+            password: bcrypt.hashSync(pass, 12)
+        })
 
         const savedUser = await newUser.save()
 
@@ -51,12 +45,12 @@ async function register(req: Request, res: Response, next: NextFunction) {
             throw new CustomError("SendingEmail", "Email Not Sent", error as Error)
         }
 
-        const populatedUser = await User.findById(savedUser._id).populate('friends');
+        const populatedUser = await USER.findById(savedUser._id).populate('friends');
         if (!populatedUser) {
-            throw new Error("populatedUser doesn't exist")
+            throw new CustomError("RegistrationError", "populated user not found")
         }
 
-        const { password, ...rest } = populatedUser;
+        const { password, ...rest } = populatedUser.toObject();
         res.status(201).json({
             message: "New User Created Successfully",
             accessToken,

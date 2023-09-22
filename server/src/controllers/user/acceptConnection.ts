@@ -1,61 +1,44 @@
 import { Request, Response, NextFunction } from 'express';
 import USER from '../../models/user'
 import mongoose from 'mongoose';
+import CustomError from '../../utils/createError';
 
-/**
- * @description  controller to accept a connection request.
- * @param {Request} req Express Request Object
- * @param {Response} res Express Response Object
- * @param {NextFunction} next Next middleware function.
- */
 async function acceptConnection(req: Request, res: Response, next: NextFunction) {
     try {
         const requestedUserId: string = req.params.userId
         const currentUserId: string = req.user.id
 
-        const [currentUser, requestedUser] = await Promise.all([
-            USER.findById(currentUserId),
-            USER.findById(requestedUserId)
-        ])
+        const currentUser = await USER.findOneAndUpdate(
+            { _id: currentUserId, connectionRequests: requestedUserId },
+            {
+                $pull: { connectionRequests: requestedUserId },
+                $addToSet: { friends: requestedUserId }
+            },
+            { new: true }
+        ).populate('friends');
 
-        if (!requestedUser || !currentUser) {
-            throw new Error("user not found")
+        const requestedUser = await USER.findOneAndUpdate(
+            { _id: requestedUserId },
+            { $addToSet: { friends: currentUserId } },
+            { new: true }
+        ).populate('friends');
+
+        if (!currentUser || !requestedUser) {
+            throw new CustomError("AuthError", "User not found");
         }
 
-        if (!currentUser.connectionRequests.includes(requestedUser.username)) {
-            throw new Error("You are already friends or a connection request has not been sent")
-        }
+        const { password, ...restCurrentUser } = currentUser.toObject();
+        const { password: Rpassword, ...restRequestedUser } = requestedUser.toObject();
 
-        const index: number = currentUser.connectionRequests.indexOf(requestedUser.username)
-        if (index > -1) {
-            currentUser.connectionRequests.splice(index, 1)
-        }
+        res.json({
+            message: 'Connected successfully',
+            user: restCurrentUser,
+            requestedUser: restRequestedUser
+        });
 
-        currentUser.friends.push(requestedUser._id)
-        const id = new mongoose.Schema.Types.ObjectId(currentUserId)
-        requestedUser.friends.push(id)
-
-        const [savedCurrentUser, savedRequestedUser] = await Promise.all([
-            currentUser.save(),
-            requestedUser.save()
-        ])
-
-        let populatedCurrentUser = await USER.findById(savedCurrentUser._id).populate('friends')
-        let populatedRequestedUser = await USER.findById(savedRequestedUser._id).populate('friends')
-
-        if (populatedCurrentUser && populatedRequestedUser) {
-            const { password, ...restCurrentUser } = populatedCurrentUser?.toObject()
-            const { password: Rpassword, ...restRequestedUser } = populatedRequestedUser?.toObject()
-
-            res.json({
-                message: 'Connected successfully',
-                user: restCurrentUser,
-                requestedUser: restRequestedUser
-            })
-        }
     } catch (error) {
-        next(error)
+        next(error);
     }
 }
 
-export default acceptConnection
+export default acceptConnection;

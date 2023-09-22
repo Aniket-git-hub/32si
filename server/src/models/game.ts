@@ -1,14 +1,7 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import { Game } from "../types/game";
 
-interface IGame extends Document {
-    players: Schema.Types.ObjectId[];
-    winner: Schema.Types.ObjectId;
-    score: string;
-    startTime: Date;
-    endTime: Date;
-}
-
-const gameSchema = new mongoose.Schema<IGame>({
+const gameSchema = new mongoose.Schema<Game>({
     players: {
         type: [
             {
@@ -36,5 +29,5 @@ const gameSchema = new mongoose.Schema<IGame>({
     }
 });
 
-const GAME = mongoose.model<IGame>('game', gameSchema);
+const GAME = mongoose.model<Game>('game', gameSchema);
 export default GAME;

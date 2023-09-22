@@ -1,23 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { User } from "../types/user";
 
-interface IUser extends Document {
-    name: string;
-    username: string;
-    email: string;
-    password: string;
-    profilePhoto: string;
-    bio: string;
-    gamesPlayed: Schema.Types.ObjectId[];
-    friends: Schema.Types.ObjectId[];
-    location: {
-        name: string;
-        type: string;
-        coordinates: number[];
-    };
-    connectionRequests: string[];
-}
-
-const userSchema = new mongoose.Schema<IUser>({
+const userSchema = new mongoose.Schema<User>({
     name: {
         type: String,
         require: true,
@@ -81,5 +65,5 @@ const userSchema = new mongoose.Schema<IUser>({
 
 userSchema.index({ location: "2dsphere" });
 
-const USER = mongoose.model<IUser>('user', userSchema);
+const USER = mongoose.model<User>('user', userSchema);
 export default USER;
