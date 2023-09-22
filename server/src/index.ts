@@ -1,6 +1,6 @@
 import "dotenv/config"
 
-import express, { Application, NextFunction, Request, Response, } from "express"
+import express, { Application, Request, Response, } from "express"
 const app: Application = express()
 const PORT: string | number = process.env.PORT || 3000
 
@@ -57,7 +57,7 @@ connectToDatabase()
  * 2. '/auth' - Authentication Routes
  * 3. '/user' - User Routes
  */
-app.get("/", (req, res: express.Response) => res.send("Hello world!"))
+app.get("/", (req, res: Response) => res.send("Hello world!"))
 
 import authRoute from "./routes/auth"
 app.use("/auth", authRoute)
@@ -74,7 +74,7 @@ app.use("/places", placesRoute)
 import errorHandler from "./middleware/errorHandler"
 app.use(errorHandler)
 // fallback default error handler
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response) => {
     console.error(err.stack);
     res.status(500).send("An error occurred!");
 });
@@ -89,6 +89,5 @@ server.listen(PORT, () =>
         `[server]: running on port: ${PORT} | http://localhost:${PORT}/`,
     ),
 )
-
 
 export default app

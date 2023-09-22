@@ -59,10 +59,15 @@ async function getAllUser(req: Request, res: Response, next: NextFunction) {
         if (!currentUser) throw new Error("currentUser not found");
         const friends = currentUser.friends;
 
-        let pipeline = createPipeline(currentUser, friends, limit, skips, true);
+        let geoNear = false;
+        if (currentUser.location && currentUser.location.type === 'Point') {
+            geoNear = true;
+        }
+
+        let pipeline = createPipeline(currentUser, friends, limit, skips, geoNear);
         let users = await USER.aggregate(pipeline);
 
-        if (users.length === 0 && currentUser.location && currentUser.location.type === 'Point') {
+        if (users.length === 0 && geoNear) {
             pipeline = createPipeline(currentUser, friends, limit, skips, false);
             users = await USER.aggregate(pipeline);
         }

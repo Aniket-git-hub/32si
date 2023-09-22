@@ -16,14 +16,15 @@ export default function Rivals() {
             const response = await getAllUsers({ page: 1, limit: 10 }, signal)
             setRivals(response.data.users)
         } catch (error) {
-          console.log(error)
+            console.log(error)
         }
     }
 
     useEffect(() => {
         const controller = new AbortController();
 
-        if (rivals.length === 0) {
+        if (!rivals.length) {
+            console.log(rivals)
             loadUsers(controller.signal)
         }
 
@@ -36,13 +37,13 @@ export default function Rivals() {
         return (
             <Center>
                 <HStack spacing={"10px"} p={5}>
-                    <Box my={2} boxShadow={"lg"}  p={4  } bg={"white"} borderRadius={5}>
+                    <Box my={2} boxShadow={"lg"} p={4} bg={"white"} borderRadius={5}>
                         <Skeleton width={"200px"} height={"250px"}></Skeleton>
                     </Box>
-                    <Box my={2} boxShadow={"lg"}  p={4  } bg={"white"} borderRadius={5}>
+                    <Box my={2} boxShadow={"lg"} p={4} bg={"white"} borderRadius={5}>
                         <Skeleton width={"200px"} height={"250px"}></Skeleton>
                     </Box>
-                    <Box my={2} boxShadow={"lg"}  p={4  } bg={"white"} borderRadius={5}>
+                    <Box my={2} boxShadow={"lg"} p={4} bg={"white"} borderRadius={5}>
                         <Skeleton width={"200px"} height={"250px"}></Skeleton>
                     </Box>
                 </HStack>
