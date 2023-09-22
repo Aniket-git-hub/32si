@@ -41,7 +41,6 @@ export default function Profile() {
 
         controllerRef.current = new AbortController()
         if (profileUser?.username != username || !profileUser) {
-            console.log("loading the profile user")
             loadProfileUserData(controllerRef.current.signal)
         }
 
@@ -50,7 +49,7 @@ export default function Profile() {
                 controllerRef.current.abort()
             }
         }
-    }, [username])
+    }, [username, profileUser])
 
     useEffect(() => {
         if (socket) {
@@ -177,7 +176,7 @@ export default function Profile() {
                     <HStack >
                         <MdPlace />
                         <Text textAlign={'center'} color={'gray.600'} >
-                            {profileUser.location.name ? profileUser.location.name : 'Earth'}
+                            {profileUser.location ? profileUser.location.name : 'Earth'}
                         </Text>
                     </HStack>
                     <Stack align={'center'} justify={'center'} direction={'row'} mt={1}>

@@ -1,5 +1,5 @@
 import { Avatar, Button, Card, CardBody, CardHeader, Heading, Link, Text, Box, VStack, SimpleGrid, IconButton, Flex, Center, Skeleton, SkeletonCircle, SkeletonText, HStack } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { MdRefresh, MdVerified } from 'react-icons/md'
 import { getAllUsers } from '../../api/user'
 import { useAllData } from '../../hooks/useAllData'
@@ -23,8 +23,7 @@ export default function Rivals() {
     useEffect(() => {
         const controller = new AbortController();
 
-        if (!rivals.length) {
-            console.log(rivals)
+        if (!rivals) {
             loadUsers(controller.signal)
         }
 
