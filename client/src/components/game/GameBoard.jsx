@@ -1,7 +1,8 @@
 import Spot from "./Spot"
 import Piece from "./Piece"
+import { useEffect, useState } from "react"
 
-const GameBoard = () => {
+const GameBoard = ({ spotOnClick }) => {
     const relations = {
         "01": ["02", "11"],
         "02": ["01", "03", "12"],
@@ -133,23 +134,41 @@ const GameBoard = () => {
         [0, 2, 2, 2, 0],
     ]
 
-    let initializedSpots = Array(boardSpots.length).fill().map(() => []);
+    const [possibleMoves, setPossibleMoves] = useState([
+        [false, false, false, false, false],
+        [false, false, false, false, false],
+        [false, false, false, false, false],
+        [false, false, false, false, false],
+        [false, false, false, false, false],
+        [false, false, false, false, false],
+        [false, false, false, false, false],
+        [false, false, false, false, false],
+        [false, false, false, false, false]
+    ])
+    const [turn, setTurn] = useState(false)
 
-    const spotOnClickHandler = ({ relations, piece, boardPosition, setRenderPiece, setIsPossibleMove }) => {
-        if (piece.props.value) {
-            console.log(piece.props.value === 1 ? 'RED' : 'BLUE', "->", boardPosition, relations)
-        }
+    useEffect(() => {
+        spotOnClick(turn)
+    }, [turn])
 
+    let initializedSpots = Array(boardSpots.length).fill().map(() => [])
+
+    const spotOnClickHandler = ({ relations }) => {
+        setTurn(prev => prev = !prev)
+        const emptySpots = []
         relations.forEach(s => {
             let [i, j] = s.split("")
             let neighbouringSpot = initializedSpots[i][j]
-            if (neighbouringSpot.props.piece === null) return
-            console.log(neighbouringSpot)
+            if (neighbouringSpot.props.piece !== null) return
+            emptySpots.push({ i, j })
         })
-
-        setIsPossibleMove(true)
-        setRenderPiece(null)
+        let newMoves = possibleMoves.map(row => row.map(() => false))
+        emptySpots.forEach(spot => {
+            newMoves[spot.i][spot.j] = !newMoves[spot.i][spot.j]
+        })
+        setPossibleMoves(newMoves)
     }
+
 
     return (
         <svg className="board">
@@ -196,6 +215,7 @@ const GameBoard = () => {
                                 : false
                         }
                         relations={relations[`${i}${j}`]}
+                        isPossibleMove={possibleMoves[i][j]}
                         onClick={spotOnClickHandler}
                         piece={boardInitialState[i][j] === 0 ? null : <Piece
                             position={{

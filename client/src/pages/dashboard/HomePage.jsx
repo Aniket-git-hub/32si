@@ -53,6 +53,10 @@ export default function HomePage() {
 
   }
 
+  const handleSpotOnClick = (turn) => {
+    turn ? setPlayerTurn(playerOneName) : setPlayerTurn(playerTwoName)
+  }
+
 
   return (
     <Grid bg="bodyColor" borderRadius={10} p={6} templateColumns={"repeat(10, 1fr)"} >
@@ -89,7 +93,7 @@ export default function HomePage() {
 
       <GridItem colSpan={6}>
         <Box display={"flex"} justifyContent={"center"}>
-          <GameBoard />
+          <GameBoard spotOnClick={handleSpotOnClick} />
         </Box>
       </GridItem>
 

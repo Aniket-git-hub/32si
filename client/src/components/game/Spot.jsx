@@ -1,16 +1,14 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const Spot = ({ nullSpot, onClick, size, position, piece, relations, boardPosition }) => {
+const Spot = ({ nullSpot, onClick, size, position, piece, relations, boardPosition, isPossibleMove }) => {
   const [renderPiece, setRenderPiece] = useState(piece)
-  const [isPossibleMove, setIsPossibleMove] = useState(false)
   const [addAnimation, setAddAnimation] = useState(false)
-
 
   return (
     <g onClick={() => {
       setAddAnimation(!addAnimation)
-      onClick({ nullSpot, size, position, relations, boardPosition, piece, setRenderPiece, isPossibleMove, setIsPossibleMove })
+      onClick({ nullSpot, size, position, relations, boardPosition, piece, setRenderPiece, isPossibleMove });
     }}>
       <circle
         style={{
