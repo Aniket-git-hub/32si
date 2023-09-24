@@ -1,5 +1,4 @@
-/* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const Spot = ({ nullSpot, onClick, size, position, piece, relations, boardPosition, isPossibleMove }) => {
   const [renderPiece, setRenderPiece] = useState(piece)

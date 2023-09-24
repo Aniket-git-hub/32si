@@ -143,7 +143,7 @@ const GameBoard = ({ spotOnClick }) => {
         [false, false, false, false, false],
         [false, false, false, false, false],
         [false, false, false, false, false],
-        [false, false, false, false, false]
+        [false, false, false, false, false],
     ])
     const [turn, setTurn] = useState(false)
 
@@ -151,24 +151,38 @@ const GameBoard = ({ spotOnClick }) => {
         spotOnClick(turn)
     }, [turn])
 
-    let initializedSpots = Array(boardSpots.length).fill().map(() => [])
+    let initializedSpots = Array(boardSpots.length)
+        .fill()
+        .map(() => [])
 
-    const spotOnClickHandler = ({ relations }) => {
-        setTurn(prev => prev = !prev)
-        const emptySpots = []
-        relations.forEach(s => {
-            let [i, j] = s.split("")
-            let neighbouringSpot = initializedSpots[i][j]
-            if (neighbouringSpot.props.piece !== null) return
-            emptySpots.push({ i, j })
-        })
-        let newMoves = possibleMoves.map(row => row.map(() => false))
-        emptySpots.forEach(spot => {
-            newMoves[spot.i][spot.j] = !newMoves[spot.i][spot.j]
-        })
-        setPossibleMoves(newMoves)
+    const [selectedPiece, setSelectedPiece] = useState(null)
+
+    const spotOnClickHandler = ({ relations, piece }) => {
+        if (
+            piece !== null &&
+            ((piece.props.value === 2 && !turn) ||
+                (piece.props.value === 1 && turn))
+        ) {
+            setSelectedPiece(piece)
+            setTurn(!turn)
+
+            const emptySpots = []
+            relations.forEach((s) => {
+                let [i, j] = s.split("")
+                let neighbouringSpot = initializedSpots[i][j]
+                if (neighbouringSpot.props.piece !== null) return
+                emptySpots.push({ i, j })
+            })
+            let newMoves = possibleMoves.map((row) => row.map(() => false))
+            emptySpots.forEach((spot) => {
+                newMoves[spot.i][spot.j] = !newMoves[spot.i][spot.j]
+            })
+
+            setPossibleMoves(newMoves)
+        } else {
+            alert("It not your turn")
+        }
     }
-
 
     return (
         <svg className="board">
@@ -194,38 +208,44 @@ const GameBoard = ({ spotOnClick }) => {
 
             {boardSpots.map((row, i) =>
                 row.map((col, j) => {
-                    let spot = (<Spot
-                        key={`${i}${j}`}
-                        position={{
-                            x: `${sizes[i][j].x}px`,
-                            y: `${sizes[i][j].y}px`,
-                        }}
-                        size="12px"
-                        boardPosition={{ i, j }}
-                        nullSpot={
-                            `${i}${j}` == "84" ||
-                                `${i}${j}` == "80" ||
-                                `${i}${j}` == "74" ||
-                                `${i}${j}` == "70" ||
-                                `${i}${j}` == "14" ||
-                                `${i}${j}` == "10" ||
-                                `${i}${j}` == "00" ||
-                                `${i}${j}` == "04"
-                                ? true
-                                : false
-                        }
-                        relations={relations[`${i}${j}`]}
-                        isPossibleMove={possibleMoves[i][j]}
-                        onClick={spotOnClickHandler}
-                        piece={boardInitialState[i][j] === 0 ? null : <Piece
+                    let spot = (
+                        <Spot
+                            key={`${i}${j}`}
                             position={{
                                 x: `${sizes[i][j].x}px`,
                                 y: `${sizes[i][j].y}px`,
                             }}
-                            size="10px"
-                            value={boardInitialState[i][j]}
-                        />}
-                    />)
+                            size="12px"
+                            boardPosition={{ i, j }}
+                            nullSpot={
+                                `${i}${j}` == "84" ||
+                                    `${i}${j}` == "80" ||
+                                    `${i}${j}` == "74" ||
+                                    `${i}${j}` == "70" ||
+                                    `${i}${j}` == "14" ||
+                                    `${i}${j}` == "10" ||
+                                    `${i}${j}` == "00" ||
+                                    `${i}${j}` == "04"
+                                    ? true
+                                    : false
+                            }
+                            relations={relations[`${i}${j}`]}
+                            isPossibleMove={possibleMoves[i][j]}
+                            onClick={spotOnClickHandler}
+                            piece={
+                                boardInitialState[i][j] === 0 ? null : (
+                                    <Piece
+                                        position={{
+                                            x: `${sizes[i][j].x}px`,
+                                            y: `${sizes[i][j].y}px`,
+                                        }}
+                                        size="10px"
+                                        value={boardInitialState[i][j]}
+                                    />
+                                )
+                            }
+                        />
+                    )
                     initializedSpots[i].push(spot)
                     return spot
                 }),
