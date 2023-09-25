@@ -47,7 +47,7 @@ app.use(cookieParser());
  * Database Connection
  * using mongoose
  */
-import connectToDatabase from './db';
+import connectToDatabase from './dbInitialization';
 connectToDatabase();
 
 /**

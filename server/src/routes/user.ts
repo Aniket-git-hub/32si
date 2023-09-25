@@ -8,6 +8,10 @@ import connectUser from '../controllers/user/connectUser';
 import disconnectUser from '../controllers/user/disconnectUser';
 import acceptConnection from '../controllers/user/acceptConnection';
 import getAUserById from '../controllers/user/getAUserById';
+import uploadProfilePicture from '../middleware/uploadProfilePicture';
+import deleteProfilePicture from '../controllers/user/deleteProfilePicture';
+import streamProfilePicture from '../controllers/user/streamProfilePIcture';
+import uploadProfilePictureController from '../controllers/user/uploadProfilePicture';
 
 const router: Router = express.Router();
 
@@ -22,5 +26,13 @@ router.get(getRoute('GET_ALL_USER_ROUTE', '/users'), verifyJWT, getAllUser);
 router.post(getRoute('CONNECT_USER_ROUTE', '/:username/connect'), verifyJWT, connectUser);
 router.post(getRoute('ACCEPT_USER_ROUTE', '/:userId/accept'), verifyJWT, acceptConnection);
 router.delete(getRoute('DISCONNECT_USER_ROUTE', '/:userId/disconnect'), verifyJWT, disconnectUser);
+router.delete(
+  getRoute('UPLOAD_PROFILE_PICTURE', '/upload-profile-image'),
+  verifyJWT,
+  uploadProfilePicture,
+  uploadProfilePictureController,
+);
+router.delete(getRoute('UPLOAD_PROFILE_PICTURE', '/delete-profile-image'), verifyJWT, deleteProfilePicture);
+router.delete(getRoute('UPLOAD_PROFILE_PICTURE', '/get-profile-image'), verifyJWT, streamProfilePicture);
 
 export default router;
