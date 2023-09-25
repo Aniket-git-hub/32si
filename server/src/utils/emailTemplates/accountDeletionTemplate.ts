@@ -17,6 +17,6 @@ const accountDeletionEmailTemplate = (name: string) => `
     <p style="font-size: 18px;">Thank you for using our services. We hope to see you again in the future.</p>
     <p style="font-size: 18px;">Best regards,</p>
     <p style="font-size: 18px;">Team 32Beads</p>
-</div>`
+</div>`;
 
-export default accountDeletionEmailTemplate
+export default accountDeletionEmailTemplate;

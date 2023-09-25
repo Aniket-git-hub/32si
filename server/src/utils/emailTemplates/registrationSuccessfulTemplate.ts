@@ -21,6 +21,6 @@ const registrationSuccessfulTemplate = (name: string) => `
     <p style="font-size: 18px;">Thank you and happy gaming,</p>
     <p style="font-size: 18px;">Team 32Beads</p>
 </div>
-`
+`;
 
-export default registrationSuccessfulTemplate
+export default registrationSuccessfulTemplate;

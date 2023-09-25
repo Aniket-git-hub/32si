@@ -1,7 +1,5 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from 'express';
 
-async function getAGame(req: Request, res: Response, next: NextFunction) {
+async function getAGame(req: Request, res: Response, next: NextFunction) {}
 
-}
-
-export default getAGame
+export default getAGame;

@@ -1,17 +1,18 @@
-import express, { Router } from "express";
-import verifyJWT from "../middleware/verifyJWT";
-import getAUser from "../controllers/user/getAUser";
-import updateUser from "../controllers/user/updateUser";
-import deleteUser from "../controllers/user/deleteUser";
-import getAllUser from "../controllers/user/getAllUser";
-import connectUser from "../controllers/user/connectUser";
-import disconnectUser from "../controllers/user/disconnectUser";
-import acceptConnection from "../controllers/user/acceptConnection";
-import getAUserById from "../controllers/user/getAUserById";
+import express, { Router } from 'express';
+import verifyJWT from '../middleware/verifyJWT';
+import getAUser from '../controllers/user/getAUser';
+import updateUser from '../controllers/user/updateUser';
+import deleteUser from '../controllers/user/deleteUser';
+import getAllUser from '../controllers/user/getAllUser';
+import connectUser from '../controllers/user/connectUser';
+import disconnectUser from '../controllers/user/disconnectUser';
+import acceptConnection from '../controllers/user/acceptConnection';
+import getAUserById from '../controllers/user/getAUserById';
 
 const router: Router = express.Router();
 
-const getRoute = (productionRoute: string, developmentRoute: string): string => process.env.NODE_ENV === 'production' ? process.env[productionRoute]! : developmentRoute;
+const getRoute = (productionRoute: string, developmentRoute: string): string =>
+  process.env.NODE_ENV === 'production' ? process.env[productionRoute]! : developmentRoute;
 
 router.get(getRoute('GET_USER_ROUTE', '/by-username/:username'), verifyJWT, getAUser);
 router.get(getRoute('GET_USER_ROUTE', '/by-id/:userId'), verifyJWT, getAUserById);

@@ -6,6 +6,6 @@ const passwordResetInitiatedTemplate = (name: string) => `
     <a href="#" style="display: inline-block; padding: 10px 20px; color: white; background-color: #007BFF; text-decoration: none;">Reset Password</a>
     <p style="font-size: 18px;">Thank you,</p>
     <p style="font-size: 18px;">Team 32Beads</p>
-  </div>`
+  </div>`;
 
-export default passwordResetInitiatedTemplate
+export default passwordResetInitiatedTemplate;

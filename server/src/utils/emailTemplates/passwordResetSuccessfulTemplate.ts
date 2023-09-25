@@ -7,6 +7,6 @@ const passwordResetSuccessfulTemplate = (name: string) => `
     <p style="font-size: 18px;">Thank you,</p>
     <p style="font-size: 18px;">Team 32Beads</p>
   </div>
-`
+`;
 
-export default passwordResetSuccessfulTemplate
+export default passwordResetSuccessfulTemplate;

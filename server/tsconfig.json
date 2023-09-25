@@ -4,15 +4,11 @@
     "module": "commonjs",
     "outDir": "./dist",
     "strict": true,
-    "esModuleInterop": true,
+    "esModuleInterop": true
   },
   "ts-node": {
     "files": true
   },
-  "files": [
-    "./src/index.ts",
-    "./src/types/express.d.ts",
-    "./src/types/socket.io.d.ts"
-  ],
-  "include": ["src/**/*.ts"],
+  "files": ["./src/index.ts", "./src/types/express.d.ts", "./src/types/socket.io.d.ts"],
+  "include": ["src/**/*.ts"]
 }

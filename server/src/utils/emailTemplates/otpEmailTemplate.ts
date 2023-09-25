@@ -9,5 +9,5 @@ const otpEmailTemplate = (name: string, otp: number) => `
     <p style="font-size: 18px;">Thank you,</p>
     <p style="font-size: 18px;">Team 32Beads</p>
   </div>
-`
-export default otpEmailTemplate
+`;
+export default otpEmailTemplate;

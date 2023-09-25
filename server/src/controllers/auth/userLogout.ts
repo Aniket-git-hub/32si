@@ -6,14 +6,14 @@ import { Request, Response, NextFunction } from 'express';
  * @param {NextFunction} next Next middleware function.
  */
 async function logout(req: Request, res: Response, next: NextFunction) {
-    try {
-        res.clearCookie('refreshToken', { path: '/' })
-        res.status(200).json({
-            message: "user logged out"
-        })
-    } catch (error) {
-        next(error)
-    }
+  try {
+    res.clearCookie('refreshToken', { path: '/' });
+    res.status(200).json({
+      message: 'user logged out',
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
-export default logout
+export default logout;
