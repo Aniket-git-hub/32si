@@ -1,12 +1,10 @@
-import { Link, Box, Text, Button, Flex, Avatar, HStack, IconButton, Menu, MenuButton, VStack, MenuList, useColorMode, MenuItem, MenuDivider, useToast, Badge, ModalOverlay, useDisclosure, Modal, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, List, ListIcon, ListItem } from "@chakra-ui/react"
-import { ArrowForwardIcon } from "@chakra-ui/icons"
-import { FiAtSign, FiBell, FiChevronDown } from 'react-icons/fi';
-import { useAuth } from "../../hooks/useAuth"
-import { NavLink, useNavigate } from 'react-router-dom'
-import { logoutUser } from "../../api/auth"
-import { useState, useEffect, useRef } from "react";
+import { Avatar, Badge, Box, Button, Flex, HStack, Link, List, ListItem, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, VStack, useDisclosure, useToast } from "@chakra-ui/react";
+import { useEffect } from "react";
+import { FiBell, FiChevronDown } from 'react-icons/fi';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { logoutUser } from "../../api/auth";
 import { useAllData } from "../../hooks/useAllData";
-import { acceptConnection, getAUserById } from "../../api/user";
+import { useAuth } from "../../hooks/useAuth";
 function TopNavBar() {
     const { user, setUser, remove } = useAuth()
     const { resetData } = useAllData()
@@ -17,6 +15,9 @@ function TopNavBar() {
     const handleLogout = async () => {
         try {
             await logoutUser()
+        } catch (error) {
+            console.log(error)
+        } finally {
             remove()
             resetData()
             alert({
@@ -27,8 +28,6 @@ function TopNavBar() {
                 isClosable: true,
                 position: 'top'
             })
-        } catch (error) {
-            console.log(error)
         }
     }
     const { isOpen, onOpen, onClose } = useDisclosure()

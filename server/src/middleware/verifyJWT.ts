@@ -7,7 +7,7 @@ function verifyJWT(req: Request, res: Response, next: NextFunction) {
     let secret: string
 
     if (!process.env.JWT_ACCESS_TOKEN_SECRET || !process.env.JWT_REFRESH_TOKEN_SECRET) {
-        throw new Error('JWT secret not set');
+        throw new CustomError('JsonWebTokenError', "Token not provided")
     }
 
     if (req.headers.authorization) {
@@ -17,7 +17,7 @@ function verifyJWT(req: Request, res: Response, next: NextFunction) {
         token = req.cookies.refreshToken
         secret = process.env.JWT_REFRESH_TOKEN_SECRET
     } else {
-        return next(new CustomError("JsonWebTokenError", 'No token provided'))
+        throw new CustomError("JsonWebTokenError", 'No token provided')
     }
 
     try {

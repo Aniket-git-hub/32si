@@ -48,6 +48,7 @@ export default function HomePage() {
   const newGameHander = () => {
     setPlayerOneScore(16)
     setPlayerTwoScore(16)
+
   }
   const AIHandler = () => {
 

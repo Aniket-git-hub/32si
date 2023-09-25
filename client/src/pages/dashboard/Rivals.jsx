@@ -1,34 +1,50 @@
-import { Avatar, Button, Card, CardBody, CardHeader, Heading, Link, Text, Box, VStack, SimpleGrid, IconButton, Flex, Center, Skeleton, SkeletonCircle, SkeletonText, HStack } from '@chakra-ui/react'
-import { useEffect } from 'react'
+import { Avatar, HStack, Center, Box, Button, Card, CardBody, Flex, Heading, IconButton, SimpleGrid, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { useEffect, useState } from 'react'
 import { MdRefresh, MdVerified } from 'react-icons/md'
+import { useNavigate } from 'react-router-dom'
 import { getAllUsers } from '../../api/user'
 import { useAllData } from '../../hooks/useAllData'
-import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 
 export default function Rivals() {
     const { user } = useAuth()
     const navigate = useNavigate()
     const { rivals, setRivals } = useAllData()
+    const [loading, setLoading] = useState(false)
+    const [page, setPage] = useState(1)
 
-    const loadUsers = async (signal) => {
+    const loadUsers = async (signal, page) => {
+        setLoading(true)
         try {
-            const response = await getAllUsers({ page: 1, limit: 10 }, signal)
-            setRivals(response.data.users)
+            const response = await getAllUsers({ page, limit: 10 }, signal)
+            setRivals(prevRivals => [...prevRivals, ...response.data.users])
         } catch (error) {
             console.log(error)
+        } finally {
+            setLoading(false)
         }
     }
 
     useEffect(() => {
         const controller = new AbortController();
-
-        if (!rivals) {
-            loadUsers(controller.signal)
+        if (rivals.length === 0) {
+            loadUsers(controller.signal, page)
         }
-
         return () => {
             controller.abort();
+        };
+    }, [page])
+
+    const handleScroll = () => {
+        if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight - 50) {
+            setPage(prevPage => prevPage + 1)
+        }
+    }
+
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
         };
     }, [])
 
@@ -36,15 +52,11 @@ export default function Rivals() {
         return (
             <Center>
                 <HStack spacing={"10px"} p={5}>
-                    <Box my={2} boxShadow={"lg"} p={4} bg={"white"} borderRadius={5}>
-                        <Skeleton width={"200px"} height={"250px"}></Skeleton>
-                    </Box>
-                    <Box my={2} boxShadow={"lg"} p={4} bg={"white"} borderRadius={5}>
-                        <Skeleton width={"200px"} height={"250px"}></Skeleton>
-                    </Box>
-                    <Box my={2} boxShadow={"lg"} p={4} bg={"white"} borderRadius={5}>
-                        <Skeleton width={"200px"} height={"250px"}></Skeleton>
-                    </Box>
+                    {[...Array(3)].map((_, index) => (
+                        <Box my={2} boxShadow={"lg"} p={4} bg={"white"} borderRadius={5} key={index}>
+                            <Skeleton width={"200px"} height={"250px"}></Skeleton>
+                        </Box>
+                    ))}
                 </HStack>
             </Center>
         )
@@ -57,7 +69,7 @@ export default function Rivals() {
                 <IconButton variant={"ghost"} _hover={{}} title='refresh' icon={<MdRefresh />} onClick={() => loadUsers()} />
             </Flex>
             <SimpleGrid minChildWidth={"250px"} spacing={"10px"} p={5}>
-                {rivals && rivals.map((item, index) => (
+                {rivals.map((item, index) => (
                     <Box my={2} key={`${index}${item.name}`}>
                         <Card w={"250px"} >
                             <CardBody>
@@ -74,6 +86,7 @@ export default function Rivals() {
                     </Box>
                 ))}
             </SimpleGrid>
+            {loading && <p>Loading...</p>}
         </>
     )
 }

@@ -157,12 +157,11 @@ const GameBoard = ({ spotOnClick }) => {
 
     const [selectedPiece, setSelectedPiece] = useState(null)
 
-    const spotOnClickHandler = ({ relations, piece }) => {
-        if (
-            piece !== null &&
-            ((piece.props.value === 2 && !turn) ||
-                (piece.props.value === 1 && turn))
-        ) {
+    const spotOnClickHandler = ({ relations, piece, boardPosition, setRenderPiece }) => {
+        if (selectedPiece) {
+            console.log(selectedPiece)
+        }
+        if (piece !== null && ((piece.props.value === 2 && !turn) || (piece.props.value === 1 && turn))) {
             setSelectedPiece(piece)
             setTurn(!turn)
 
@@ -173,14 +172,25 @@ const GameBoard = ({ spotOnClick }) => {
                 if (neighbouringSpot.props.piece !== null) return
                 emptySpots.push({ i, j })
             })
-            let newMoves = possibleMoves.map((row) => row.map(() => false))
+            const newMoves = possibleMoves.map((row) => row.map(() => false))
             emptySpots.forEach((spot) => {
                 newMoves[spot.i][spot.j] = !newMoves[spot.i][spot.j]
             })
 
             setPossibleMoves(newMoves)
-        } else {
-            alert("It not your turn")
+        }
+        // else {
+        //     const newMoves = possibleMoves.map((row) => row.map(() => false))
+        //     setPossibleMoves(newMoves)
+        //     setSelectedPiece(null)
+        //     // get the current spot from the selection and update the selected piece 
+        // }
+
+        if (piece === null) {
+            // const currentSpot = initializedSpots[boardPosition.i][boardPosition.j]
+            // setRenderPiece(selectedPiece)
+            // setSelectedPiece(null)
+            alert("will set the selected piece here ")
         }
     }
 
