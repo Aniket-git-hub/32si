@@ -21,7 +21,7 @@ const storage = new GridFsStorage({
 const upload = multer({ storage });
 
 function uploadProfilePicture(req: Request, res: Response, next: NextFunction) {
-  upload.single('profileImage')(req, res, (err) => {
+  upload.single('profile_Picture')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       next(err);
     } else if (err) {
