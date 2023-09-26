@@ -10,7 +10,7 @@ const commonRules = {
       .withMessage('Oops! The name should be a string.')
       .notEmpty()
       .withMessage('Oh no! You forgot to enter your name.')
-      .isLength({ max: 12 })
+      .isLength({ max: 25 })
       .withMessage('Hold on! Your name should be no more than 12 characters.')
       .trim(),
   ],
@@ -32,8 +32,8 @@ export const userRegistrationInputsValidationRules = [
     .withMessage('Oops! You forgot to enter your username.')
     .isLength({ max: 25 })
     .withMessage('Hold on! Your username should be no more than 25 characters.')
-    .isAlphanumeric()
-    .withMessage('Hmm... Your username should only contain letters and numbers.')
+    .matches(/^[a-zA-Z0-9_]+$/)
+    .withMessage('Hmm... Your username should only contain letters, numbers, and underscores.')
     .trim(),
   ...commonRules.email,
   ...commonRules.password,

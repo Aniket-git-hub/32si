@@ -72,11 +72,6 @@ app.use('/places', placesRoute);
  */
 import errorHandler from './middleware/errorHandler';
 app.use(errorHandler);
-// fallback default error handler
-app.use((err: Error, req: Request, res: Response) => {
-  console.error(err.stack);
-  res.status(500).send('An error occurred!');
-});
 
 import { createServer } from 'http';
 import { initializeSocketIO } from './initializeSocket';

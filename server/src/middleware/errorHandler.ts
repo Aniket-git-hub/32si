@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { MongooseError } from 'mongoose';
 import { MongoError } from 'mongodb';
+import CustomError from '../utils/createError';
 
 interface ErrorInfo {
   status: number;
@@ -8,7 +9,13 @@ interface ErrorInfo {
 }
 
 const errorTypeMap: Record<string, ErrorInfo> = {
-  ValidationError: { status: 400, message: (error) => `Oops! There seems to be a validation error: ${error.message}` },
+  ValidationError: {
+    status: 400,
+    message: (error) =>
+      `Validation Error: ${
+        (error as CustomError).errors.length > 0 ? (error as CustomError).errors.join(', ') : error.message
+      }`,
+  },
   CastError: { status: 404, message: "Uh-oh! The resource you're looking for cannot be found." },
   '11000': { status: 409, message: "Hold on! It looks like there's a duplicate key error." },
   JsonWebTokenError: { status: 401, message: 'Hmm... The token provided seems to be invalid.' },

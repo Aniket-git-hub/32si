@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { gfs, gridfsBucket } from '../../dbInitialization';
 import CustomError from '../../utils/createError';
 import USER from '../../models/user';
+import mongoose from 'mongoose';
 
 async function deleteProfilePicture(req: Request, res: Response, next: NextFunction) {
   try {
@@ -9,7 +10,7 @@ async function deleteProfilePicture(req: Request, res: Response, next: NextFunct
 
     const file = await gfs.files.findOne({ filename: req.params.filename });
     if (!file) throw new CustomError('Error404', 'Profile picture not found');
-    await gridfsBucket.delete(file._id);
+    await gridfsBucket.delete(new mongoose.Types.ObjectId(file._id));
 
     const updatedUser = await USER.findByIdAndUpdate(userId, { profilePicture: '' }, { new: true }).populate('friends');
     if (!updatedUser) throw new CustomError('UserUpdateError', 'Problem updating the user');

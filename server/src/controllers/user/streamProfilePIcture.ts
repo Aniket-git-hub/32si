@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { gfs, gridfsBucket } from '../../dbInitialization';
 import CustomError from '../../utils/createError';
+import mongoose from 'mongoose';
 
 async function streamProfilePicture(req: Request, res: Response, next: NextFunction) {
   try {
@@ -8,7 +9,7 @@ async function streamProfilePicture(req: Request, res: Response, next: NextFunct
     if (!file) {
       throw new CustomError('Error404', 'File not found');
     }
-    const readStream = gridfsBucket.openDownloadStream(file._id);
+    const readStream = gridfsBucket.openDownloadStream(new mongoose.Types.ObjectId(file._id));
     readStream.pipe(res);
   } catch (error) {
     next(error);

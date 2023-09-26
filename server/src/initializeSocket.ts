@@ -24,7 +24,6 @@ export const initializeSocketIO = (server: any) => {
         socket.userId = decoded.id;
         next();
       } catch (err) {
-        console.log(err);
         next(new CustomError('JsonWebTokenError', 'Invalid Token', err as Error));
       }
     } else {
