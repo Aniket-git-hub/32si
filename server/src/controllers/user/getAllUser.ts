@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import USER from '../../models/user';
 
-// Helper function to create pipeline
 function createPipeline(currentUser: any, friends: any[], limit: number, skips: number, geoNear: boolean) {
   let pipeline: any[] = [];
 
@@ -22,6 +21,7 @@ function createPipeline(currentUser: any, friends: any[], limit: number, skips: 
           gamesPlayedCount: { $size: '$gamesPlayed' },
         },
       },
+      { $project: { password: 0, friends: 0, connectionRequests: 0, gamesPlayed: 0 } },
       { $skip: skips },
       { $limit: limit },
     );
@@ -34,7 +34,7 @@ function createPipeline(currentUser: any, friends: any[], limit: number, skips: 
           gamesPlayedCount: { $size: { $ifNull: ['$gamesPlayed', []] } },
         },
       },
-      { $sample: { size: limit } },
+      { $project: { password: 0, friends: 0, connectionRequests: 0, gamesPlayed: 0 } },
       { $skip: skips },
       { $limit: limit },
     );
@@ -53,7 +53,7 @@ async function getAllUser(req: Request, res: Response, next: NextFunction) {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-    let skips = (page - 1) * 10;
+    let skips = (page - 1) * limit;
 
     const currentUser = await USER.findById(req.user.id);
     if (!currentUser) throw new Error('currentUser not found');
