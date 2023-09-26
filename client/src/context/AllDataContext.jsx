@@ -8,6 +8,8 @@ export const AllDataContextProvider = ({ children }) => {
   const [games, setGames] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [onlineFriends, setOnlineFriends] = useState([]);
+  const [totalUsersCount, setTotalUsersCount] = useState(0);
+  const [page, setPage] = useState(1);
 
   const resetData = () => {
     setRivals([]);
@@ -31,6 +33,10 @@ export const AllDataContextProvider = ({ children }) => {
         onlineFriends,
         setOnlineFriends,
         resetData,
+        totalUsersCount,
+        setTotalUsersCount,
+        page,
+        setPage
       }}
     >
       {children}
