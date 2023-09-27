@@ -2,7 +2,7 @@ import { Center, Flex, Heading, Stack, Text, Button, Image, Box, SkeletonText, S
 import { useAuth } from "../../hooks/useAuth";
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { acceptConnection, connectUser, disconnectUser, getAUserByUsername } from "../../api/user";
+import { acceptConnection, connectUser, disconnectUser, getAUserByUsername, getProfilePicture } from "../../api/user";
 import { MdPlace } from "react-icons/md"
 import { AtSignIcon } from "@chakra-ui/icons"
 import { HiOutlineRectangleGroup } from "react-icons/hi2";
@@ -20,6 +20,7 @@ export default function Profile() {
     const [isAccepting, setAccepting] = useState(false)
     const [requestSent, setRequestSent] = useState(false)
     const [myProfile, setMyProfile] = useState(false)
+
     const controllerRef = useRef(null)
 
     const loadProfileUserData = async (signal) => {
@@ -40,7 +41,7 @@ export default function Profile() {
         }
 
         controllerRef.current = new AbortController()
-        if (profileUser?.username != username || !profileUser) {
+        if (profileUser?.username !== username || !profileUser) {
             loadProfileUserData(controllerRef.current.signal)
         }
 
@@ -49,15 +50,14 @@ export default function Profile() {
                 controllerRef.current.abort()
             }
         }
-    }, [username, profileUser])
+    }, [username])
 
     useEffect(() => {
         if (socket) {
             socket.on("connectionRequest", () => loadProfileUserData(controllerRef.current.signal));
             socket.on("connectionRequestAccepted", () => loadProfileUserData(controllerRef.current.signal));
         }
-    }, []);
-
+    }, [])
 
     const handleConnectUser = async ({ username }) => {
         try {
@@ -148,10 +148,10 @@ export default function Profile() {
                 boxShadow={'2xl'}
                 padding={4}
             >
-                <Flex flex={1} bg="blue.200">
-                    <Image objectFit="cover" boxSize="100%"
-                        src="https://source.unsplash.com/random/500x500/?girl"
-                        alt="#"
+                <Flex flex={1} bg="blue.200" rounded={"lg"} overflow={"hidden"}>
+                    <Image objectFit="cover" boxSize="100%" rounded={"lg"} overflow={"hidden"}
+                        src={getProfilePicture(profileUser.profilePhoto)}
+                        alt={profileUser.username}
                     />
 
                 </Flex>

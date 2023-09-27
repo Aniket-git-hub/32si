@@ -17,7 +17,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MdRefresh, MdVerified } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
-import { getAllUsers } from '../../api/user';
+import { getAllUsers, getProfilePicture } from '../../api/user';
 import { useAllData } from '../../hooks/useAllData';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -89,10 +89,9 @@ export default function Rivals() {
                                 <Card w={'250px'}>
                                     <CardBody>
                                         <VStack>
-                                            <Avatar size={'xl'} src="https://source.unsplash.com/random/200x200/?profile" />
+                                            <Avatar size={'xl'} src={getProfilePicture(item.profilePhoto)} name={item.username} />
                                             <Heading size={'sm'}>
                                                 <Button variant={'ghost'} _hover={{}} rightIcon={<MdVerified />} _active={{}}>
-                                                    {' '}
                                                     {item.name}
                                                 </Button>
                                             </Heading>

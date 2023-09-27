@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import useDebounce from "../../../hooks/useDebounce.jsx";
 import getPlaces from "../../../api/getPlaces";
 import ComboBox from "../../utils/comboBox";
-import { updateUser } from "../../../api/user";
+import { getProfilePicture, updateUser } from "../../../api/user";
 export default function ProfileSettings() {
     const { user, save } = useAuth();
     let initialState = {
@@ -67,13 +67,13 @@ export default function ProfileSettings() {
             (async () => {
                 try {
                     const res = await getPlaces(debouncedValue);
-                      setPlaces(
+                    setPlaces(
                         res.data.map((item) => ({
-                          name: item.name,
-                          coordinates: [item.lat, item.lng],
-                          type: "Point",
+                            name: item.name,
+                            coordinates: [item.lat, item.lng],
+                            type: "Point",
                         }))
-                      );
+                    );
                 } catch (error) {
                     console.log(error);
                 }
@@ -107,8 +107,8 @@ export default function ProfileSettings() {
                     <Image
                         objectFit="cover"
                         boxSize="100%"
-                        src="https://source.unsplash.com/random/500x500/?girl"
-                        alt="#"
+                        src={getProfilePicture(user.profilePhoto)}
+                        alt={user.username}
                     />
                     <Button>Remove</Button>
                 </Box>
