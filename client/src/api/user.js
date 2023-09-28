@@ -13,7 +13,7 @@ const handleRequest = async (endpoint, data, method, signal) => {
         };
         switch (method) {
             case "GET":
-                response = await interceptorsInstance.get(`${endpoint}?page=${data?.page}&limit=${data?.limit}`, config);
+                response = await interceptorsInstance.get(endpoint, config);
                 break;
             case "POST":
                 response = await interceptorsInstance.post(endpoint, data, config);
@@ -37,7 +37,7 @@ const handleRequest = async (endpoint, data, method, signal) => {
 
 
 export const updateUser = async (data, signal) => handleRequest(getEndpoint('VITE_UPDATE_USER_ROUTE', '/user/'), data, "PUT", signal)
-export const getAllUsers = async (data, signal) => handleRequest(getEndpoint('VITE_ALL_USERS_ROUTE', '/user/users'), data, "GET", signal)
+export const getAllUsers = async (data, signal) => handleRequest(`${getEndpoint('VITE_ALL_USERS_ROUTE', '/user/users')}?page=${data.page}&limit=${data.limit}`, data, "GET", signal)
 export const getAUserByUsername = async (username, signal) => handleRequest(`${getEndpoint("VITE_GET_A_USER_ROUTE", '/user/by-username/')}${username}`, null, "GET", signal)
 export const getAUserById = async (id, signal) => handleRequest(`${getEndpoint("VITE_GET_A_USER_ROUTE", '/user/by-id/')}${id}`, null, "GET", signal)
 export const connectUser = async (username, signal) => handleRequest(`${getEndpoint("VITE_CONNECT_USER_ROUTE", '/user/')}${username}/connect`, null, "POST", signal)

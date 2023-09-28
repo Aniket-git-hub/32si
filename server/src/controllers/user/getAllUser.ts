@@ -67,9 +67,12 @@ async function getAllUser(req: Request, res: Response, next: NextFunction) {
     let pipeline = createPipeline(currentUser, friends, limit, skips, geoNear);
     let users = await USER.aggregate(pipeline);
 
+    let hasMore = users.length === limit;
+
     if (users.length === 0 && geoNear) {
       pipeline = createPipeline(currentUser, friends, limit, skips, false);
       users = await USER.aggregate(pipeline);
+      hasMore = users.length === limit;
     }
 
     const count = await USER.countDocuments({ _id: { $nin: [...friends, currentUser._id] } });
@@ -79,6 +82,7 @@ async function getAllUser(req: Request, res: Response, next: NextFunction) {
       total: count,
       page,
       limit,
+      hasMore,
     });
   } catch (error) {
     next(error);

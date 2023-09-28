@@ -8,8 +8,9 @@ export const AllDataContextProvider = ({ children }) => {
   const [games, setGames] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [onlineFriends, setOnlineFriends] = useState([]);
-  const [totalUsersCount, setTotalUsersCount] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const [pageLoaded, setPageLoaded] = useState([]);
 
   const resetData = () => {
     setRivals([]);
@@ -17,6 +18,9 @@ export const AllDataContextProvider = ({ children }) => {
     setGames([]);
     setNotifications([]);
     setOnlineFriends([]);
+    setHasMore(true);
+    setPage(1);
+    setPageLoaded([]);
   };
 
   return (
@@ -33,10 +37,12 @@ export const AllDataContextProvider = ({ children }) => {
         onlineFriends,
         setOnlineFriends,
         resetData,
-        totalUsersCount,
-        setTotalUsersCount,
+        hasMore,
+        setHasMore,
         page,
-        setPage
+        setPage,
+        pageLoaded,
+        setPageLoaded,
       }}
     >
       {children}
