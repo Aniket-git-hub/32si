@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { getEnvironmentVariable } from './Helper';
 
 interface UserData {
   id: string;
@@ -13,8 +14,8 @@ interface Token {
 }
 
 function generateToken(userData: UserData): Token {
-  const accessToken = jwt.sign(userData, process.env.JWT_ACCESS_TOKEN_SECRET as string, { expiresIn: '15m' });
-  const refreshToken = jwt.sign(userData, process.env.JWT_REFRESH_TOKEN_SECRET as string, { expiresIn: '24h' });
+  const accessToken = jwt.sign(userData, getEnvironmentVariable('JWT_ACCESS_TOKEN_SECRET'), { expiresIn: '15m' });
+  const refreshToken = jwt.sign(userData, getEnvironmentVariable('JWT_REFRESH_TOKEN_SECRET'), { expiresIn: '24h' });
   return { accessToken, refreshToken };
 }
 

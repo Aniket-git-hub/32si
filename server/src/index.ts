@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 import express, { Application, Request, Response } from 'express';
+import { getEnvironmentVariable } from './utils/Helper';
 const app: Application = express();
 const PORT: string | number = process.env.PORT || 3000;
 
@@ -9,14 +10,14 @@ const PORT: string | number = process.env.PORT || 3000;
  *  prevents cross origin error and preflight error
  */
 import cors from 'cors';
-const prodOrigins = [process.env.ORIGIN_1, process.env.ORIGIN_2];
+const prodOrigins = [getEnvironmentVariable('ORIGIN_1'), getEnvironmentVariable('ORIGIN_2')];
 const devOrigin = ['http://localhost:5173'];
-const allowedOrigins = process.env.NODE_ENV === 'production' ? prodOrigins : devOrigin;
+const allowedOrigins = getEnvironmentVariable('NODE_ENV') === 'production' ? prodOrigins : devOrigin;
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (process.env.NODE_ENV === 'production') {
-        if (allowedOrigins.includes(origin)) {
+      if (getEnvironmentVariable('NODE_ENV') === 'production') {
+        if (origin && allowedOrigins.includes(origin)) {
           callback(null, true);
         } else {
           callback(new Error('Not allowed by CORS'));

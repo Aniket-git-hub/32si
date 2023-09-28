@@ -12,11 +12,9 @@ import uploadProfilePicture from '../middleware/uploadProfilePicture';
 import deleteProfilePicture from '../controllers/user/deleteProfilePicture';
 import streamProfilePicture from '../controllers/user/streamProfilePIcture';
 import uploadProfilePictureController from '../controllers/user/uploadProfilePicture';
+import { getRoute } from '../utils/Helper';
 
 const router: Router = express.Router();
-
-const getRoute = (productionRoute: string, developmentRoute: string): string =>
-  process.env.NODE_ENV === 'production' ? process.env[productionRoute]! : developmentRoute;
 
 router.get(getRoute('GET_USER_ROUTE', '/by-username/:username'), verifyJWT, getAUser);
 router.get(getRoute('GET_USER_ROUTE', '/by-id/:userId'), verifyJWT, getAUserById);

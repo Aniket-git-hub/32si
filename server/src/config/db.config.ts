@@ -1,3 +1,5 @@
+import { getEnvironmentVariable } from '../utils/Helper';
+
 export default {
-  mongodb_URI: process.env.MONGODB_URI as string,
+  mongodb_URI: getEnvironmentVariable('MONGODB_URI'),
 };

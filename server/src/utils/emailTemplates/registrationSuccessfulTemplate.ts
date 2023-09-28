@@ -1,3 +1,5 @@
+import { getEnvironmentVariable } from '../Helper';
+
 const registrationSuccessfulTemplate = (name: string) => `
     <div style="max-width: 600px; margin: auto; padding: 20px; font-family: Arial, sans-serif; color: #333; border: 1px solid #b8b8b8; border-radius:.3rem;">
     <!-- <img src="https://example.com/image.jpg" alt="B2 Beads Board Game" style="width: 100%;"> -->
@@ -17,7 +19,9 @@ const registrationSuccessfulTemplate = (name: string) => `
         </tr>
     </table>
     <p style="font-size: 18px;">If you have any questions or feedback, please don't hesitate to contact us. We're always here to help.</p>
-    <a href="${process.env.APP_URL}" style="display: inline-block; padding: 10px 20px; color: white; background-color: #007BFF; text-decoration: none; font-size: 18px; border-radius: 5px; cursor:pointer; transition: all 0.2s ease-in-out;" onmouseover="this.style.backgroundColor='#0069D9'" onmouseout="this.style.backgroundColor='#007BFF'">Login</a>
+    <a href=" ${getEnvironmentVariable(
+      'APP_URL',
+    )}" style="display: inline-block; padding: 10px 20px; color: white; background-color: #007BFF; text-decoration: none; font-size: 18px; border-radius: 5px; cursor:pointer; transition: all 0.2s ease-in-out;" onmouseover="this.style.backgroundColor='#0069D9'" onmouseout="this.style.backgroundColor='#007BFF'">Login</a>
     <p style="font-size: 18px;">Thank you and happy gaming,</p>
     <p style="font-size: 18px;">Team 32Beads</p>
 </div>

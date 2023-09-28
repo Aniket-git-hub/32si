@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import USER from '../../models/user';
 import generateToken from '../../utils/generateToken';
 import CustomError from '../../utils/createError';
+import { getEnvironmentVariable } from '../../utils/Helper';
 
 /**
  * @description  controller to login the user.
@@ -29,9 +30,9 @@ async function login(req: Request, res: Response, next: NextFunction): Promise<v
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production' ? true : false,
+      secure: getEnvironmentVariable('NODE_ENV') === 'production' ? true : false,
       maxAge: 24 * 60 * 60 * 1000,
-      domain: process.env.NODE_ENV === 'production' ? process.env.ORIGIN_2! : 'localhost',
+      domain: getEnvironmentVariable('NODE__ENV') === 'production' ? getEnvironmentVariable('ORIGIN_2') : 'localhost',
       path: '/',
     });
 
