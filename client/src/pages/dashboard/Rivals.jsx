@@ -12,7 +12,8 @@ import {
     Text,
     VStack,
     Skeleton,
-    HStack
+    HStack,
+    IconButton
 } from "@chakra-ui/react";
 import { MdVerified, MdRefresh } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +21,7 @@ import { getAllUsers, getProfilePicture } from "../../api/user";
 import { useAllData } from "../../hooks/useAllData";
 
 export default function Rivals() {
-    const { rivals, setRivals, page, setPage, hasMore, setHasMore } = useAllData();
+    const { rivals, setRivals, page, setPage, hasMore, setHasMore, pageLoaded, setPageLoaded } = useAllData();
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const observer = useRef();
@@ -39,43 +40,43 @@ export default function Rivals() {
         [loading, hasMore, setPage]
     );
 
+    const loadData = async (signal) => {
+        try {
+            setLoading(true);
+            const response = await getAllUsers({ page, limit: 10 }, signal);
+            setHasMore(response.data.hasMore);
+            setPageLoaded((prev) => [...prev, response.data.page]);
+            setRivals((prev) => [...prev, ...response.data.users]);
+        } catch (error) {
+            if (error.code !== "ERR_CANCELED") {
+                console.log(error);
+            }
+        } finally {
+            setLoading(false);
+        }
+    }
+
     useEffect(() => {
         const controller = new AbortController();
-
-        const loadData = async () => {
-            try {
-                setLoading(true);
-                const response = await getAllUsers({ page, limit: 10 }, controller.signal);
-                setHasMore(response.data.hasMore);
-                setRivals((prev) => [...prev, ...response.data.users]);
-            } catch (error) {
-                if (error.code !== "ERR_CANCELED") {
-                    console.log(error);
-                }
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        if (hasMore) {
-            loadData();
+        if (hasMore && !pageLoaded.includes(page)) {
+            loadData(controller.signal);
         }
 
         return () => {
             controller.abort();
         }
-    }, [page, setHasMore, setRivals, hasMore]);
+    }, [page, setHasMore, setRivals, hasMore, pageLoaded]);
 
     return (
         <>
             <Flex justifyContent={"space-between"}>
                 <Heading size={"lg"}>Rivals</Heading>
-                <Button
+                <IconButton
                     variant={"ghost"}
                     _hover={{}}
                     title="refresh"
                     icon={<MdRefresh />}
-                    onClick={() => setPage((prev) => prev + 1)}
+                    onClick={() => { }}
                 />
             </Flex>
             <SimpleGrid minChildWidth={"250px"} spacing={"10px"} p={5}>
