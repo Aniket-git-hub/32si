@@ -43,8 +43,9 @@ export const getAUserById = async (id, signal) => handleRequest(`${getEndpoint("
 export const connectUser = async (username, signal) => handleRequest(`${getEndpoint("VITE_CONNECT_USER_ROUTE", '/user/')}${username}/connect`, null, "POST", signal)
 export const disconnectUser = async (userId, signal) => handleRequest(`${getEndpoint("VITE_DISCONNECT_USER_ROUTE", '/user/')}${userId}/disconnect`, null, "DELETE", signal)
 export const acceptConnection = async (userId, signal) => handleRequest(`${getEndpoint("VITE_ACCEPT_CONNECTION_ROUTE", '/user/')}${userId}/accept`, null, "POST", signal)
-
+export const updateProfilePicture = async (formData, signal) => handleRequest(`${getEndpoint("VITE_UPDATE_PROFILE_PICTURE_ROUTE", '/user/upload-profile-picture')}`, formData, "POST", signal)
+export const deleteProfilePicture = async (filename, signal) => handleRequest(`${getEndpoint("VITE_DELETE_PROFILE_PICTURE_ROUTE", '/user/delete-profile-picture')}/${filename}`, null, "DELETE", signal)
 export const getProfilePicture = (filename) => {
-    let url = getEndpoint("VITE_GET_PROFILE_PICTURE", 'http://localhost:3000/user/get-profile-image')
+    let url = getEndpoint("VITE_GET_PROFILE_PICTURE_ROUTE", 'http://localhost:3000/user/get-profile-picture')
     return `${url}/${filename}`
 }

@@ -12,7 +12,7 @@ async function deleteProfilePicture(req: Request, res: Response, next: NextFunct
     if (!file) throw new CustomError('Error404', 'Profile picture not found');
     await gridfsBucket.delete(new mongoose.Types.ObjectId(file._id));
 
-    const updatedUser = await USER.findByIdAndUpdate(userId, { profilePicture: '' }, { new: true }).populate('friends');
+    const updatedUser = await USER.findByIdAndUpdate(userId, { profilePhoto: '' }, { new: true }).populate('friends');
     if (!updatedUser) throw new CustomError('UserUpdateError', 'Problem updating the user');
 
     const { password, ...rest } = updatedUser.toObject();

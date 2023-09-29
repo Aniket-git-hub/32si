@@ -9,8 +9,17 @@ async function uploadProfilePictureController(req: Request, res: Response, next:
       throw new CustomError('Error404', 'Profile picture not found');
     }
     const userId = req.user.id;
-    await USER.findByIdAndUpdate(userId, { profilePhoto: file.filename });
-    res.json({ message: 'Profile picture uploaded successfully' });
+    const updatedUser = await USER.findByIdAndUpdate(userId, { profilePhoto: file.filename }, { new: true }).populate(
+      'friends',
+    );
+    if (!updatedUser) throw new CustomError('UserUpdateError', 'Problem updating the user');
+
+    const { password, ...rest } = updatedUser.toObject();
+
+    res.status(200).json({
+      message: 'profile picture uploaded successfully',
+      user: rest,
+    });
   } catch (error) {
     next(error);
   }

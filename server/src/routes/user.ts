@@ -25,16 +25,16 @@ router.post(getRoute('CONNECT_USER_ROUTE', '/:username/connect'), verifyJWT, con
 router.post(getRoute('ACCEPT_USER_ROUTE', '/:userId/accept'), verifyJWT, acceptConnection);
 router.delete(getRoute('DISCONNECT_USER_ROUTE', '/:userId/disconnect'), verifyJWT, disconnectUser);
 router.post(
-  getRoute('UPLOAD_PROFILE_PICTURE_ROUTE', '/upload-profile-image'),
+  getRoute('UPLOAD_PROFILE_PICTURE_ROUTE', '/upload-profile-picture'),
   verifyJWT,
   uploadProfilePicture,
   uploadProfilePictureController,
 );
 router.delete(
-  getRoute('DELETE_PROFILE_PICTURE_ROUTE', '/delete-profile-image/:filename'),
+  getRoute('DELETE_PROFILE_PICTURE_ROUTE', '/delete-profile-picture/:filename'),
   verifyJWT,
   deleteProfilePicture,
 );
-router.get(getRoute('GET_PROFILE_PICTURE_ROUTE', '/get-profile-image/:filename'), verifyJWT, streamProfilePicture);
+router.get(getRoute('GET_PROFILE_PICTURE_ROUTE', '/get-profile-picture/:filename'), verifyJWT, streamProfilePicture);
 
 export default router;
