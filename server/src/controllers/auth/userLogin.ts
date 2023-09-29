@@ -32,7 +32,7 @@ async function login(req: Request, res: Response, next: NextFunction): Promise<v
       sameSite: 'lax',
       secure: getEnvironmentVariable('NODE_ENV') === 'production' ? true : false,
       maxAge: 24 * 60 * 60 * 1000,
-      domain: getEnvironmentVariable('NODE__ENV') === 'production' ? getEnvironmentVariable('ORIGIN_2') : 'localhost',
+      domain: getEnvironmentVariable('NODE_ENV') === 'production' ? getEnvironmentVariable('ORIGIN_2') : 'localhost',
       path: '/',
     });
 
