@@ -1,3 +1,4 @@
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import transporter from '../config/mailer.config';
 import accountDeletionEmailTemplate from './emailTemplates/accountDeletionTemplate';
 import otpEmailTemplate from './emailTemplates/otpEmailTemplate';
@@ -7,8 +8,8 @@ import registrationSuccessfulTemplate from './emailTemplates/registrationSuccess
 
 interface EmailResponse {
   success: boolean;
-  info: any;
-  error: Error;
+  info?: SMTPTransport.SentMessageInfo;
+  error?: Error;
 }
 
 async function sendEmail(receiverEmail: string, subject: string, template: string): Promise<EmailResponse> {
@@ -20,8 +21,8 @@ async function sendEmail(receiverEmail: string, subject: string, template: strin
       html: template,
     });
     return { success: true, info };
-  } catch (error) {
-    return { success: false, (error as Error) };
+  } catch (error: unknown) {
+    return { success: false, error: error as Error };
   }
 }
 

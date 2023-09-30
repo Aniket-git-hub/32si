@@ -30,7 +30,6 @@ const errorTypeMap: Record<string, ErrorInfo> = {
  * @param {Error} error Error Object
  * @param {Request} req Express.js Request Object
  * @param {Response} res Express.js Response Object
- * @param {NextFunction} next Next Middleware Function
  */
 function errorHandler(error: Error, req: Request, res: Response): void {
   if (process.env.NODE_ENV === 'development') {
@@ -44,7 +43,7 @@ function errorHandler(error: Error, req: Request, res: Response): void {
   }
   errorInfo = errorInfo || { status: 500, message: 'Internal Server Error' };
 
-  res.status(errorInfo.status).json({
+  res?.status(errorInfo.status).json({
     message: typeof errorInfo.message === 'function' ? errorInfo.message(error) : errorInfo.message,
   });
 }

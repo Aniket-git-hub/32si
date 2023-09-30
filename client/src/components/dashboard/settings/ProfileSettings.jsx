@@ -1,4 +1,4 @@
-import { Box, Heading, Stack, Flex, Image, Button, FormControl, InputGroup, FormLabel, Input, FormErrorMessage, IconButton, InputLeftElement, Icon } from "@chakra-ui/react";
+import { Box, Heading, Stack, Flex, Image, Button, FormControl, InputGroup, FormLabel, Input, FormErrorMessage, IconButton, InputLeftElement, Icon, useToast } from "@chakra-ui/react";
 import { useFormValidation } from "../../../hooks/useFormValidation";
 import { useAuth } from "../../../hooks/useAuth.jsx";
 import { FiEdit, FiFile, FiImage } from "react-icons/fi";
@@ -10,6 +10,7 @@ import getPlaces from "../../../api/getPlaces";
 import ComboBox from "../../utils/comboBox";
 import { deleteProfilePicture, getProfilePicture, updateProfilePicture, updateUser } from "../../../api/user";
 export default function ProfileSettings() {
+    const alert = useToast()
     const { user, save } = useAuth();
     let initialState = {
         name: user?.name || "",
@@ -123,6 +124,16 @@ export default function ProfileSettings() {
             setSelectedFileName(null);
             setPreviewFileSrc(null);
         } catch (error) {
+            if (error.code === "ERR_NETWORK") {
+                alert({
+                    title: "Network Error",
+                    description: error.message,
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                    position: "top",
+                })
+            }
             console.log(error)
         } finally {
             setSavingProfilePicture(false)
@@ -304,7 +315,7 @@ export default function ProfileSettings() {
                         </FormControl>
                     </form>
                 </Stack>
-            </Flex>
-        </Box>
+            </Flex >
+        </Box >
     );
 }

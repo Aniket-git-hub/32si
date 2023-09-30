@@ -35,6 +35,6 @@ router.delete(
   verifyJWT,
   deleteProfilePicture,
 );
-router.get(getRoute('GET_PROFILE_PICTURE_ROUTE', '/get-profile-picture/:filename'), verifyJWT, streamProfilePicture);
+router.get(getRoute('GET_PROFILE_PICTURE_ROUTE', '/get-profile-picture/:filename'), streamProfilePicture);
 
 export default router;

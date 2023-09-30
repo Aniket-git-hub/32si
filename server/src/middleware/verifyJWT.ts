@@ -21,8 +21,8 @@ function verifyJWT(req: Request, res: Response, next: NextFunction) {
     const decoded = jwt.verify(token, secret);
     req.user = decoded;
     next();
-  } catch (error: any) {
-    next(new CustomError('JsonWebTokenError', 'Invalid token', error));
+  } catch (error: unknown) {
+    next(new CustomError('JsonWebTokenError', 'Invalid token', error as Error));
   }
 }
 
