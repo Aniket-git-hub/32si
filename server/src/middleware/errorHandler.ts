@@ -1,5 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
-import { MongooseError } from 'mongoose';
+import { Request, Response } from 'express';
 import { MongoError } from 'mongodb';
 import CustomError from '../utils/createError';
 
@@ -33,7 +32,7 @@ const errorTypeMap: Record<string, ErrorInfo> = {
  * @param {Response} res Express.js Response Object
  * @param {NextFunction} next Next Middleware Function
  */
-function errorHandler(error: Error, req: Request, res: Response, next: NextFunction): void {
+function errorHandler(error: Error, req: Request, res: Response): void {
   if (process.env.NODE_ENV === 'development') {
     console.log(`[server]: Request: ${req.path} - [error]: ${error.message}`);
   }

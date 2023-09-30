@@ -9,7 +9,7 @@ interface Socket extends IOSocket {
 }
 
 let io: IOServer;
-let users = new Map<string, any>();
+const users = new Map<string, any>();
 
 export const initializeSocketIO = (server: any) => {
   io = new IOServer(server);

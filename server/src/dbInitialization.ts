@@ -1,4 +1,4 @@
-import mongoose, { ConnectOptions, Connection } from 'mongoose';
+import mongoose, { ConnectOptions } from 'mongoose';
 import dbConfig from './config/db.config';
 import gridfs, { Grid } from 'gridfs-stream';
 

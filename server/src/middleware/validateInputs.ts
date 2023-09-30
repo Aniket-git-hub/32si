@@ -80,7 +80,7 @@ export const resetPasswordValidationRules = [...commonRules.email, ...commonRule
 export function inputValidation(req: Request, res: Response, next: NextFunction) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    let err = new CustomError('ValidationError', 'Validation Error');
+    const err = new CustomError('ValidationError', 'Validation Error');
     err.errors = errors.array().map((obj) => obj.msg);
     next(err);
   }

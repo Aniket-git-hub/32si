@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-import express, { Application, Request, Response } from 'express';
+import express, { Application, Response } from 'express';
 import { getEnvironmentVariable } from './utils/Helper';
 const app: Application = express();
 const PORT: string | number = process.env.PORT || 3000;

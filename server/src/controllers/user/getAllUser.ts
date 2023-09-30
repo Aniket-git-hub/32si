@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import USER from '../../models/user';
 
 function createPipeline(currentUser: any, friends: any[], limit: number, skips: number, geoNear: boolean) {
-  let pipeline: any[] = [];
+  const pipeline: any[] = [];
 
   if (geoNear) {
     pipeline.push(
@@ -53,7 +53,7 @@ async function getAllUser(req: Request, res: Response, next: NextFunction) {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-    let skips = (page - 1) * limit;
+    const skips = (page - 1) * limit;
 
     const currentUser = await USER.findById(req.user.id);
     if (!currentUser) throw new Error('currentUser not found');

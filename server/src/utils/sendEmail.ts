@@ -7,13 +7,13 @@ import registrationSuccessfulTemplate from './emailTemplates/registrationSuccess
 
 interface EmailResponse {
   success: boolean;
-  info?: any;
-  error?: any;
+  info: any;
+  error: Error;
 }
 
 async function sendEmail(receiverEmail: string, subject: string, template: string): Promise<EmailResponse> {
   try {
-    let info = await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: process.env.MAIL_EMAIL,
       to: receiverEmail,
       subject,
@@ -21,7 +21,7 @@ async function sendEmail(receiverEmail: string, subject: string, template: strin
     });
     return { success: true, info };
   } catch (error) {
-    return { success: false, error };
+    return { success: false, (error as Error) };
   }
 }
 

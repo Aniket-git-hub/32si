@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { Otp } from '../types/otp';
 
 const optSchema = new Schema<Otp>({

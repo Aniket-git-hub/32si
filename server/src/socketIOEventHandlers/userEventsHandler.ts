@@ -26,7 +26,7 @@ export const userEventsHandler = (socket: Socket, users: Map<string, User>) => {
     const user = users.get(userId);
     if (user) {
       user.friendsList = friendsList;
-      let onlineFriends = friendsList.filter((friendId) => users.has(friendId));
+      const onlineFriends = friendsList.filter((friendId) => users.has(friendId));
       socket.emit('friendsOnline', onlineFriends);
       onlineFriends.forEach((friendId) => {
         const friend = users.get(friendId);
