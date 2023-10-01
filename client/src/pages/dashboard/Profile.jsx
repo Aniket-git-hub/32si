@@ -2,12 +2,13 @@ import { Center, Flex, Heading, Stack, Text, Button, Image, Box, SkeletonText, S
 import { useAuth } from "../../hooks/useAuth";
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { acceptConnection, connectUser, disconnectUser, getAUserByUsername, getProfilePicture } from "../../api/user";
+import { acceptConnection, connectUser, disconnectUser, getAUserByUsername, getProfilePicture, getSmallProfilePicture } from "../../api/user";
 import { MdPlace } from "react-icons/md"
 import { AtSignIcon } from "@chakra-ui/icons"
 import { HiOutlineRectangleGroup } from "react-icons/hi2";
 import { BsPeople } from "react-icons/bs";
 import useSocket from "../../hooks/useSocket";
+import ImageWithPreview from "../../components/utils/ImageWithPreview";
 
 export default function Profile() {
     const { socket } = useSocket()
@@ -149,11 +150,12 @@ export default function Profile() {
                 padding={4}
             >
                 <Flex flex={1} bg="blue.200" rounded={"lg"} overflow={"hidden"}>
-                    <Image objectFit="cover" boxSize="100%" rounded={"lg"} overflow={"hidden"}
-                        src={getProfilePicture(profileUser.profilePhoto)}
+                    <ImageWithPreview
+                        objectFit="cover" boxSize="100%" rounded={"lg"} overflow={"hidden"}
                         alt={profileUser.username}
+                        smallURL={getSmallProfilePicture(profileUser.profilePhoto)}
+                        largeURL={getProfilePicture(profileUser.profilePhoto)}
                     />
-
                 </Flex>
                 <Stack
                     flex={1}

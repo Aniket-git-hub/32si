@@ -8,7 +8,8 @@ import { useEffect } from "react";
 import useDebounce from "../../../hooks/useDebounce.jsx";
 import getPlaces from "../../../api/getPlaces";
 import ComboBox from "../../utils/comboBox";
-import { deleteProfilePicture, getProfilePicture, updateProfilePicture, updateUser } from "../../../api/user";
+import { deleteProfilePicture, getProfilePicture, getSmallProfilePicture, updateProfilePicture, updateUser } from "../../../api/user";
+import ImageWithPreview from "../../utils/ImageWithPreview";
 export default function ProfileSettings() {
     const alert = useToast()
     const { user, save } = useAuth();
@@ -173,13 +174,13 @@ export default function ProfileSettings() {
                             ?
                             <Box>
                                 <IconButton onClick={removeProfilePictureHandler} rounded={"100"} shadow={"lg"} size={"sm"} icon={<CloseIcon />} transform={"translate(-50%, 50%)"} />
-                                <Image
-                                    shadow={"lg"}
+                                <ImageWithPreview shadow={"lg"}
                                     borderRadius={10}
                                     objectFit="cover"
                                     boxSize="100%"
-                                    src={getProfilePicture(user.profilePhoto)}
-                                    alt={user.username}
+                                    alt="Image"
+                                    smallURL={getSmallProfilePicture(user.profilePhoto)}
+                                    largeURL={getProfilePicture(user.profilePhoto)}
                                 />
                             </Box>
                             :

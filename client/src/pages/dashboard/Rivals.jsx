@@ -17,8 +17,9 @@ import {
 } from "@chakra-ui/react";
 import { MdVerified, MdRefresh } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-import { getAllUsers, getProfilePicture } from "../../api/user";
+import { getAllUsers, getProfilePicture, getSmallProfilePicture } from "../../api/user";
 import { useAllData } from "../../hooks/useAllData";
+import AvatarWithPreview from "../../components/utils/AvatarWithPreview";
 
 export default function Rivals() {
     const { rivals, setRivals, page, setPage, hasMore, setHasMore, pageLoaded, setPageLoaded } = useAllData();
@@ -85,9 +86,10 @@ export default function Rivals() {
                         <Card w={"250px"}>
                             <CardBody>
                                 <VStack>
-                                    <Avatar
+                                    <AvatarWithPreview
                                         size={"xl"}
-                                        src={user.profilePhoto && getProfilePicture(user.profilePhoto)}
+                                        smallURL={getSmallProfilePicture(user.profilePhoto)}
+                                        largeURL={getProfilePicture(user.profilePhoto)}
                                         name={user.username}
                                     />
                                     <Heading size={"sm"}>

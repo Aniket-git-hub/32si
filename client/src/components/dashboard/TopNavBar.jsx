@@ -5,7 +5,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { logoutUser } from "../../api/auth";
 import { useAllData } from "../../hooks/useAllData";
 import { useAuth } from "../../hooks/useAuth";
-import { getProfilePicture } from "../../api/user";
+import { getProfilePicture, getSmallProfilePicture } from "../../api/user";
+import AvatarWithPreview from "../utils/AvatarWithPreview";
 function TopNavBar() {
     const { user, setUser, remove } = useAuth()
     const { resetData } = useAllData()
@@ -80,7 +81,12 @@ function TopNavBar() {
                         <Menu >
                             <MenuButton transition={'all .3s'} _focus={{ boxShadow: 'none' }}>
                                 <HStack>
-                                    <Avatar size={'sm'} src={getProfilePicture(profilePhoto)} />
+                                    <AvatarWithPreview
+                                        size={"sm"}
+                                        smallURL={getSmallProfilePicture(user.profilePhoto)}
+                                        largeURL={getProfilePicture(user.profilePhoto)}
+                                        name={user.username}
+                                    />
                                     <VStack
                                         display={{ base: 'none', md: 'flex' }}
                                         alignItems='flex-start'

@@ -49,3 +49,7 @@ export const getProfilePicture = (filename) => {
     let url = getEndpoint("VITE_GET_PROFILE_PICTURE_ROUTE", 'http://localhost:3000/user/get-profile-picture')
     return `${url}/${filename}`
 }
+export const getSmallProfilePicture = (filename) => {
+    let url = getEndpoint("VITE_GET_SMALL_PROFILE_PICTURE_ROUTE", 'http://localhost:3000/user/get-profile-picture-small')
+    return `${url}/${filename}`
+}
