@@ -1,6 +1,7 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { MongoError } from 'mongodb';
 import CustomError from '../utils/createError';
+import { getEnvironmentVariable } from '../utils/Helper';
 
 interface ErrorInfo {
   status: number;
@@ -30,9 +31,10 @@ const errorTypeMap: Record<string, ErrorInfo> = {
  * @param {Error} error Error Object
  * @param {Request} req Express.js Request Object
  * @param {Response} res Express.js Response Object
+ * @param {NextFunction} next Express.js NextFunction
  */
-function errorHandler(error: Error, req: Request, res: Response): void {
-  if (process.env.NODE_ENV === 'development') {
+function errorHandler(error: Error, req: Request, res: Response, next: NextFunction): void {
+  if (getEnvironmentVariable('NODE_ENV') === 'development') {
     console.log(`[server]: Request: ${req.path} - [error]: ${error.message}`);
   }
 
@@ -46,6 +48,8 @@ function errorHandler(error: Error, req: Request, res: Response): void {
   res?.status(errorInfo.status).json({
     message: typeof errorInfo.message === 'function' ? errorInfo.message(error) : errorInfo.message,
   });
+
+  next();
 }
 
 export default errorHandler;

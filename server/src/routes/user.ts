@@ -13,6 +13,7 @@ import deleteProfilePicture from '../controllers/user/deleteProfilePicture';
 import streamProfilePicture from '../controllers/user/streamProfilePIcture';
 import uploadProfilePictureController from '../controllers/user/uploadProfilePicture';
 import { getRoute } from '../utils/Helper';
+import StreamProfilePictureSmall from '../controllers/user/StreamProfilePictureSmall';
 
 const router: Router = express.Router();
 
@@ -36,5 +37,6 @@ router.delete(
   deleteProfilePicture,
 );
 router.get(getRoute('GET_PROFILE_PICTURE_ROUTE', '/get-profile-picture/:filename'), streamProfilePicture);
+router.get(getRoute('GET_PROFILE_PICTURE_ROUTE', '/get-profile-picture-small/:filename'), StreamProfilePictureSmall);
 
 export default router;

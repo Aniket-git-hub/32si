@@ -1,6 +1,7 @@
 import multer from 'multer';
 import { NextFunction, Request, Response } from 'express';
 import sharp from 'sharp';
+import CustomError from '../utils/createError';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -17,15 +18,27 @@ function uploadProfilePicture(req: Request, res: Response, next: NextFunction) {
       next(err);
     }
 
-    if (req.file) {
-      const buffer = await sharp(req.file.buffer).resize({ width: 500, height: 500 }).png().toBuffer();
+    if (!req.file) {
+      throw new CustomError('Error404', 'No files found');
+    }
 
+    if (!req.file.mimetype.startsWith('image/')) {
+      throw new CustomError('Error404', 'File must be an image');
+    }
+
+    try {
+      const image = sharp(req.file.buffer);
+      const buffer = await image
+        .webp({ quality: 80, nearLossless: true })
+        .resize({ width: 500, height: 500 })
+        .toBuffer();
       req.file.buffer = buffer;
-      req.file.originalname = req.file.originalname.replace(/(\.[\w\d_-]+)$/i, '_comp.png').replace(/\s/g, '');
+      req.file.originalname = req.file.originalname.replace(/(\.[\w\d_-]+)$/i, '_comp.webp').replace(/\s/g, '');
 
-      const smallBuffer = await sharp(req.file.buffer).resize({ width: 20, height: 20 }).png().toBuffer();
-
+      const smallBuffer = await image.resize({ width: 20, height: 20 }).toBuffer();
       req.file.smallBuffer = smallBuffer;
+    } catch (error) {
+      next(error);
     }
 
     next();

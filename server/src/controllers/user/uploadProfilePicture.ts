@@ -10,7 +10,6 @@ async function uploadProfilePictureController(req: Request, res: Response, next:
       throw new CustomError('Error404', 'Profile picture not found');
     }
 
-    // Save smaller image to GridFS
     const writeStream = gridfsBucket.openUploadStream(file.originalname, {
       contentType: file.mimetype,
     });
@@ -18,7 +17,6 @@ async function uploadProfilePictureController(req: Request, res: Response, next:
     writeStream.write(file.buffer);
     writeStream.end();
 
-    // Save very small image to GridFS
     if (file.smallBuffer) {
       const smallWriteStream = gridfsBucket.openUploadStream(file.originalname.replace(/(\.[\w\d_-]+)$/i, '_small$1'), {
         contentType: file.mimetype,
