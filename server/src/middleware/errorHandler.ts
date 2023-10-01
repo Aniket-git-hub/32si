@@ -34,7 +34,7 @@ const errorTypeMap: Record<string, ErrorInfo> = {
  * @param {NextFunction} next Express.js NextFunction
  */
 function errorHandler(error: Error, req: Request, res: Response, next: NextFunction): void {
-  if (getEnvironmentVariable('NODE_ENV') === 'development') {
+  if (getEnvironmentVariable('NODE_ENV') === 'development' || getEnvironmentVariable('TEST')) {
     console.log(`[server]: Request: ${req.path} - [error]: ${error.message}`);
   }
 

@@ -37,6 +37,9 @@ router.delete(
   deleteProfilePicture,
 );
 router.get(getRoute('GET_PROFILE_PICTURE_ROUTE', '/get-profile-picture/:filename'), streamProfilePicture);
-router.get(getRoute('GET_PROFILE_PICTURE_ROUTE', '/get-profile-picture-small/:filename'), StreamProfilePictureSmall);
+router.get(
+  getRoute('GET_PROFILE_PICTURE_ROUTE_SMALL', '/get-profile-picture-small/:filename'),
+  StreamProfilePictureSmall,
+);
 
 export default router;
