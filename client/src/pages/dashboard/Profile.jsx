@@ -153,8 +153,8 @@ export default function Profile() {
                     <ImageWithPreview
                         objectFit="cover" boxSize="100%" rounded={"lg"} overflow={"hidden"}
                         alt={profileUser.username}
-                        smallURL={getSmallProfilePicture(profileUser.profilePhoto)}
-                        largeURL={getProfilePicture(profileUser.profilePhoto)}
+                        smallURL={getSmallProfilePicture(profileUser.profilePhoto ? profileUser.profilePhoto : 'defaultImage_1_comp.webp')}
+                        largeURL={getProfilePicture(profileUser.profilePhoto ? profileUser.profilePhoto : (profileUser.gender && profileUser.gender === 'male' ? 'defaultImage_3_comp.webp' : profileUser.gender === 'female' ? 'defaultImage_2_comp.webp' : 'defaultImage_1_comp.webp') || 'defaultImage_1_comp.webp')}
                     />
                 </Flex>
                 <Stack

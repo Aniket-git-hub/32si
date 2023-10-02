@@ -186,18 +186,29 @@ export default function ProfileSettings() {
                             :
                             <>
                                 {
-                                    previewFileSrc &&
-                                    <Box>
-                                        <IconButton onClick={removePreviewImageHandler} rounded={"100"} shadow={"lg"} size={"sm"} icon={<CloseIcon />} transform={"translate(-50%, 50%)"} />
-                                        <Image
-                                            shadow={"lg"}
-                                            borderRadius={10}
-                                            objectFit="cover"
-                                            boxSize="100%"
-                                            src={previewFileSrc && previewFileSrc}
-                                            alt={user.username}
-                                        />
-                                    </Box>
+                                    previewFileSrc ?
+                                        <Box>
+                                            <IconButton onClick={removePreviewImageHandler} rounded={"100"} shadow={"lg"} size={"sm"} icon={<CloseIcon />} transform={"translate(-50%, 50%)"} />
+                                            <Image
+                                                shadow={"lg"}
+                                                borderRadius={10}
+                                                objectFit="cover"
+                                                boxSize="100%"
+                                                src={previewFileSrc && previewFileSrc}
+                                                alt={user.username}
+                                            />
+                                        </Box> :
+                                        <Box>
+                                            <ImageWithPreview
+                                                shadow={"lg"}
+                                                borderRadius={10}
+                                                objectFit="cover"
+                                                boxSize="100%"
+                                                largeURL={getProfilePicture('defaultImage_1_comp.webp')}
+                                                smallURL={getSmallProfilePicture('defaultImage_1_comp.webp')}
+                                                alt={user.username}
+                                            />
+                                        </Box>
                                 }
                                 <InputGroup my={3}>
                                     <InputLeftElement>
