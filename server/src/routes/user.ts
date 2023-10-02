@@ -16,6 +16,7 @@ import { getRoute } from '../utils/Helper';
 import StreamProfilePictureSmall from '../controllers/user/StreamProfilePictureSmall';
 import { feedbackValidationRules, inputValidation } from '../middleware/validateInputs';
 import postApplicationFeedback from '../controllers/user/applicationFeedback';
+import searchUsers from '../controllers/user/searchUsers';
 
 const router: Router = express.Router();
 
@@ -51,5 +52,7 @@ router.post(
   inputValidation,
   postApplicationFeedback,
 );
+
+router.get('users/search', verifyJWT, searchUsers);
 
 export default router;

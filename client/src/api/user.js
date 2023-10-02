@@ -54,3 +54,5 @@ export const getSmallProfilePicture = (filename) => {
     return `${url}/${filename}`
 }
 export const sendFeedback = async (data, signal) => handleRequest(`${getEndpoint("VITE_SEND_FEEDBACK_URL", '/user/feedback')}`, data, "POST", signal)
+
+export const searchUsers = async (data, signal) => handleRequest(`${getEndpoint("VITE_SEARCH_USERS_ROUTE", 'user/users/search')}?q=${data.query}`, null, "GET", signal)
