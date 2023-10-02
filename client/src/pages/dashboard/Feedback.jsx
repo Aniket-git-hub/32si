@@ -17,6 +17,7 @@ import {
   Wrap,
   WrapItem,
   FormErrorMessage,
+  Link,
 } from "@chakra-ui/react";
 import {
   MdEmail,
@@ -92,7 +93,7 @@ export default function Feedback() {
                           _hover={{ border: "2px solid  #805AD5" }}
                           leftIcon={<MdEmail color="#805AD5" size="20px" />}
                         >
-                          hello@letsbug.com
+                          hello@letsbug.in
                         </Button>
                         <Button
                           size="md"
@@ -115,30 +116,36 @@ export default function Feedback() {
                       px={5}
                       alignItems="flex-start"
                     >
-                      <IconButton
-                        aria-label="facebook"
-                        variant="ghost"
-                        size="lg"
-                        isRound={true}
-                        _hover={{ bg: "#805AD5" }}
-                        icon={<BsLinkedin size="28px" />}
-                      />
-                      <IconButton
-                        aria-label="github"
-                        variant="ghost"
-                        size="lg"
-                        isRound={true}
-                        _hover={{ bg: "#805AD5" }}
-                        icon={<BsGithub size="28px" />}
-                      />
-                      <IconButton
-                        aria-label="instagram"
-                        variant="ghost"
-                        size="lg"
-                        isRound={true}
-                        _hover={{ bg: "#805AD5" }}
-                        icon={<BsInstagram size="28px" />}
-                      />
+                      <Link href="https://www.linkedin.com/in/aniket-singh-80371b201" isExternal>
+                        <IconButton
+                          aria-label="linkedin"
+                          variant="ghost"
+                          size="lg"
+                          isRound={true}
+                          _hover={{ bg: "#805AD5" }}
+                          icon={<BsLinkedin size="28px" />}
+                        />
+                      </Link>
+                      <Link href="https://github.com/Aniket-git-hub" isExternal>
+                        <IconButton
+                          aria-label="github"
+                          variant="ghost"
+                          size="lg"
+                          isRound={true}
+                          _hover={{ bg: "#805AD5" }}
+                          icon={<BsGithub size="28px" />}
+                        />
+                      </Link>
+                      <Link href="https://www.instagram.com/aniketsingh6967/" isExternal>
+                        <IconButton
+                          aria-label="instagram"
+                          variant="ghost"
+                          size="lg"
+                          isRound={true}
+                          _hover={{ bg: "#805AD5" }}
+                          icon={<BsInstagram size="28px" />}
+                        />
+                      </Link>
                     </HStack>
                   </Box>
                 </WrapItem>
