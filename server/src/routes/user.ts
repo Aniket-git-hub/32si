@@ -14,6 +14,8 @@ import streamProfilePicture from '../controllers/user/streamProfilePIcture';
 import uploadProfilePictureController from '../controllers/user/uploadProfilePicture';
 import { getRoute } from '../utils/Helper';
 import StreamProfilePictureSmall from '../controllers/user/StreamProfilePictureSmall';
+import { feedbackValidationRules, inputValidation } from '../middleware/validateInputs';
+import postApplicationFeedback from '../controllers/user/applicationFeedback';
 
 const router: Router = express.Router();
 
@@ -40,6 +42,14 @@ router.get(getRoute('GET_PROFILE_PICTURE_ROUTE', '/get-profile-picture/:filename
 router.get(
   getRoute('GET_PROFILE_PICTURE_ROUTE_SMALL', '/get-profile-picture-small/:filename'),
   StreamProfilePictureSmall,
+);
+//feedback
+router.post(
+  getRoute('APP_FEEDBACK_ROUTE', '/feedback'),
+  verifyJWT,
+  feedbackValidationRules,
+  inputValidation,
+  postApplicationFeedback,
 );
 
 export default router;

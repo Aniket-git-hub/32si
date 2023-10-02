@@ -5,6 +5,8 @@ import otpEmailTemplate from './emailTemplates/otpEmailTemplate';
 import passwordResetInitiatedTemplate from './emailTemplates/passwordResetInitiatedTemplate';
 import passwordResetSuccessfulTemplate from './emailTemplates/passwordResetSuccessfulTemplate';
 import registrationSuccessfulTemplate from './emailTemplates/registrationSuccessfulTemplate';
+import feedbackReceivedTemplate from './emailTemplates/feedbackReceivedTempate';
+import newFeedbackReceivedTemplate from './emailTemplates/newFeedbackReceivedTemplate';
 
 interface EmailResponse {
   success: boolean;
@@ -36,3 +38,16 @@ export const sendRegistrationSuccessfulEmail = (receiverEmail: string, name: str
   sendEmail(receiverEmail, 'Welcome to B2 Beads Board Game!', registrationSuccessfulTemplate(name));
 export const sendAccountDeletionEmail = (receiverEmail: string, name: string) =>
   sendEmail(receiverEmail, ' Your Account Deletion Request', accountDeletionEmailTemplate(name));
+export const sendFeedbackReceivedEmail = (receiverEmail: string, name: string) =>
+  sendEmail(receiverEmail, 'Thank You for Your Valuable Feedback!', feedbackReceivedTemplate(name));
+export const sendNewFeedbackReceivedEmail = (
+  receiverEmail: string,
+  userName: string,
+  userMessage: string,
+  userEmail: string,
+) =>
+  sendEmail(
+    receiverEmail,
+    'New User Feedback Received',
+    newFeedbackReceivedTemplate('Aniket Singh', userName, userEmail, userMessage),
+  );

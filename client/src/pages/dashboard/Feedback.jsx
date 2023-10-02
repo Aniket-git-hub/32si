@@ -27,13 +27,15 @@ import {
 } from "react-icons/md";
 import { BsGithub, BsPerson, BsInstagram, BsLinkedin } from "react-icons/bs";
 import { useFormValidation } from "../../hooks/useFormValidation";
+import { sendFeedback } from "../../api/user";
 
 export default function Feedback() {
-  const initialState = { name:"", email:"", message:"" };
+  const initialState = { name: "", email: "", message: "" };
 
   const submitFeedback = async (values) => {
     try {
-      return { title: "Success", message: "Feedback Sent" };
+      const response = await sendFeedback(values)
+      return { title: "Success", message: response.data.message };
     } catch (error) {
       throw error;
     }
@@ -163,7 +165,7 @@ export default function Feedback() {
                                 size="md"
                               />
                             </InputGroup>
-                              <FormErrorMessage>{errors.name}</FormErrorMessage>
+                            <FormErrorMessage>{errors.name}</FormErrorMessage>
                           </FormControl>
                           <FormControl
                             id="email"

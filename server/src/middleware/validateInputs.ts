@@ -18,13 +18,6 @@ const commonRules = {
   password: [body('password').isString().withMessage('Uh-oh! Your password should be a string.').trim()],
 };
 
-/**
- * @type {Array}
- * Validation rules array for validation of register inputs filed.
- * - rules set for Email filed
- * - rules set for Password filed
- */
-
 export const userRegistrationInputsValidationRules = [
   ...commonRules.name,
   body('username')
@@ -41,13 +34,6 @@ export const userRegistrationInputsValidationRules = [
     .isLength({ max: 15, min: 8 })
     .withMessage('Uh-oh! Your password should be between 8 and 15 characters.'),
 ];
-
-/**
- * @type {Array}
- * Validation rules array for validation of login inputs filed.
- * - rules set for Email filed
- * - rules set for Password filed
- */
 
 export const userLoginInputsValidationRules = [
   ...commonRules.email,
@@ -68,13 +54,18 @@ export const forgotPasswordOtpValidationRules = [
 
 export const resetPasswordValidationRules = [...commonRules.email, ...commonRules.password];
 
+export const feedbackValidationRules = [
+  ...commonRules.email,
+  ...commonRules.name,
+  body('message').isLength({ min: 5 }).withMessage('Message must be at least 5 characters long'),
+];
+
 /**
  * @description Checks if validation result has any error and if so then returns status 400 error to the client for
  * bad request as the data sent to the server failed validation. else next() middleware is called
  * @param {Request} req Express.js Request Object
  * @param {Response} res Express.js Response Object
  * @param {NextFunction} next Next Middleware Function
- * @returns {Response} Response to client
  */
 
 export function inputValidation(req: Request, res: Response, next: NextFunction) {

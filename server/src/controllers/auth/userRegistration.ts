@@ -36,10 +36,10 @@ async function register(req: Request, res: Response, next: NextFunction) {
       path: '/',
     });
 
-    if (process.env.NODE_ENV === 'production') {
+    if (getEnvironmentVariable('NODE_ENV') === 'production') {
       const { success, error } = await sendRegistrationSuccessfulEmail(savedUser.email, savedUser.name);
       if (!success) {
-        console.error('SendingEmail Error:', error);
+        throw new CustomError('SendingEmail', 'Email Not Sent', error as Error);
       }
     }
 

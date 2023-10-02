@@ -53,3 +53,4 @@ export const getSmallProfilePicture = (filename) => {
     let url = getEndpoint("VITE_GET_SMALL_PROFILE_PICTURE_ROUTE", 'http://localhost:3000/user/get-profile-picture-small')
     return `${url}/${filename}`
 }
+export const sendFeedback = async (data, signal) => handleRequest(`${getEndpoint("VITE_SEND_FEEDBACK_URL", '/user/feedback')}`, data, "POST", signal)
