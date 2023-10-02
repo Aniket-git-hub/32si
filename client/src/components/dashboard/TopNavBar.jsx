@@ -1,4 +1,4 @@
-import { Avatar, Badge, Box, Button, Flex, HStack, Link, List, ListItem, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, VStack, useDisclosure, useToast } from "@chakra-ui/react";
+import { Avatar, Badge, Box, Button, Flex, HStack, IconButton, Link, List, ListItem, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, VStack, useDisclosure, useToast } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { FiBell, FiChevronDown } from 'react-icons/fi';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -74,9 +74,21 @@ function TopNavBar() {
         <>
             <Flex as="nav" p=".5rem" pr="1rem" justifyContent="end" alignItems="center">
                 <HStack spacing={{ base: 0, md: 6 }}>
-                    <Button variant="ghost" size="sm" leftIcon={<FiBell size="20" />} onClick={() => onOpen()} >
-                        <Badge variant={"subtle"} colorScheme="green">New</Badge>
-                    </Button>
+                    <IconButton variant="ghost" size="sm" position={"relative"} leftIcon={<FiBell size="20" />} onClick={() => onOpen()} >
+                        {
+                            notifications.length > 0 &&
+                            <Badge colorScheme="red" variant="solid" aspectRatio={"1/1"} borderRadius={"1000px"} style={{
+                                position: "absolute",
+                                top: "10px",
+                                right: "5px",
+                                fontSize: "10px",
+                                fontStyle: "regular",
+                                fontWeight: "lighter",
+                            }}>
+                                {notifications.length}
+                            </Badge>
+                        }
+                    </IconButton>
                     <Flex alignItems={'center'}>
                         <Menu >
                             <MenuButton transition={'all .3s'} _focus={{ boxShadow: 'none' }}>
