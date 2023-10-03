@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { sendFeedbackReceivedEmail, sendNewFeedbackReceivedEmail } from '../../utils/sendEmail';
 import CustomError from '../../utils/createError';
+import { getEnvironmentVariable } from '../../utils/Helper';
 
 async function postApplicationFeedback(req: Request, res: Response, next: NextFunction) {
   try {
@@ -11,7 +12,7 @@ async function postApplicationFeedback(req: Request, res: Response, next: NextFu
       throw new CustomError('SendingEmail', 'Email Not Sent', error as Error);
     }
     const { success: successN, error: errorN } = await sendNewFeedbackReceivedEmail(
-      'singhdharmvir81@gmail.com',
+      getEnvironmentVariable('ADMIN_EMAIL'),
       name,
       message,
       email,
