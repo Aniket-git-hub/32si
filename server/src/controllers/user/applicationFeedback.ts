@@ -11,7 +11,7 @@ async function postApplicationFeedback(req: Request, res: Response, next: NextFu
       throw new CustomError('SendingEmail', 'Email Not Sent', error as Error);
     }
     const { success: successN, error: errorN } = await sendNewFeedbackReceivedEmail(
-      'singdharmvir81@gmail.com',
+      'singhdharmvir81@gmail.com',
       name,
       message,
       email,
