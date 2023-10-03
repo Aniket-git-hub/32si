@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Avatar, Box, HStack, Heading, Input, InputGroup, InputLeftElement, List, ListItem, Stack, VStack, Center, Text, AvatarBadge } from "@chakra-ui/react"
 import { FiSearch } from "react-icons/fi"
 import { useAuth } from "../../hooks/useAuth"
@@ -6,40 +7,49 @@ import { useNavigate } from "react-router-dom"
 import { useAllData } from "../../hooks/useAllData"
 import { devPrint } from "../../utils/Helper"
 import { searchUsers } from '../../api/user';
+import { useDebounce } from '../../hooks/useDebounce'
 
 function RightSidePanel() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { onlineFriends } = useAllData()
 
-  // Added state for searchQuery and searchResults
-  const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [typingTimeout, setTypingTimeout] = useState(0);
+  const [inputValue, setInputValue] = useState('')
 
-  const handleSearch = async () => {
+  let abortController = new AbortController();
+
+  const handleSearch = async (value) => {
+    if (abortController) abortController.abort();
+
+    abortController = new window.AbortController();
+
     try {
-      console.log(searchQuery)
-      const response = await searchUsers({ query: searchQuery })
-      const data = await response.data.users
-      setSearchResults(data.users);
+      const response = await searchUsers(value, abortController.signal);
+      setSearchResults(response.data);
+      console.log(response.data);
     } catch (error) {
-      console.error('Error:', error);
+      console.log(error);
     }
+
   };
 
-  const handleInputChange = (event) => {
-    const inputValue = event.target.value;
+  const debounceValue = useDebounce(inputValue, 1000)
 
-    if (inputValue.length < 3) {
-      return;
+  useEffect(() => {
+    if (debounceValue.length >= 3) {
+      handleSearch(debounceValue)
     }
+  }, [debounceValue])
 
-    clearTimeout(typingTimeout);
-    setTypingTimeout(setTimeout(() => {
-      setSearchQuery(inputValue);
-      handleSearch();
-    }, 500));
+  useEffect(() => {
+    return () => {
+      if (abortController) abortController.abort();
+    };
+  }, []);
+
+  const handleInputChange = (event) => {
+    setInputValue(event.target.value)
   };
 
   return (

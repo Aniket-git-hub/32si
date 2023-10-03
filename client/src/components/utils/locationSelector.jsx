@@ -1,6 +1,6 @@
-import { FormControl, FormLabel, Input, InputGroup, List,    ListItem } from '@chakra-ui/react'
+import { FormControl, FormLabel, Input, InputGroup, List, ListItem } from '@chakra-ui/react'
 import Downshift from 'downshift'
-export default function comboBox({ isDisabled, value, places, handleInputValueChange, handleSelection}) {
+export default function comboBox({ isDisabled, value, places, handleInputValueChange, handleSelection }) {
     return (
         <Downshift
             onChange={handleSelection}
@@ -27,7 +27,8 @@ export default function comboBox({ isDisabled, value, places, handleInputValueCh
                     <List {...getMenuProps()} border={'1px solid lightgray'} >
                         {
                             isOpen ? (places.length == 0 ?
-                                <ListItem>loading...</ListItem> : places.filter(item => !inputValue || item?.name.includes(inputValue)).map((item, index) => (
+                                <ListItem>loading...</ListItem>
+                                : places.filter(item => !inputValue || item?.name.includes(inputValue)).map((item, index) => (
                                     <ListItem
                                         {...getItemProps({
                                             key: `${index}${item.name}`,
@@ -39,7 +40,7 @@ export default function comboBox({ isDisabled, value, places, handleInputValueCh
                                         p={2}
                                         borderRadius={5}
                                     >{item.name}</ListItem>
-                                )) ) 
+                                )))
                                 : null}
                     </List>
                 </FormControl>

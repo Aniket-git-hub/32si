@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import useDebounce from "../../../hooks/useDebounce.jsx";
 import getPlaces from "../../../api/getPlaces";
-import ComboBox from "../../utils/comboBox";
+import ComboBox from "../../utils/locationSelector";
 import { deleteProfilePicture, getProfilePicture, getSmallProfilePicture, updateProfilePicture, updateUser } from "../../../api/user";
 import ImageWithPreview from "../../utils/ImageWithPreview";
 export default function ProfileSettings() {

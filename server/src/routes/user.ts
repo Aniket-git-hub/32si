@@ -53,6 +53,6 @@ router.post(
   postApplicationFeedback,
 );
 
-router.get('users/search', verifyJWT, searchUsers);
+router.get('/users/search', verifyJWT, searchUsers);
 
 export default router;
