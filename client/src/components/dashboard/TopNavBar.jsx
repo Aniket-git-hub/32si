@@ -1,4 +1,4 @@
-import { Avatar, Badge, Box, Button, Flex, HStack, IconButton, Link, List, ListItem, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, VStack, useDisclosure, useToast } from "@chakra-ui/react";
+import { Avatar, Badge, Box, Button, Flex, HStack, IconButton, Link, List, ListItem, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spacer, Text, VStack, useDisclosure, useToast } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { FiBell, FiChevronDown } from 'react-icons/fi';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -49,10 +49,8 @@ function TopNavBar() {
 
     useEffect(() => {
         if (user.connectionRequests?.length !== 0) {
-            console.log("mounting")
             user.connectionRequests.forEach(username => {
                 let notificationsExist = notifications.some(n => n.key === username)
-                console.log(notificationsExist)
                 if (!notificationsExist) {
                     setNotifications(prev => [
                         ...prev,
@@ -68,7 +66,7 @@ function TopNavBar() {
         return () => {
             setNotifications([])
         }
-    }, [])
+    }, [user.connectionRequests])
 
     return (
         <>
@@ -167,6 +165,8 @@ function TopNavBar() {
                         </List>
                     </ModalBody>
                     <ModalFooter>
+                        <Button variant={"outline"} colorScheme="purple" isDisabled={!notifications.length} onClick={() => setNotifications([])}>Clear</Button>
+                        <Spacer />
                         <Button onClick={onClose}>Close</Button>
                     </ModalFooter>
                 </ModalContent>

@@ -8,27 +8,32 @@ async function acceptConnection(req: Request, res: Response, next: NextFunction)
     const requestedUserId: string = req.params.userId;
     const currentUserId: string = req.user.id;
 
+    const requestedUser = await USER.findById(requestedUserId);
+    if (!requestedUser) {
+      throw new CustomError('AuthError', 'User not found');
+    }
+
     const currentUser = await USER.findOneAndUpdate(
-      { _id: currentUserId, connectionRequests: requestedUserId },
+      { _id: currentUserId, connectionRequests: requestedUser.username },
       {
-        $pull: { connectionRequests: requestedUserId },
+        $pull: { connectionRequests: requestedUser.username },
         $addToSet: { friends: requestedUserId },
       },
       { new: true },
     ).populate('friends');
 
-    const requestedUser = await USER.findOneAndUpdate(
+    const updatedRequestedUser = await USER.findOneAndUpdate(
       { _id: requestedUserId },
       { $addToSet: { friends: currentUserId } },
       { new: true },
     ).populate('friends');
 
-    if (!currentUser || !requestedUser) {
+    if (!currentUser || !updatedRequestedUser) {
       throw new CustomError('AuthError', 'User not found');
     }
 
     const { password, ...restCurrentUser } = currentUser.toObject();
-    const { password: Rpassword, ...restRequestedUser } = requestedUser.toObject();
+    const { password: Rpassword, ...restRequestedUser } = updatedRequestedUser.toObject();
 
     res.json({
       message: 'Connected successfully',

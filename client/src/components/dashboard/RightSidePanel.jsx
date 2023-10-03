@@ -19,8 +19,9 @@ function RightSidePanel() {
 
   const handleSearch = async () => {
     try {
+      console.log(searchQuery)
       const response = await searchUsers({ query: searchQuery })
-      const data = await response.json();
+      const data = await response.data.users
       setSearchResults(data.users);
     } catch (error) {
       console.error('Error:', error);
@@ -30,17 +31,15 @@ function RightSidePanel() {
   const handleInputChange = (event) => {
     const inputValue = event.target.value;
 
-    // Validate the input here (you can add more validation logic)
     if (inputValue.length < 3) {
       return;
     }
 
-    // Debouncing logic
     clearTimeout(typingTimeout);
     setTypingTimeout(setTimeout(() => {
       setSearchQuery(inputValue);
       handleSearch();
-    }, 500)); // Adjust the delay as needed (300ms in this case)
+    }, 500));
   };
 
   return (
@@ -55,23 +54,24 @@ function RightSidePanel() {
 
         <Heading size={"md"}> Allies </Heading>
         <List>
-          {searchResults.map(result => (
-            <ListItem key={result._id} _hover={{ bg: "gray.100", cursor: "pointer" }} px={3} py={2} borderRadius={5}
-              onClick={() => navigate(`/profile/@${result.username}`, { state: { friend: result } })}
+          {user.friends && user.friends.map(friend => (
+            <ListItem key={friend._id} _hover={{ bg: "gray.100", cursor: "pointer" }} px={3} py={2} borderRadius={5}
+              onClick={() => navigate(`/profile/@${friend.username}`, { state: { friend } })}
             >
               <HStack>
-                <Avatar src={result?.profilePicture} size={"sm"} name={result?.name}>
-                  {onlineFriends?.includes(result._id) && (
-                    <AvatarBadge boxSize='1.25em' bg='green.500' title={`${result.username} is online`} ></AvatarBadge>
+                <Avatar src={friend?.profilePicture} size={"sm"} name={friend?.name}>
+                  {onlineFriends?.includes(friend._id) && (
+                    <AvatarBadge boxSize='1.25em' bg='green.500' title={`${friend.username} is online`} ></AvatarBadge>
                   )}
                 </Avatar>
                 <Center>
-                  <Text>  {result?.username}</Text>
+                  <Text>  {friend?.username}</Text>
                 </Center>
               </HStack>
             </ListItem>
           ))}
         </List>
+
       </Stack>
     </Box>
   )
