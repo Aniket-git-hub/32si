@@ -10,7 +10,11 @@ const PORT: string | number = process.env.PORT || 3000;
  *  prevents cross origin error and preflight error
  */
 import cors from 'cors';
-const prodOrigins = [getEnvironmentVariable('ORIGIN_1'), getEnvironmentVariable('ORIGIN_2')];
+const prodOrigins = [
+  getEnvironmentVariable('ORIGIN_1'),
+  getEnvironmentVariable('ORIGIN_2'),
+  getEnvironmentVariable('ORIGIN_3'),
+];
 const devOrigin = ['http://localhost:5173'];
 const allowedOrigins = getEnvironmentVariable('NODE_ENV') === 'production' ? prodOrigins : devOrigin;
 app.use(

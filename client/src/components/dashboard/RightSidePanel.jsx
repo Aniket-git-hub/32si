@@ -6,8 +6,9 @@ import { useAuth } from "../../hooks/useAuth"
 import { useNavigate } from "react-router-dom"
 import { useAllData } from "../../hooks/useAllData"
 import { devPrint } from "../../utils/Helper"
-import { searchUsers } from '../../api/user';
-import { useDebounce } from '../../hooks/useDebounce'
+import { getProfilePicture, getSmallProfilePicture, searchUsers } from '../../api/user';
+import useDebounce from '../../hooks/useDebounce'
+import AvatarWithPreview from '../utils/AvatarWithPreview'
 
 function RightSidePanel() {
   const { user } = useAuth()
@@ -69,11 +70,16 @@ function RightSidePanel() {
               onClick={() => navigate(`/profile/@${friend.username}`, { state: { friend } })}
             >
               <HStack>
-                <Avatar src={friend?.profilePicture} size={"sm"} name={friend?.name}>
+                <AvatarWithPreview
+                  size={"sm"}
+                  name={friend?.name}
+                  smallURL={getSmallProfilePicture(friend?.profilePicture)}
+                  largeURL={getProfilePicture(friend?.profilePicture)}
+                >
                   {onlineFriends?.includes(friend._id) && (
                     <AvatarBadge boxSize='1.25em' bg='green.500' title={`${friend.username} is online`} ></AvatarBadge>
                   )}
-                </Avatar>
+                </AvatarWithPreview>
                 <Center>
                   <Text>  {friend?.username}</Text>
                 </Center>

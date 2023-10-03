@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Avatar } from '@chakra-ui/react';
 
-const AvatarWithPreview = ({ smallURL, largeURL, ...rest }) => {
+const AvatarWithPreview = ({ smallURL, largeURL, children, ...rest }) => {
       const [src, setSrc] = useState(smallURL);
 
       return (
@@ -13,7 +13,7 @@ const AvatarWithPreview = ({ smallURL, largeURL, ...rest }) => {
                         img.onload = () => setSrc(largeURL);
                   }}
                   {...rest}
-            />
+            > {children} </Avatar>
       );
 };
 
