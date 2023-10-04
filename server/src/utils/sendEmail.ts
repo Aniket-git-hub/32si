@@ -42,8 +42,8 @@ export const sendPasswordResetSuccessfulEmail = (receiverEmail: string, name: st
 export const sendRegistrationSuccessfulEmail = (receiverEmail: string, name: string) =>
   sendEmail(receiverEmail, 'Welcome to B2 Beads Board Game!', registrationSuccessfulTemplate(name));
 
-export const sendAccountDeletionEmail = (receiverEmail: string, name: string, confirmationLink: string, cancellationLink: string) =>
-  sendEmail(receiverEmail, 'Your Account Deletion Request', accountDeletionEmailTemplate(name, confirmationLink, cancellationLink));
+export const sendAccountDeletionEmail = (receiverEmail: string, name: string, confirmationLink: string, otp: number, cancellationLink: string) =>
+  sendEmail(receiverEmail, 'Your Account Deletion Request', accountDeletionEmailTemplate(name, confirmationLink, otp, cancellationLink));
 
 export const sendAccountDeletionSuccesfullEmail = (receiverEmail: string, name: string) =>
   sendEmail(receiverEmail, 'Your Account Deleted Succesfully', accountDeletionSuccessTemplate(name));

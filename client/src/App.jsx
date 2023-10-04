@@ -17,6 +17,7 @@ import Rivals from './pages/dashboard/Rivals';
 import { useAllData } from './hooks/useAllData';
 import { useEffect } from 'react';
 import useSocket from './hooks/useSocket'
+import DeleteAccountConfirmationPage from './pages/auth/DeleteAccountConfirmationPage';
 
 function App() {
   const { user, setUser, isAuthenticated, verifyOTP } = useAuth()
@@ -65,6 +66,7 @@ function App() {
       <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate replace to="/" />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage verifyOTP={verifyOTP} />} />
       <Route path="/reset-password" element={verifyOTP ? <ResetPasswordPage /> : <Error404Page />} />
+      <Route path="/delete-account/:deletionToken" element={!user ? <DeleteAccountConfirmationPage /> : <Error404Page />} />
       <Route path="*" element={<Error404Page />} />
     </Routes>
   )

@@ -10,9 +10,12 @@ import getPlaces from "../../../api/getPlaces";
 import ComboBox from "../../utils/locationSelector";
 import { deleteAccountRequest, deleteProfilePicture, getProfilePicture, getSmallProfilePicture, updateProfilePicture, updateUser } from "../../../api/user";
 import ImageWithPreview from "../../utils/ImageWithPreview";
+import { logoutUser } from "../../../api/auth";
+import { useAllData } from "../../../hooks/useAllData";
 export default function ProfileSettings() {
     const alert = useToast()
-    const { user, save } = useAuth();
+    const { user, save, remove } = useAuth();
+    const { resetData } = useAllData()
     let initialState = {
         name: user?.name || "",
         username: user?.username || "",
@@ -156,6 +159,7 @@ export default function ProfileSettings() {
         try {
             setdeleting(true)
             await deleteAccountRequest()
+            await logoutUser()
             alert({
                 title: "Account Deletion Request",
                 description: `Account deletion confirmation email sent to ${user.email}`,
@@ -164,6 +168,8 @@ export default function ProfileSettings() {
                 isClosable: true,
                 position: "top",
             })
+            resetData()
+            remove()
         } catch (error) {
             if (error.code === "ERR_NETWORK") {
                 alert({

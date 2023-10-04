@@ -3,7 +3,10 @@ import USER from '../../models/user';
 import CustomError from '../../utils/createError';
 import { sendAccountDeletionEmail } from '../../utils/sendEmail';
 import generateDeletionToken from '../../utils/generateDeletionToken';
-import { getEnvironmentVariable } from '../../utils/Helper';
+import { getEnvironmentVariable, getRoute } from '../../utils/Helper';
+import OTP from '../../models/otp';
+import bcrypt from 'bcryptjs';
+
 
 async function deleteUserRequest(req: Request, res: Response, next: NextFunction) {
       try {
@@ -16,12 +19,19 @@ async function deleteUserRequest(req: Request, res: Response, next: NextFunction
             user.deletionToken = deletionToken;
             await user.save();
 
-            const serverURL = getEnvironmentVariable('NODE_ENV') === 'production' ? getEnvironmentVariable('SERVER_URL') : 'http://localhost:3000/'
+            const otp = Math.floor(100000 + Math.random() * 900000);
+            const newOtp = new OTP({
+                  email: user.email,
+                  otp: bcrypt.hashSync(String(otp), 12)
+            })
+            await newOtp.save()
 
-            const confirmationLink: string = `${serverURL}user${getEnvironmentVariable('DELETE_USER_ROUTE')}${deletionToken}`;
+            const serverURL = getEnvironmentVariable('NODE_ENV') === 'production' ? getEnvironmentVariable('SERVER_URL') : 'http://localhost:5173/'
+
+            const confirmationLink: string = `${getRoute("DELETE_ACCOUNT_URL", 'http://localhost:5173/delete-account/')}${deletionToken}`;
             const cancellationLink: string = `${serverURL}user${getEnvironmentVariable('CANCEL_DELETE_USER_ROUTE')}${deletionToken}`;
 
-            const { success, error } = await sendAccountDeletionEmail(user.email, user.name, confirmationLink, cancellationLink);
+            const { success, error } = await sendAccountDeletionEmail(user.email, user.name, confirmationLink, otp, cancellationLink);
             if (!success) {
                   throw new CustomError('SendingEmail', 'Email not sent', error);
             }
