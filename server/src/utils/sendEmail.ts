@@ -8,6 +8,7 @@ import registrationSuccessfulTemplate from './emailTemplates/registrationSuccess
 import feedbackReceivedTemplate from './emailTemplates/feedbackReceivedTempate';
 import newFeedbackReceivedTemplate from './emailTemplates/newFeedbackReceivedTemplate';
 import accountDeletionSuccessTemplate from './emailTemplates/accountDeletionSuccessfullTempate';
+import accountDeletionCancellationTemplate from './emailTemplates/accountDeletionCancellationTemplate ';
 
 interface EmailResponse {
   success: boolean;
@@ -46,6 +47,9 @@ export const sendAccountDeletionEmail = (receiverEmail: string, name: string, co
 
 export const sendAccountDeletionSuccesfullEmail = (receiverEmail: string, name: string) =>
   sendEmail(receiverEmail, 'Your Account Deleted Succesfully', accountDeletionSuccessTemplate(name));
+
+export const sendAccountDeletionCancellationEmail = (receiverEmail: string, name: string) =>
+  sendEmail(receiverEmail, 'Account Deletion Request Cancelled', accountDeletionCancellationTemplate(name));
 
 export const sendFeedbackReceivedEmail = (receiverEmail: string, name: string) =>
   sendEmail(receiverEmail, 'Thank You for Your Valuable Feedback!', feedbackReceivedTemplate(name));
