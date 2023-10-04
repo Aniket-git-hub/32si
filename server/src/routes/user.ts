@@ -20,8 +20,8 @@ import searchUsers from '../controllers/user/searchUsers';
 
 const router: Router = express.Router();
 
-router.get(getRoute('GET_USER_ROUTE', '/by-username/:username'), verifyJWT, getAUser);
-router.get(getRoute('GET_USER_ROUTE', '/by-id/:userId'), verifyJWT, getAUserById);
+router.get(getRoute('GET_USER_BY_USERNAME_ROUTE', '/by-username/:username'), verifyJWT, getAUser);
+router.get(getRoute('GET_USER_BY_USER_ID_ROUTE', '/by-id/:userId'), verifyJWT, getAUserById);
 router.put(getRoute('UPDATE_USER_ROUTE', '/'), verifyJWT, updateUser);
 router.delete(getRoute('DELETE_USER_ROUTE', '/'), verifyJWT, deleteUser);
 router.get(getRoute('GET_ALL_USER_ROUTE', '/users'), verifyJWT, getAllUser);

@@ -21,7 +21,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (getEnvironmentVariable('NODE_ENV') === 'production') {
-        if (origin && allowedOrigins.includes(origin)) {
+        if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
         } else {
           callback(new Error(`${origin} not allowed by cors`));
@@ -30,6 +30,7 @@ app.use(
         callback(null, true);
       }
     },
+    optionsSuccessStatus: 200,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   }),
