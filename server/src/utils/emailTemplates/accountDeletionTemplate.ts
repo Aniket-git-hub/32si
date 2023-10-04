@@ -1,4 +1,4 @@
-const accountDeletionEmailTemplate = (name: string) => `
+const accountDeletionEmailTemplate = (name: string, confirmationLink: string, cancellationLink: string) => `
   <div style="max-width: 600px; margin: auto; padding: 20px; font-family: Arial, sans-serif; color: #333; border: 1px solid #b8b8b8; border-radius:.3rem;">
     <h2 style="font-size: 24px;">Account Deletion Request</h2>
     <p style="font-size: 18px;">Dear ${name},</p>
@@ -11,7 +11,11 @@ const accountDeletionEmailTemplate = (name: string) => `
     </ul>
     <p style="font-size: 18px;">If you're sure about this decision and understand the consequences, please click on the link below to confirm your account deletion:</p>
     <div style="text-align: center; margin-top: 20px;">
-        <a href="#" style="background-color: #ff0000; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: .3rem;">Confirm Account Deletion</a>
+        <a href="${confirmationLink}" style="background-color: #ff0000; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: .3rem;">Confirm Account Deletion</a>
+    </div>
+    <p style="font-size: 18px;">If you didn't request this or if you've changed your mind, please click on the link below to cancel the account deletion:</p>
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="${cancellationLink}" style="background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: .3rem;">Cancel Account Deletion</a>
     </div>
     <p style="font-size: 18px;">If you didn't request this or if you've changed your mind, please disregard this email or contact our support team.</p>
     <p style="font-size: 18px;">Thank you for using our services. We hope to see you again in the future.</p>

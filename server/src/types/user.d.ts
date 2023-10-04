@@ -15,4 +15,5 @@ interface User extends Document {
     coordinates: number[];
   };
   connectionRequests: string[];
+  deletionToken: string;
 }

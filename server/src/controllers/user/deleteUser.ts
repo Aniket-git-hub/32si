@@ -1,15 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
 import USER from '../../models/user';
 import CustomError from '../../utils/createError';
-import { sendAccountDeletionEmail } from '../../utils/sendEmail';
+import { sendAccountDeletionSuccesfullEmail } from '../../utils/sendEmail';
 
 async function deleteUser(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = req.user.id;
-    const user = await USER.findById(userId);
+    const token = req.params.token;
+    const user = await USER.findOne({ deletionToken: token });
     if (!user) throw new CustomError('DeleteError', 'user not found');
+    const userId = user._id
 
-    const { success, error } = await sendAccountDeletionEmail(user.email, user.name);
+    const { success, error } = await sendAccountDeletionSuccesfullEmail(user.email, user.name);
     if (!success) {
       throw new CustomError('SendingEmail', 'Email not sent', error);
     }

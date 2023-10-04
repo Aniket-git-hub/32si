@@ -61,6 +61,10 @@ const userSchema = new mongoose.Schema<User>({
       ref: 'user',
     },
   ],
+  deletionToken: {
+    type: String,
+  }
+
 });
 
 userSchema.index({ location: '2dsphere' });

@@ -7,6 +7,7 @@ import passwordResetSuccessfulTemplate from './emailTemplates/passwordResetSucce
 import registrationSuccessfulTemplate from './emailTemplates/registrationSuccessfulTemplate';
 import feedbackReceivedTemplate from './emailTemplates/feedbackReceivedTempate';
 import newFeedbackReceivedTemplate from './emailTemplates/newFeedbackReceivedTemplate';
+import accountDeletionSuccessTemplate from './emailTemplates/accountDeletionSuccessfullTempate';
 
 interface EmailResponse {
   success: boolean;
@@ -30,16 +31,25 @@ async function sendEmail(receiverEmail: string, subject: string, template: strin
 
 export const sendOTPEmail = (receiverEmail: string, name: string, otp: number) =>
   sendEmail(receiverEmail, 'Hello, OTP here', otpEmailTemplate(name, otp));
+
 export const sendPasswordResetInitiatedEmail = (receiverEmail: string, name: string) =>
   sendEmail(receiverEmail, 'Password Reset Initiated', passwordResetInitiatedTemplate(name));
+
 export const sendPasswordResetSuccessfulEmail = (receiverEmail: string, name: string) =>
   sendEmail(receiverEmail, 'Password Reset Successful', passwordResetSuccessfulTemplate(name));
+
 export const sendRegistrationSuccessfulEmail = (receiverEmail: string, name: string) =>
   sendEmail(receiverEmail, 'Welcome to B2 Beads Board Game!', registrationSuccessfulTemplate(name));
-export const sendAccountDeletionEmail = (receiverEmail: string, name: string) =>
-  sendEmail(receiverEmail, ' Your Account Deletion Request', accountDeletionEmailTemplate(name));
+
+export const sendAccountDeletionEmail = (receiverEmail: string, name: string, confirmationLink: string, cancellationLink: string) =>
+  sendEmail(receiverEmail, 'Your Account Deletion Request', accountDeletionEmailTemplate(name, confirmationLink, cancellationLink));
+
+export const sendAccountDeletionSuccesfullEmail = (receiverEmail: string, name: string) =>
+  sendEmail(receiverEmail, 'Your Account Deleted Succesfully', accountDeletionSuccessTemplate(name));
+
 export const sendFeedbackReceivedEmail = (receiverEmail: string, name: string) =>
   sendEmail(receiverEmail, 'Thank You for Your Valuable Feedback!', feedbackReceivedTemplate(name));
+
 export const sendNewFeedbackReceivedEmail = (
   receiverEmail: string,
   userName: string,
