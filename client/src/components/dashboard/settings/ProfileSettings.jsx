@@ -1,4 +1,4 @@
-import { Box, Heading, Stack, Flex, Image, Button, FormControl, InputGroup, FormLabel, Input, FormErrorMessage, IconButton, InputLeftElement, Icon, useToast } from "@chakra-ui/react";
+import { Box, Heading, Stack, Flex, Image, Button, FormControl, InputGroup, FormLabel, Input, FormErrorMessage, IconButton, InputLeftElement, Icon, useToast, HStack, Divider, useSafeLayoutEffect } from "@chakra-ui/react";
 import { useFormValidation } from "../../../hooks/useFormValidation";
 import { useAuth } from "../../../hooks/useAuth.jsx";
 import { FiEdit, FiFile, FiImage } from "react-icons/fi";
@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import useDebounce from "../../../hooks/useDebounce.jsx";
 import getPlaces from "../../../api/getPlaces";
 import ComboBox from "../../utils/locationSelector";
-import { deleteProfilePicture, getProfilePicture, getSmallProfilePicture, updateProfilePicture, updateUser } from "../../../api/user";
+import { deleteAccountRequest, deleteProfilePicture, getProfilePicture, getSmallProfilePicture, updateProfilePicture, updateUser } from "../../../api/user";
 import ImageWithPreview from "../../utils/ImageWithPreview";
 export default function ProfileSettings() {
     const alert = useToast()
@@ -16,7 +16,6 @@ export default function ProfileSettings() {
     let initialState = {
         name: user?.name || "",
         username: user?.username || "",
-        email: user?.email,
         bio: user?.bio || "",
         location: user?.location || ""
     };
@@ -152,6 +151,35 @@ export default function ProfileSettings() {
             setSelectedImage(null)
         }
     }
+    const [deleting, setdeleting] = useState(false)
+    const handleDeleteAccountRequest = async () => {
+        try {
+            setdeleting(true)
+            await deleteAccountRequest()
+            alert({
+                title: "Account Deletion Request",
+                description: `Account deletion confirmation email sent to ${user.email}`,
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+                position: "top",
+            })
+        } catch (error) {
+            if (error.code === "ERR_NETWORK") {
+                alert({
+                    title: "Network Error",
+                    description: error.message,
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                    position: "top",
+                })
+            }
+            console.log(error)
+        } finally {
+            setdeleting(false)
+        }
+    }
 
     return (
         <Box
@@ -160,6 +188,15 @@ export default function ProfileSettings() {
             padding={5}
             borderRadius={5}
             height={"450px"}
+            overflowY={"scroll"}
+            minH={"80vh"}
+            sx={
+                {
+                    '::-webkit-scrollbar': {
+                        display: 'none'
+                    }
+                }
+            }
         >
             <Heading size="md">Update Profile</Heading>
             <Flex
@@ -276,22 +313,7 @@ export default function ProfileSettings() {
                             </InputGroup>
                             <FormErrorMessage> {errors.bio}</FormErrorMessage>
                         </FormControl>
-                        <FormControl
-                            id="email"
-                            isInvalid={errors.email}
-                            isReadOnly={!editProfile}
-                            isDisabled={!editProfile}
-                        >
-                            <FormLabel>Email</FormLabel>
-                            <InputGroup>
-                                <Input
-                                    name="email"
-                                    value={values.email}
-                                    onChange={handleChange}
-                                />
-                            </InputGroup>
-                            <FormErrorMessage> {errors.username}</FormErrorMessage>
-                        </FormControl>
+
                         <ComboBox
                             isDisabled={!editProfile}
                             places={places}
@@ -328,6 +350,54 @@ export default function ProfileSettings() {
                     </form>
                 </Stack>
             </Flex >
+
+            <Heading size="md" mt={"50px"} mb={5}>Danger Section</Heading>
+            <Box p={5}>
+                <form>
+                    <Flex justifyContent={"space-between "} alignItems={"baseline"}>
+                        <FormControl>
+                            <FormLabel>Email</FormLabel>
+                            <InputGroup>
+                                <Input
+                                    value={user.email}
+                                />
+                            </InputGroup>
+                            <FormErrorMessage> </FormErrorMessage>
+                        </FormControl>
+                        <Button colorScheme="red" variant={"outline"} onClick={() => alert({ description: "comming soon" })}>Update</Button>
+                    </Flex>
+                </form>
+                <form>
+                    <HStack>
+                        <FormControl
+                        >
+                            <FormLabel>Password</FormLabel>
+                            <InputGroup>
+                                <Input
+                                    value={" "}
+                                    name="password"
+                                />
+                            </InputGroup>
+                            <FormErrorMessage> </FormErrorMessage>
+                        </FormControl>
+                        <Button colorScheme="red" variant={"outline"} onClick={() => alert({ description: "comming soon" })}>Update</Button>
+                    </HStack>
+                </form>
+
+                <Divider my={5}></Divider>
+                <Button
+                    colorScheme="red"
+                    w={"full"}
+                    onClick={handleDeleteAccountRequest}
+                    loadingText={"Deleting..."}
+                    isLoading={deleting}
+                    isDisabled={deleting}
+                >
+                    Delete Account
+                </Button>
+
+            </Box>
+
         </Box >
     );
 }
