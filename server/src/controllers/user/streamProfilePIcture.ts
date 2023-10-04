@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { gridfsBucket } from '../../dbInitialization';
 import CustomError from '../../utils/createError';
+import sharp from 'sharp';
 
 async function streamProfilePicture(req: Request, res: Response, next: NextFunction) {
   try {
@@ -10,7 +11,8 @@ async function streamProfilePicture(req: Request, res: Response, next: NextFunct
       throw new CustomError('Error404', 'File not found');
     }
     const readStream = gridfsBucket.openDownloadStreamByName(filename);
-    readStream.pipe(res);
+    const transform = sharp().webp({ lossless: true });
+    readStream.pipe(transform).pipe(res);
   } catch (error) {
     next(error);
   }
