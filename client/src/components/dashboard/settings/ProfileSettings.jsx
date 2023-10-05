@@ -366,6 +366,7 @@ export default function ProfileSettings() {
                             <InputGroup>
                                 <Input
                                     value={user.email}
+                                    onChange={() => alert({ description: "comming soom" })}
                                 />
                             </InputGroup>
                             <FormErrorMessage> </FormErrorMessage>
@@ -382,6 +383,7 @@ export default function ProfileSettings() {
                                 <Input
                                     value={" "}
                                     name="password"
+                                    onChange={() => alert({ description: "comming soom" })}
                                 />
                             </InputGroup>
                             <FormErrorMessage> </FormErrorMessage>

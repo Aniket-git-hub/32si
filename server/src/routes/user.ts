@@ -27,7 +27,7 @@ router.get(getRoute('GET_USER_BY_USER_ID_ROUTE', '/by-id/:userId'), verifyJWT, g
 router.put(getRoute('UPDATE_USER_ROUTE', '/'), verifyJWT, updateUser);
 router.delete(getRoute('DELETE_USER_REQUEST_ROUTE', '/'), verifyJWT, deleteUserRequest);
 router.post(`${getRoute('DELETE_USER_ROUTE', '/delete-user/')}:token`, deleteUser)
-router.get(`${getRoute('CANCEL_DELETE_USER_ROUTE', '/cancel-delete-user/')}:token`, cancelAccountDeletion)
+router.post(`${getRoute('CANCEL_DELETE_USER_ROUTE', '/cancel-delete-user/')}:token`, cancelAccountDeletion)
 router.get(getRoute('GET_ALL_USER_ROUTE', '/users'), verifyJWT, getAllUser);
 router.post(getRoute('CONNECT_USER_ROUTE', '/:username/connect'), verifyJWT, connectUser);
 router.post(getRoute('ACCEPT_USER_ROUTE', '/:userId/accept'), verifyJWT, acceptConnection);

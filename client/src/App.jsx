@@ -18,6 +18,7 @@ import { useAllData } from './hooks/useAllData';
 import { useEffect } from 'react';
 import useSocket from './hooks/useSocket'
 import DeleteAccountConfirmationPage from './pages/auth/DeleteAccountConfirmationPage';
+import CancelDeleteAccountRequestPage from './pages/auth/CancelDeleteAccountRequestPage';
 
 function App() {
   const { user, setUser, isAuthenticated, verifyOTP } = useAuth()
@@ -67,6 +68,7 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPasswordPage verifyOTP={verifyOTP} />} />
       <Route path="/reset-password" element={verifyOTP ? <ResetPasswordPage /> : <Error404Page />} />
       <Route path="/delete-account/:deletionToken" element={!user ? <DeleteAccountConfirmationPage /> : <Error404Page />} />
+      <Route path="/cancel-delete-account/:deletionToken" element={<CancelDeleteAccountRequestPage />} />
       <Route path="*" element={<Error404Page />} />
     </Routes>
   )

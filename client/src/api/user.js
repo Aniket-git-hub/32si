@@ -59,3 +59,4 @@ export const searchUsers = async (data, signal) => handleRequest(`${getEndpoint(
 
 export const deleteAccountRequest = async (signal) => handleRequest(`${getEndpoint("VITE_DELETE_ACCOUNT_ROUTE", '/user/')}`, null, "DELETE", signal)
 export const confirmAccountDeletion = async (data, signal) => handleRequest(`${getEndpoint("VITE_CONFIRM_ACCOUNT_DELETION", '/user/delete-user')}/${data.deletionToken}`, data, "POST", signal)
+export const cancelAccountDeleteRequest = async (data, signal) => handleRequest(`${getEndpoint("VITE_CANCEL_ACCOUNT_DELETION", '/user/cancel-delete-user')}/${data.deletionToken}`, data, "POST", signal)

@@ -29,7 +29,7 @@ async function deleteUserRequest(req: Request, res: Response, next: NextFunction
             const serverURL = getEnvironmentVariable('NODE_ENV') === 'production' ? getEnvironmentVariable('SERVER_URL') : 'http://localhost:5173/'
 
             const confirmationLink: string = `${getRoute("DELETE_ACCOUNT_URL", 'http://localhost:5173/delete-account/')}${deletionToken}`;
-            const cancellationLink: string = `${serverURL}user${getEnvironmentVariable('CANCEL_DELETE_USER_ROUTE')}${deletionToken}`;
+            const cancellationLink: string = `${getRoute("CANCEL_DELETE_ACCOUNT_URL", "http://localhost:5173/cancel-delete-account/")}${deletionToken}`;
 
             const { success, error } = await sendAccountDeletionEmail(user.email, user.name, confirmationLink, otp, cancellationLink);
             if (!success) {
