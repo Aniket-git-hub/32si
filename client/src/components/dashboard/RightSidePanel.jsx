@@ -20,19 +20,23 @@ function RightSidePanel() {
 
   let abortController = new AbortController();
 
-  const handleSearch = async (value) => {
+  const handleSearch = async (value, user) => {
     if (abortController) abortController.abort();
 
     abortController = new window.AbortController();
-
+    console.log(value)
     try {
-      const response = await searchUsers(value, abortController.signal);
+      const query = { query: value, page: 1, limit: 10 };
+      if (user && user.location && user.location.coordinates) {
+        query.longitude = user.location.coordinates[0];
+        query.latitude = user.location.coordinates[1];
+      }
+      const response = await searchUsers(query, abortController.signal);
       setSearchResults(response.data);
       console.log(response.data);
     } catch (error) {
       console.log(error);
     }
-
   };
 
   const debounceValue = useDebounce(inputValue, 1000)

@@ -55,7 +55,14 @@ export const getSmallProfilePicture = (filename) => {
 }
 export const sendFeedback = async (data, signal) => handleRequest(`${getEndpoint("VITE_SEND_FEEDBACK_URL", '/user/feedback')}`, data, "POST", signal)
 
-export const searchUsers = async (data, signal) => handleRequest(`${getEndpoint("VITE_SEARCH_USERS_ROUTE", '/user/users/search')}?q=${data.query}`, null, "GET", signal)
+export const searchUsers = async (data, signal) => {
+    let url = `${getEndpoint("VITE_SEARCH_USERS_ROUTE", '/user/users/search')}?q=${data.query}`;
+    if (data.longitude && data.latitude) {
+        url += `&longitude=${data.longitude}&latitude=${data.latitude}`;
+    }
+    url += `&page=${data.page}&limit=${data.limit}`;
+    return handleRequest(url, null, "GET", signal);
+};
 
 export const deleteAccountRequest = async (signal) => handleRequest(`${getEndpoint("VITE_DELETE_ACCOUNT_ROUTE", '/user/')}`, null, "DELETE", signal)
 export const confirmAccountDeletion = async (data, signal) => handleRequest(`${getEndpoint("VITE_CONFIRM_ACCOUNT_DELETION", '/user/delete-user')}/${data.deletionToken}`, data, "POST", signal)
