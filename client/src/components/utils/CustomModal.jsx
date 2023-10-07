@@ -1,6 +1,6 @@
 import { Button, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure } from "@chakra-ui/react"
 import React from "react";
-function CustomModal({ title, trigger, children, size }) {
+function CustomModal({ title, trigger, children, size, footer }) {
       const { isOpen, onOpen, onClose } = useDisclosure()
       return (
             <>
@@ -17,7 +17,13 @@ function CustomModal({ title, trigger, children, size }) {
                                     {React.cloneElement(children, { onClose: onClose })}
                               </ModalBody>
                               <ModalFooter>
-                                    <Button onClick={() => onClose()} >Close</Button>
+                                    {
+                                          footer ?
+                                                footer(onClose)
+                                                :
+                                                <Button onClick={() => onClose()} >Close</Button>
+
+                                    }
                               </ModalFooter>
                         </ModalContent>
                   </Modal>
