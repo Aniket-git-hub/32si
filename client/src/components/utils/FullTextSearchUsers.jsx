@@ -89,8 +89,8 @@ function FullTextSearchUsers({ onClose }) {
                                                       <AvatarWithPreview
                                                             size={"sm"}
                                                             name={e.name}
-                                                            smallURL={getSmallProfilePicture(e.profilePicture)}
-                                                            largeURL={getProfilePicture(e.profilePicture)}
+                                                            smallURL={getSmallProfilePicture(e.profilePhoto)}
+                                                            largeURL={getProfilePicture(e.profilePhoto)}
                                                       >
                                                       </AvatarWithPreview>
                                                       <Center>
