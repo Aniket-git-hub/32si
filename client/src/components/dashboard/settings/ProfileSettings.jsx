@@ -1,17 +1,17 @@
-import { Box, Heading, Stack, Flex, Image, Button, FormControl, InputGroup, FormLabel, Input, FormErrorMessage, IconButton, InputLeftElement, Icon, useToast, HStack, Divider, useSafeLayoutEffect } from "@chakra-ui/react";
-import { useFormValidation } from "../../../hooks/useFormValidation";
-import { useAuth } from "../../../hooks/useAuth.jsx";
-import { FiEdit, FiFile, FiImage } from "react-icons/fi";
 import { CloseIcon } from "@chakra-ui/icons";
-import { useState } from "react";
-import { useEffect } from "react";
-import useDebounce from "../../../hooks/useDebounce.jsx";
-import getPlaces from "../../../api/getPlaces";
-import ComboBox from "../../utils/locationSelector";
-import { deleteAccountRequest, deleteProfilePicture, getProfilePicture, getSmallProfilePicture, updateProfilePicture, updateUser } from "../../../api/user";
-import ImageWithPreview from "../../utils/ImageWithPreview";
+import { Box, Button, Divider, Flex, FormControl, FormErrorMessage, FormLabel, Heading, Icon, IconButton, Image, Input, InputGroup, InputLeftElement, Spacer, Stack, useToast } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import { FiEdit, FiImage } from "react-icons/fi";
 import { logoutUser } from "../../../api/auth";
+import getPlaces from "../../../api/getPlaces";
+import { deleteAccountRequest, deleteProfilePicture, getProfilePicture, getSmallProfilePicture, updateProfilePicture, updateUser } from "../../../api/user";
 import { useAllData } from "../../../hooks/useAllData";
+import { useAuth } from "../../../hooks/useAuth.jsx";
+import useDebounce from "../../../hooks/useDebounce.jsx";
+import { useFormValidation } from "../../../hooks/useFormValidation";
+import CustomAlertDialog from "../../utils/CustomAlertDialog";
+import ImageWithPreview from "../../utils/ImageWithPreview";
+import ComboBox from "../../utils/locationSelector";
 export default function ProfileSettings() {
     const alert = useToast()
     const { user, save, remove } = useAuth();
@@ -159,7 +159,6 @@ export default function ProfileSettings() {
         try {
             setdeleting(true)
             await deleteAccountRequest()
-            await logoutUser()
             alert({
                 title: "Account Deletion Request",
                 description: `Account deletion confirmation email sent to ${user.email}`,
@@ -168,6 +167,7 @@ export default function ProfileSettings() {
                 isClosable: true,
                 position: "top",
             })
+            await logoutUser()
             resetData()
             remove()
         } catch (error) {
@@ -207,7 +207,6 @@ export default function ProfileSettings() {
             <Heading size="md">Update Profile</Heading>
             <Flex
                 w="100%"
-                height={{ sm: "fit-content", md: "320px" }}
                 direction={{ base: "column", md: "row" }}
                 padding={2}
             >
@@ -357,11 +356,11 @@ export default function ProfileSettings() {
                 </Stack>
             </Flex >
 
-            <Heading size="md" mt={"50px"} mb={5}>Danger Section</Heading>
+            <Heading size="md" my={1}>Danger</Heading>
             <Box p={5}>
                 <form>
-                    <Flex justifyContent={"space-between "} alignItems={"baseline"}>
-                        <FormControl>
+                    <Flex justifyContent={"space-between "} alignItems="flex-end">
+                        <FormControl flex={20} >
                             <FormLabel>Email</FormLabel>
                             <InputGroup>
                                 <Input
@@ -371,29 +370,43 @@ export default function ProfileSettings() {
                             </InputGroup>
                             <FormErrorMessage> </FormErrorMessage>
                         </FormControl>
-                        <Button colorScheme="red" variant={"outline"} onClick={() => alert({ description: "comming soon" })}>Update</Button>
+                        <Spacer flex={1} />
+                        <Button isDisabled isReadOnly flex={2} colorScheme="red" variant={"outline"} onClick={() => alert({ description: "comming soon" })}>Update</Button>
                     </Flex>
-                </form>
-                <form>
-                    <HStack>
-                        <FormControl
-                        >
-                            <FormLabel>Password</FormLabel>
-                            <InputGroup>
-                                <Input
-                                    value={" "}
-                                    name="password"
-                                    onChange={() => alert({ description: "comming soom" })}
-                                />
-                            </InputGroup>
-                            <FormErrorMessage> </FormErrorMessage>
-                        </FormControl>
-                        <Button colorScheme="red" variant={"outline"} onClick={() => alert({ description: "comming soon" })}>Update</Button>
-                    </HStack>
                 </form>
 
                 <Divider my={5}></Divider>
-                <Button
+
+                <CustomAlertDialog
+                    title={"Warning"}
+                    trigger={(onOpen) => {
+                        return <>
+                            <Button
+                                colorScheme="red"
+                                w={"full"}
+                                onClick={onOpen}
+                                loadingText={"Deleting..."}
+                                isLoading={deleting}
+                                isDisabled={deleting}
+                            >
+                                Delete Account Request
+                            </Button>
+                        </>
+                    }}
+
+                    footer={(onClose) => (
+                        <>
+                            <Flex justifyContent={"space-between "} alignItems="center">
+                                <Button flex={2} onClick={onClose}>Cancel</Button>
+                                <Spacer flex={1}></Spacer>
+                                <Button flex={2} onClick={() => { handleDeleteAccountRequest(); onClose(); }} colorScheme="red">Delete</Button>
+                            </Flex>
+                        </>
+                    )}
+                >
+                    <p>Are you sure you want to delete you account?</p>
+                </CustomAlertDialog>
+                {/* <Button
                     colorScheme="red"
                     w={"full"}
                     onClick={handleDeleteAccountRequest}
@@ -401,8 +414,8 @@ export default function ProfileSettings() {
                     isLoading={deleting}
                     isDisabled={deleting}
                 >
-                    Delete Account
-                </Button>
+                    Delete Account Request
+                </Button> */}
 
             </Box>
 
