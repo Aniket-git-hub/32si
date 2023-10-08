@@ -1,8 +1,8 @@
-import { Card, CardBody, Text, Heading, VStack, Button, HStack, Grid, GridItem, Box } from "@chakra-ui/react";
+import { Box, Button, Card, CardBody, Grid, GridItem, HStack, Heading, Text, VStack } from "@chakra-ui/react";
+import { useEffect, useState } from 'react';
 import GameBoard from "../../components/game/GameBoard";
 import { useAuth } from "../../hooks/useAuth";
 import useSocket from "../../hooks/useSocket";
-import { useEffect, useState } from 'react';
 
 export default function HomePage() {
   const { user } = useAuth()

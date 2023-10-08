@@ -1,6 +1,6 @@
-import Spot from "./Spot"
-import Piece from "./Piece"
 import { useEffect, useState } from "react"
+import Piece from "./Piece"
+import Spot from "./Spot"
 
 const GameBoard = ({ spotOnClick }) => {
     const relations = {
@@ -110,17 +110,11 @@ const GameBoard = ({ spotOnClick }) => {
             { x: 0, y: 0 },
         ],
     ]
-    const boardSpots = [
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-    ]
+    const [turn, setTurn] = useState(false)
+
+    useEffect(() => {
+        spotOnClick(turn)
+    }, [turn])
 
     const boardInitialState = [
         [0, 1, 1, 1, 0],
@@ -143,56 +137,100 @@ const GameBoard = ({ spotOnClick }) => {
         [false, false, false, false, false],
         [false, false, false, false, false],
         [false, false, false, false, false],
-        [false, false, false, false, false],
+        [false, false, false, false, false]
     ])
-    const [turn, setTurn] = useState(false)
 
-    useEffect(() => {
-        spotOnClick(turn)
-    }, [turn])
+    let beadsBoard = []
+    const [pieces, setPieces] = useState(boardInitialState.map((row, i) => row.map((pieceValue, j) => {
+        return <Piece
+            position={{
+                x: `${sizes[i][j].x}px`,
+                y: `${sizes[i][j].y}px`,
+            }}
+            size="10px"
+            value={pieceValue}
+        />
+    })));
+    const [lastClickedSpot, setLastClickedSpot] = useState(null);
+    const [firstClick, setFirstClick] = useState(false)
 
-    let initializedSpots = Array(boardSpots.length)
-        .fill()
-        .map(() => [])
+    function spotOnClickHandler(e, spot) {
+        if (!spot.piece) {
+            if (!lastClickedSpot) return
+            movePiece(e, spot, lastClickedSpot)
+        } else
+            showPossibleMoves(e, spot)
 
-    const [selectedPiece, setSelectedPiece] = useState(null)
-
-    const spotOnClickHandler = ({ relations, piece, boardPosition, setRenderPiece }) => {
-        if (selectedPiece) {
-            console.log(selectedPiece)
-        }
-        if (piece !== null && ((piece.props.value === 2 && !turn) || (piece.props.value === 1 && turn))) {
-            setSelectedPiece(piece)
-            setTurn(!turn)
-
-            const emptySpots = []
-            relations.forEach((s) => {
-                let [i, j] = s.split("")
-                let neighbouringSpot = initializedSpots[i][j]
-                if (neighbouringSpot.props.piece !== null) return
-                emptySpots.push({ i, j })
-            })
-            const newMoves = possibleMoves.map((row) => row.map(() => false))
-            emptySpots.forEach((spot) => {
-                newMoves[spot.i][spot.j] = !newMoves[spot.i][spot.j]
-            })
-
-            setPossibleMoves(newMoves)
-        }
-        // else {
-        //     const newMoves = possibleMoves.map((row) => row.map(() => false))
-        //     setPossibleMoves(newMoves)
-        //     setSelectedPiece(null)
-        //     // get the current spot from the selection and update the selected piece 
-        // }
-
-        if (piece === null) {
-            // const currentSpot = initializedSpots[boardPosition.i][boardPosition.j]
-            // setRenderPiece(selectedPiece)
-            // setSelectedPiece(null)
-            alert("will set the selected piece here ")
-        }
     }
+
+    function showPossibleMoves(e, spot) {
+        let newPossibleMoves = [...possibleMoves]
+        if (firstClick && lastClickedSpot && lastClickedSpot.boardPosition.i === spot.boardPosition.i && lastClickedSpot.boardPosition.j === spot.boardPosition.j) {
+            spot.relations.forEach(p => {
+                let [i, j] = p.split("");
+                newPossibleMoves[i][j] = false;
+            });
+            setPossibleMoves(newPossibleMoves);
+            setLastClickedSpot(spot);
+            setFirstClick(false)
+            return
+        }
+        if (lastClickedSpot) {
+            lastClickedSpot.relations.forEach(p => {
+                let [lastI, lastJ] = p.split("");
+                newPossibleMoves[lastI][lastJ] = false;
+            });
+        }
+        spot.relations.forEach(p => {
+            let [i, j] = p.split("");
+            let neighouringSpot = beadsBoard[i][j]
+            if (!neighouringSpot.props.piece) {
+                newPossibleMoves[i][j] = true;
+            }
+        });
+        setFirstClick(true)
+        setPossibleMoves(newPossibleMoves);
+        setLastClickedSpot(spot);
+    }
+    function movePiece(e, spot, lastClickedSpot) {
+        // alert("Selected Piece wil be moved here")
+        console.log(lastClickedSpot)
+    }
+
+    boardInitialState.forEach((row, i) => {
+        let rowArray = [];
+        row.forEach((col, j) => {
+
+            rowArray.push(
+                <Spot
+                    key={`${i}${j}`}
+                    position={{
+                        x: `${sizes[i][j].x}px`,
+                        y: `${sizes[i][j].y}px`,
+                    }}
+                    size="12px"
+                    boardPosition={{ i, j }}
+                    nullSpot={
+                        `${i}${j}` == "84" ||
+                            `${i}${j}` == "80" ||
+                            `${i}${j}` == "74" ||
+                            `${i}${j}` == "70" ||
+                            `${i}${j}` == "14" ||
+                            `${i}${j}` == "10" ||
+                            `${i}${j}` == "00" ||
+                            `${i}${j}` == "04"
+                            ? true
+                            : false
+                    }
+                    piece={pieces[i][j].props.value !== 0 ? pieces[i][j] : null}
+                    relations={relations[`${i}${j}`]}
+                    isPossibleMove={possibleMoves[i][j]}
+                    onClick={spotOnClickHandler}
+                />
+            )
+        })
+        beadsBoard.push(rowArray);
+    })
 
     return (
         <svg className="board">
@@ -210,56 +248,12 @@ const GameBoard = ({ spotOnClick }) => {
                             x2={`${to.x}`}
                             y2={`${to.y}`}
                             stroke="white"
-                            strokeWidth="2px"
+                            strokeWidth="3px"
                         />
                     )
                 })
             })}
-
-            {boardSpots.map((row, i) =>
-                row.map((col, j) => {
-                    let spot = (
-                        <Spot
-                            key={`${i}${j}`}
-                            position={{
-                                x: `${sizes[i][j].x}px`,
-                                y: `${sizes[i][j].y}px`,
-                            }}
-                            size="12px"
-                            boardPosition={{ i, j }}
-                            nullSpot={
-                                `${i}${j}` == "84" ||
-                                    `${i}${j}` == "80" ||
-                                    `${i}${j}` == "74" ||
-                                    `${i}${j}` == "70" ||
-                                    `${i}${j}` == "14" ||
-                                    `${i}${j}` == "10" ||
-                                    `${i}${j}` == "00" ||
-                                    `${i}${j}` == "04"
-                                    ? true
-                                    : false
-                            }
-                            relations={relations[`${i}${j}`]}
-                            isPossibleMove={possibleMoves[i][j]}
-                            onClick={spotOnClickHandler}
-                            piece={
-                                boardInitialState[i][j] === 0 ? null : (
-                                    <Piece
-                                        position={{
-                                            x: `${sizes[i][j].x}px`,
-                                            y: `${sizes[i][j].y}px`,
-                                        }}
-                                        size="10px"
-                                        value={boardInitialState[i][j]}
-                                    />
-                                )
-                            }
-                        />
-                    )
-                    initializedSpots[i].push(spot)
-                    return spot
-                }),
-            )}
+            {beadsBoard}
         </svg>
     )
 }

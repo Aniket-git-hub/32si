@@ -50,17 +50,18 @@ function NotificationButton() {
                         title={"Notifications"}
                         trigger={(onOpen) => {
                               return <>
-                                    <IconButton variant="ghost" size="sm" position={"relative"} leftIcon={<FiBell size="20" />} onClick={() => onOpen()} >
+                                    <IconButton variant="ghost" pl={2} size="sm" position={"relative"} leftIcon={<FiBell size="20" />} onClick={() => onOpen()} >
                                           {
-                                                notifications.length > 0 &&
-                                                <Badge colorScheme="red" variant="solid" aspectRatio={"1/1"} borderRadius={"1000px"} style={{
-                                                      position: "absolute",
-                                                      top: "10px",
-                                                      right: "5px",
-                                                      fontSize: "10px",
-                                                      fontStyle: "regular",
-                                                      fontWeight: "lighter",
-                                                }}>
+                                                <Badge
+                                                      hidden={!notifications.length > 0}
+                                                      colorScheme="red" variant="solid" aspectRatio={"1/1"} borderRadius={"1000px"} style={{
+                                                            position: "absolute",
+                                                            top: "10px",
+                                                            right: "5px",
+                                                            fontSize: "10px",
+                                                            fontStyle: "regular",
+                                                            fontWeight: "lighter",
+                                                      }}>
                                                       {notifications.length}
                                                 </Badge>
                                           }
