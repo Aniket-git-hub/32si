@@ -142,14 +142,14 @@ const GameBoard = ({ spotOnClick }) => {
 
     let beadsBoard = []
     const [pieces, setPieces] = useState(boardInitialState.map((row, i) => row.map((pieceValue, j) => {
-        return <Piece
+        return pieceValue !== 0 ? <Piece
             position={{
                 x: `${sizes[i][j].x}px`,
                 y: `${sizes[i][j].y}px`,
             }}
             size="10px"
             value={pieceValue}
-        />
+        /> : null
     })));
     const [lastClickedSpot, setLastClickedSpot] = useState(null);
     const [firstClick, setFirstClick] = useState(false)
@@ -192,9 +192,37 @@ const GameBoard = ({ spotOnClick }) => {
         setPossibleMoves(newPossibleMoves);
         setLastClickedSpot(spot);
     }
-    function movePiece(e, spot, lastClickedSpot) {
-        // alert("Selected Piece wil be moved here")
-        console.log(lastClickedSpot)
+    function movePiece(e, spot) {
+        let { i, j } = spot.boardPosition;
+
+        // Check if the spot is marked as a possible move
+        if (!possibleMoves[i][j]) {
+            return; // If not, exit the function without moving the piece
+        }
+
+        console.table(pieces)
+        let lastPiece = lastClickedSpot.piece
+
+        // Create a new Piece component with the updated position
+        let newPiece = <Piece
+            position={{
+                x: `${sizes[i][j].x}px`,
+                y: `${sizes[i][j].y}px`,
+            }}
+            size="10px"
+            value={lastPiece.props.value}
+        />
+
+        // Update the pieces state
+        let newPieces = pieces.map(row => [...row]); // Create a deep copy of the pieces state
+        newPieces[i][j] = newPiece;
+        newPieces[lastClickedSpot.boardPosition.i][lastClickedSpot.boardPosition.j] = null;
+        setPieces(newPieces);
+
+        // Reset the possibleMoves and lastClickedSpot states
+        setPossibleMoves(possibleMoves.map(row => row.map(() => false)));
+        setLastClickedSpot(null);
+
     }
 
     boardInitialState.forEach((row, i) => {
@@ -222,7 +250,7 @@ const GameBoard = ({ spotOnClick }) => {
                             ? true
                             : false
                     }
-                    piece={pieces[i][j].props.value !== 0 ? pieces[i][j] : null}
+                    piece={pieces[i][j]}
                     relations={relations[`${i}${j}`]}
                     isPossibleMove={possibleMoves[i][j]}
                     onClick={spotOnClickHandler}
