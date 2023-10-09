@@ -160,7 +160,6 @@ const GameBoard = ({ spotOnClick }) => {
             movePiece(e, spot, lastClickedSpot)
         } else
             showPossibleMoves(e, spot)
-
     }
 
     function showPossibleMoves(e, spot) {
@@ -183,45 +182,55 @@ const GameBoard = ({ spotOnClick }) => {
         }
         spot.relations.forEach(p => {
             let [i, j] = p.split("");
-            let neighouringSpot = beadsBoard[i][j]
-            if (!neighouringSpot.props.piece) {
+            let neighbouringSpot = beadsBoard[i][j]
+            if (!neighbouringSpot.props.piece) {
                 newPossibleMoves[i][j] = true;
+            } else {
+                // Check the neighbors of the neighboring spot
+                neighbouringSpot.props.relations.forEach(p2 => {
+                    let [i2, j2] = p2.split("");
+                    let neighbouringNeighbouringSpot = beadsBoard[i2][j2]
+                    if (!neighbouringNeighbouringSpot.props.piece) {
+                        newPossibleMoves[i2][j2] = true;
+                    }
+                });
             }
         });
         setFirstClick(true)
         setPossibleMoves(newPossibleMoves);
         setLastClickedSpot(spot);
     }
+
     function movePiece(e, spot) {
-        let { i, j } = spot.boardPosition;
-
-        // Check if the spot is marked as a possible move
-        if (!possibleMoves[i][j]) {
-            return; // If not, exit the function without moving the piece
-        }
-
-        console.table(pieces)
         let lastPiece = lastClickedSpot.piece
+        let { i, j } = spot.boardPosition
 
-        // Create a new Piece component with the updated position
-        let newPiece = <Piece
-            position={{
-                x: `${sizes[i][j].x}px`,
-                y: `${sizes[i][j].y}px`,
-            }}
-            size="10px"
-            value={lastPiece.props.value}
-        />
+        if (possibleMoves[i][j]) {
+            let newPiece = <Piece
+                position={{
+                    x: `${sizes[i][j].x}px`,
+                    y: `${sizes[i][j].y}px`,
+                }}
+                size="10px"
+                value={lastPiece.props.value}
+            />
 
-        // Update the pieces state
-        let newPieces = pieces.map(row => [...row]); // Create a deep copy of the pieces state
-        newPieces[i][j] = newPiece;
-        newPieces[lastClickedSpot.boardPosition.i][lastClickedSpot.boardPosition.j] = null;
-        setPieces(newPieces);
+            let newPieces = pieces.map(row => [...row]);
+            newPieces[i][j] = newPiece;
+            newPieces[lastClickedSpot.boardPosition.i][lastClickedSpot.boardPosition.j] = null;
 
-        // Reset the possibleMoves and lastClickedSpot states
-        setPossibleMoves(possibleMoves.map(row => row.map(() => false)));
-        setLastClickedSpot(null);
+            if (!lastClickedSpot.relations.includes(`${i}${j}`)) {
+                let middleI = (lastClickedSpot.boardPosition.i + i) / 2;
+                let middleJ = (lastClickedSpot.boardPosition.j + j) / 2;
+
+                newPieces[middleI][middleJ] = null;
+            }
+
+            setPieces(newPieces);
+
+            setPossibleMoves(possibleMoves.map(row => row.map(() => false)));
+            setLastClickedSpot(null);
+        }
 
     }
 

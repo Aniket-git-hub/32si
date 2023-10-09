@@ -10,6 +10,7 @@ const Piece = ({ value, position, size }) => {
       <circle
         style={{
           cursor: "pointer",
+          transition: 'all .5 ease-in-out'
         }}
         cx={position.x}
         cy={position.y}
