@@ -26,7 +26,7 @@ export default function HomePage() {
   const [playerTwoColor, setPlayerTwoColor] = useState("blue")
   const [playerOneName, setPlayerOneName] = useState("RED")
   const [playerTwoName, setPlayerTwoName] = useState("BLUE")
-  const [playerTurn, setPlayerTurn] = useState(playerTwoName)
+  const [playerTurn, setPlayerTurn] = useState(playerOneName)
   const [previousGames, setPreviousGames] = useState([
     {
       playerOne: 12,
@@ -45,17 +45,19 @@ export default function HomePage() {
     },
   ])
 
+  const [newGame, setNewGame] = useState(false)
   const newGameHander = () => {
-    setPlayerOneScore(16)
-    setPlayerTwoScore(16)
-
+    setNewGame(prev => !prev)
   }
+
   const AIHandler = () => {
 
   }
 
-  const handleSpotOnClick = (turn) => {
-    turn ? setPlayerTurn(playerOneName) : setPlayerTurn(playerTwoName)
+  const handleBoardUpdate = (currentPlayer, redScore, blueScore) => {
+    setPlayerOneScore(redScore)
+    setPlayerTwoScore(blueScore)
+    setPlayerTurn(currentPlayer == 1 ? playerOneName : playerTwoName)
   }
 
 
@@ -94,7 +96,7 @@ export default function HomePage() {
 
       <GridItem colSpan={6}>
         <Box display={"flex"} justifyContent={"center"}>
-          <GameBoard spotOnClick={handleSpotOnClick} />
+          <GameBoard boardUpdate={handleBoardUpdate} setNewGame={newGame} />
         </Box>
       </GridItem>
 

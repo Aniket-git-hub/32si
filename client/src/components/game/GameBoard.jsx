@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import Piece from "./Piece"
 import Spot from "./Spot"
 
-const GameBoard = ({ spotOnClick }) => {
+const GameBoard = ({ boardUpdate, setNewGame }) => {
     const relations = {
         "01": ["02", "11"],
         "02": ["01", "03", "12"],
@@ -110,11 +110,6 @@ const GameBoard = ({ spotOnClick }) => {
             { x: 0, y: 0 },
         ],
     ]
-    const [turn, setTurn] = useState(false)
-
-    useEffect(() => {
-        spotOnClick(turn)
-    }, [turn])
 
     const boardInitialState = [
         [0, 1, 1, 1, 0],
@@ -128,18 +123,7 @@ const GameBoard = ({ spotOnClick }) => {
         [0, 2, 2, 2, 0],
     ]
 
-    const [possibleMoves, setPossibleMoves] = useState([
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false],
-        [false, false, false, false, false]
-    ])
-
+    const [possibleMoves, setPossibleMoves] = useState(boardInitialState.map(row => row.map(_ => false)))
     let beadsBoard = []
     const [pieces, setPieces] = useState(boardInitialState.map((row, i) => row.map((pieceValue, j) => {
         return pieceValue !== 0 ? <Piece
@@ -153,15 +137,28 @@ const GameBoard = ({ spotOnClick }) => {
     })));
     const [lastClickedSpot, setLastClickedSpot] = useState(null);
     const [firstClick, setFirstClick] = useState(false)
+    const [currentPlayer, setCurrentPlayer] = useState(1);
+    const [redScore, setRedScore] = useState(16);
+    const [blueScore, setBlueScore] = useState(16);
 
     function spotOnClickHandler(e, spot) {
+        if (spot.piece && spot.piece.props.value !== currentPlayer) {
+            return;
+        }
         if (!spot.piece) {
             if (!lastClickedSpot) return
             movePiece(e, spot, lastClickedSpot)
-        } else
+        } else {
             showPossibleMoves(e, spot)
+        }
     }
 
+    /**
+     * 
+     * @param {onClick} e navtive click event
+     * @param {Spot} spot currently clicked spot to of from which possible moves will be shown
+     * @returns 
+     */
     function showPossibleMoves(e, spot) {
         let newPossibleMoves = [...possibleMoves]
         if (firstClick && lastClickedSpot && lastClickedSpot.boardPosition.i === spot.boardPosition.i && lastClickedSpot.boardPosition.j === spot.boardPosition.j) {
@@ -180,22 +177,28 @@ const GameBoard = ({ spotOnClick }) => {
                 newPossibleMoves[lastI][lastJ] = false;
             });
         }
+        const { i: currentI, j: currentJ } = spot.boardPosition
         spot.relations.forEach(p => {
-            let [i, j] = p.split("");
-            let neighbouringSpot = beadsBoard[i][j]
+            let [firstLevelNeighbourI, firstLevelNeighbourJ] = p.split("");
+            let neighbouringSpot = beadsBoard[firstLevelNeighbourI][firstLevelNeighbourJ]
             if (!neighbouringSpot.props.piece) {
-                newPossibleMoves[i][j] = true;
+                newPossibleMoves[firstLevelNeighbourI][firstLevelNeighbourJ] = true;
             } else {
-                // Check the neighbors of the neighboring spot
-                neighbouringSpot.props.relations.forEach(p2 => {
-                    let [i2, j2] = p2.split("");
-                    let neighbouringNeighbouringSpot = beadsBoard[i2][j2]
-                    if (!neighbouringNeighbouringSpot.props.piece) {
-                        newPossibleMoves[i2][j2] = true;
-                    }
-                });
+                if (currentI == firstLevelNeighbourI || currentJ == firstLevelNeighbourJ) {
+                    neighbouringSpot.props.relations.forEach(p2 => {
+                        let [secondLevelNeighbourI, secondLevelNeighbourJ] = p2.split("");
+                        if ((currentI == firstLevelNeighbourI && firstLevelNeighbourI == secondLevelNeighbourI) ||
+                            (currentJ == firstLevelNeighbourJ && firstLevelNeighbourJ === secondLevelNeighbourJ)) {
+                            let neighbouringNeighbouringSpot = beadsBoard[secondLevelNeighbourI][secondLevelNeighbourJ]
+                            if (!neighbouringNeighbouringSpot.props.piece) {
+                                newPossibleMoves[secondLevelNeighbourI][secondLevelNeighbourJ] = true;
+                            }
+                        }
+                    });
+                }
             }
         });
+
         setFirstClick(true)
         setPossibleMoves(newPossibleMoves);
         setLastClickedSpot(spot);
@@ -224,15 +227,64 @@ const GameBoard = ({ spotOnClick }) => {
                 let middleJ = (lastClickedSpot.boardPosition.j + j) / 2;
 
                 newPieces[middleI][middleJ] = null;
+
+                if (pieces[middleI][middleJ].props.value === 1) {
+                    setRedScore(redScore - 1);
+                } else if (pieces[middleI][middleJ].props.value === 2) {
+                    setBlueScore(blueScore - 1);
+                }
             }
 
             setPieces(newPieces);
 
             setPossibleMoves(possibleMoves.map(row => row.map(() => false)));
             setLastClickedSpot(null);
+            setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
         }
 
     }
+
+    function resetGame() {
+        setPieces(boardInitialState.map((row, i) => row.map((pieceValue, j) => {
+            return pieceValue !== 0 ? <Piece
+                position={{
+                    x: `${sizes[i][j].x}px`,
+                    y: `${sizes[i][j].y}px`,
+                }}
+                size="10px"
+                value={pieceValue}
+            /> : null
+        })));
+
+        setPossibleMoves([
+            [false, false, false, false, false],
+            [false, false, false, false, false],
+            [false, false, false, false, false],
+            [false, false, false, false, false],
+            [false, false, false, false, false],
+            [false, false, false, false, false],
+            [false, false, false, false, false],
+            [false, false, false, false, false],
+            [false, false, false, false, false],
+        ]);
+
+        setLastClickedSpot(null);
+
+        setFirstClick(false);
+
+        setCurrentPlayer(1);
+
+        setRedScore(16);
+        setBlueScore(16);
+    }
+
+    useEffect(() => {
+        resetGame()
+    }, [setNewGame])
+
+    useEffect(() => {
+        boardUpdate(currentPlayer, redScore, blueScore)
+    }, [blueScore, redScore, currentPlayer])
 
     boardInitialState.forEach((row, i) => {
         let rowArray = [];
