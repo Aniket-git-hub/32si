@@ -1,5 +1,6 @@
 import { Box, Button, Card, CardBody, Grid, GridItem, HStack, Heading, Text, VStack } from "@chakra-ui/react";
 import { useEffect, useState } from 'react';
+import Confetti from "react-confetti";
 import GameBoard from "../../components/game/GameBoard";
 import { useAuth } from "../../hooks/useAuth";
 import useSocket from "../../hooks/useSocket";
@@ -20,6 +21,10 @@ export default function HomePage() {
     }
   }, [user, socket])
 
+  const [windowDimensions, setWindowDimensions] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
   const [playerOneScore, setPlayerOneScore] = useState(16)
   const [playerTwoScore, setPlayerTwoScore] = useState(16)
   const [playerOneColor, setPlayerOneColor] = useState("red")
@@ -27,6 +32,7 @@ export default function HomePage() {
   const [playerOneName, setPlayerOneName] = useState("RED")
   const [playerTwoName, setPlayerTwoName] = useState("BLUE")
   const [playerTurn, setPlayerTurn] = useState(playerOneName)
+  const [confetti, setConfetti] = useState(false)
   const [previousGames, setPreviousGames] = useState([
     {
       playerOne: 12,
@@ -58,6 +64,7 @@ export default function HomePage() {
     setPlayerOneScore(redScore)
     setPlayerTwoScore(blueScore)
     setPlayerTurn(currentPlayer == 1 ? playerOneName : playerTwoName)
+    setConfetti(prev => !prev)
   }
 
 
@@ -96,6 +103,7 @@ export default function HomePage() {
 
       <GridItem colSpan={6}>
         <Box display={"flex"} justifyContent={"center"}>
+          {confetti && <Confetti numberOfPieces={300} width={windowDimensions.width} height={windowDimensions.height} />}
           <GameBoard boardUpdate={handleBoardUpdate} setNewGame={newGame} />
         </Box>
       </GridItem>
