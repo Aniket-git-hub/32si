@@ -125,6 +125,8 @@ const GameBoard = ({ boardUpdate, setNewGame }) => {
 
     const [possibleMoves, setPossibleMoves] = useState(boardInitialState.map(row => row.map(_ => false)))
     let beadsBoard = []
+    let linesArray = [];
+
     const [pieces, setPieces] = useState(boardInitialState.map((row, i) => row.map((pieceValue, j) => {
         return pieceValue !== 0 ? <Piece
             position={{
@@ -142,6 +144,7 @@ const GameBoard = ({ boardUpdate, setNewGame }) => {
     const [blueScore, setBlueScore] = useState(16);
 
     function spotOnClickHandler(e, spot) {
+        console.log(linesArray)
         if (spot.piece && spot.piece.props.value !== currentPlayer) {
             return;
         }
@@ -255,25 +258,10 @@ const GameBoard = ({ boardUpdate, setNewGame }) => {
                 value={pieceValue}
             /> : null
         })));
-
-        setPossibleMoves([
-            [false, false, false, false, false],
-            [false, false, false, false, false],
-            [false, false, false, false, false],
-            [false, false, false, false, false],
-            [false, false, false, false, false],
-            [false, false, false, false, false],
-            [false, false, false, false, false],
-            [false, false, false, false, false],
-            [false, false, false, false, false],
-        ]);
-
+        setPossibleMoves(boardInitialState.map(row => row.map(_ => false)));
         setLastClickedSpot(null);
-
         setFirstClick(false);
-
         setCurrentPlayer(1);
-
         setRedScore(16);
         setBlueScore(16);
     }
@@ -283,13 +271,13 @@ const GameBoard = ({ boardUpdate, setNewGame }) => {
     }, [setNewGame])
 
     useEffect(() => {
-        boardUpdate(currentPlayer, redScore, blueScore)
+        let winner = redScore === 0 ? 2 : blueScore === 0 ? 1 : null
+        boardUpdate(currentPlayer, redScore, blueScore, winner)
     }, [blueScore, redScore, currentPlayer])
 
     boardInitialState.forEach((row, i) => {
         let rowArray = [];
-        row.forEach((col, j) => {
-
+        row.forEach((_, j) => {
             rowArray.push(
                 <Spot
                     key={`${i}${j}`}
@@ -321,9 +309,33 @@ const GameBoard = ({ boardUpdate, setNewGame }) => {
         beadsBoard.push(rowArray);
     })
 
+
+    Object.entries(relations).forEach((row, rowIndex) => {
+        const [i, j] = row[0].split("");
+        let from = sizes[i][j];
+        let rowArray = [];
+        row[1].forEach((e, columnIndex) => {
+            const [k, l] = e.split("");
+            let to = sizes[k][l];
+            let line = (
+                <line
+                    key={`${rowIndex}-${columnIndex}`}
+                    x1={`${from.x}`}
+                    y1={`${from.y}`}
+                    x2={`${to.x}`}
+                    y2={`${to.y}`}
+                    stroke="white"
+                    strokeWidth="3px"
+                />
+            );
+            rowArray.push(line);
+        });
+        linesArray.push(rowArray);
+    });
+
     return (
         <svg className="board">
-            {Object.entries(relations).map((row, index) => {
+            {/* {Object.entries(relations).map((row, index) => {
                 const [i, j] = row[0].split("")
                 let from = sizes[i][j]
                 return row[1].map((e, indexTwo) => {
@@ -341,7 +353,8 @@ const GameBoard = ({ boardUpdate, setNewGame }) => {
                         />
                     )
                 })
-            })}
+            })} */}
+            {linesArray}
             {beadsBoard}
         </svg>
     )

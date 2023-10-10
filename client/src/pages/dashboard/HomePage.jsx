@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardBody, Grid, GridItem, HStack, Heading, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Card, CardBody, Grid, GridItem, HStack, Heading, Text, VStack, useToast } from "@chakra-ui/react";
 import { useEffect, useState } from 'react';
 import Confetti from "react-confetti";
 import GameBoard from "../../components/game/GameBoard";
@@ -8,6 +8,7 @@ import useSocket from "../../hooks/useSocket";
 export default function HomePage() {
   const { user } = useAuth()
   const { socket } = useSocket()
+  const alert = useToast()
 
   useEffect(() => {
     if (user && socket) {
@@ -32,24 +33,9 @@ export default function HomePage() {
   const [playerOneName, setPlayerOneName] = useState("RED")
   const [playerTwoName, setPlayerTwoName] = useState("BLUE")
   const [playerTurn, setPlayerTurn] = useState(playerOneName)
+  const [winner, setWinner] = useState(null)
   const [confetti, setConfetti] = useState(false)
-  const [previousGames, setPreviousGames] = useState([
-    {
-      playerOne: 12,
-      playerTwo: 0,
-      winner: "BLUE"
-    },
-    {
-      playerOne: 7,
-      playerTwo: 0,
-      winner: "BLUE"
-    },
-    {
-      playerOne: 2,
-      playerTwo: 0,
-      winner: "RED"
-    },
-  ])
+  const [previousGames, setPreviousGames] = useState([])
 
   const [newGame, setNewGame] = useState(false)
   const newGameHander = () => {
@@ -60,13 +46,31 @@ export default function HomePage() {
 
   }
 
-  const handleBoardUpdate = (currentPlayer, redScore, blueScore) => {
+  const checkWinner = (playerWon) => {
+    setWinner(playerWon === 1 ? playerOneName : playerWon === 2 ? playerTwoName : null)
+    if (playerWon) {
+      setConfetti(prev => !prev)
+      setTimeout(() => {
+        setConfetti(prev => !prev)
+      }, 3000)
+      alert(
+        {
+          title: "We have a winner",
+          description: `${winner} has won the game. Congratulations`,
+          position: "top",
+          status: "success",
+          duration: 3000
+        }
+      )
+    }
+  }
+
+  const handleBoardUpdate = (currentPlayer, redScore, blueScore, playerWon) => {
     setPlayerOneScore(redScore)
     setPlayerTwoScore(blueScore)
     setPlayerTurn(currentPlayer == 1 ? playerOneName : playerTwoName)
-    setConfetti(prev => !prev)
+    checkWinner(playerWon)
   }
-
 
   return (
     <Grid bg="bodyColor" borderRadius={10} p={6} templateColumns={"repeat(10, 1fr)"} >
