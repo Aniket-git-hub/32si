@@ -21,6 +21,7 @@ function Spot({ nullSpot, onClick, size, position, piece, relations, boardPositi
         stroke="black"
         strokeWidth="1"
         fill={!isPossibleMove ? "white" : "lightgreen"}
+        className={isPossibleMove ? "breathing-circle rotating-circle" : ""}
       />
       {piece}
     </g>

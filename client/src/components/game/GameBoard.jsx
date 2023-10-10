@@ -184,29 +184,31 @@ const GameBoard = ({ boardUpdate, setNewGame }) => {
             let [firstLevelNeighbourI, firstLevelNeighbourJ] = p.split("");
             let neighbouringSpot = beadsBoard[firstLevelNeighbourI][firstLevelNeighbourJ]
             if (!neighbouringSpot.props.piece) {
-                console.log(neighbouringSpot)
                 newPossibleMoves[firstLevelNeighbourI][firstLevelNeighbourJ] = true;
             } else {
-                if (neighbouringSpot.props.piece.value === spot.piece.value) {
+                if (spot.piece.props.value !== neighbouringSpot.props.piece.props.value) {
+                    console.log("filled", neighbouringSpot.props.boardPosition)
                     neighbouringSpot.props.relations.forEach(p2 => {
                         let [secondLevelNeighbourI, secondLevelNeighbourJ] = p2.split("");
+                        let neighbouringNeighbouringSpot = beadsBoard[secondLevelNeighbourI][secondLevelNeighbourJ]
                         if (currentI == firstLevelNeighbourI || currentJ == firstLevelNeighbourJ) {
                             if ((currentI == firstLevelNeighbourI && firstLevelNeighbourI == secondLevelNeighbourI) ||
                                 (currentJ == firstLevelNeighbourJ && firstLevelNeighbourJ === secondLevelNeighbourJ)) {
-                                let neighbouringNeighbouringSpot = beadsBoard[secondLevelNeighbourI][secondLevelNeighbourJ]
                                 if (!neighbouringNeighbouringSpot.props.piece) {
                                     newPossibleMoves[secondLevelNeighbourI][secondLevelNeighbourJ] = true;
                                 }
                             }
                         } else {
                             if ((firstLevelNeighbourI != secondLevelNeighbourI && firstLevelNeighbourJ != secondLevelNeighbourJ) &&
-                                (currentI != secondLevelNeighbourI && currentJ != secondLevelNeighbourJ)
-                            ) {
-                                newPossibleMoves[secondLevelNeighbourI][secondLevelNeighbourJ] = true;
+                                (currentI != secondLevelNeighbourI && currentJ != secondLevelNeighbourJ)) {
+                                if (neighbouringNeighbouringSpot.props.piece.value === spot.piece.props.value) {
+                                    newPossibleMoves[secondLevelNeighbourI][secondLevelNeighbourJ] = true;
+                                }
                             }
                         }
                     });
                 }
+
             }
         });
 
