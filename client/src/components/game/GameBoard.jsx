@@ -144,7 +144,6 @@ const GameBoard = ({ boardUpdate, setNewGame }) => {
     const [blueScore, setBlueScore] = useState(16);
 
     function spotOnClickHandler(e, spot) {
-        console.log(linesArray)
         if (spot.piece && spot.piece.props.value !== currentPlayer) {
             return;
         }
@@ -185,15 +184,24 @@ const GameBoard = ({ boardUpdate, setNewGame }) => {
             let [firstLevelNeighbourI, firstLevelNeighbourJ] = p.split("");
             let neighbouringSpot = beadsBoard[firstLevelNeighbourI][firstLevelNeighbourJ]
             if (!neighbouringSpot.props.piece) {
+                console.log(neighbouringSpot)
                 newPossibleMoves[firstLevelNeighbourI][firstLevelNeighbourJ] = true;
             } else {
-                if (currentI == firstLevelNeighbourI || currentJ == firstLevelNeighbourJ) {
+                if (neighbouringSpot.props.piece.value === spot.piece.value) {
                     neighbouringSpot.props.relations.forEach(p2 => {
                         let [secondLevelNeighbourI, secondLevelNeighbourJ] = p2.split("");
-                        if ((currentI == firstLevelNeighbourI && firstLevelNeighbourI == secondLevelNeighbourI) ||
-                            (currentJ == firstLevelNeighbourJ && firstLevelNeighbourJ === secondLevelNeighbourJ)) {
-                            let neighbouringNeighbouringSpot = beadsBoard[secondLevelNeighbourI][secondLevelNeighbourJ]
-                            if (!neighbouringNeighbouringSpot.props.piece) {
+                        if (currentI == firstLevelNeighbourI || currentJ == firstLevelNeighbourJ) {
+                            if ((currentI == firstLevelNeighbourI && firstLevelNeighbourI == secondLevelNeighbourI) ||
+                                (currentJ == firstLevelNeighbourJ && firstLevelNeighbourJ === secondLevelNeighbourJ)) {
+                                let neighbouringNeighbouringSpot = beadsBoard[secondLevelNeighbourI][secondLevelNeighbourJ]
+                                if (!neighbouringNeighbouringSpot.props.piece) {
+                                    newPossibleMoves[secondLevelNeighbourI][secondLevelNeighbourJ] = true;
+                                }
+                            }
+                        } else {
+                            if ((firstLevelNeighbourI != secondLevelNeighbourI && firstLevelNeighbourJ != secondLevelNeighbourJ) &&
+                                (currentI != secondLevelNeighbourI && currentJ != secondLevelNeighbourJ)
+                            ) {
                                 newPossibleMoves[secondLevelNeighbourI][secondLevelNeighbourJ] = true;
                             }
                         }
