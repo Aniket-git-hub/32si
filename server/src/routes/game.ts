@@ -1,11 +1,9 @@
 import express, { Router } from 'express';
-import verifyJWT from '../middleware/verifyJWT';
 import getAGame from '../controllers/game/getAGame';
+import verifyJWT from '../middleware/verifyJWT';
 
 const router: Router = express.Router();
 
-// get a game
-const getAGameRoute: string = process.env.NODE_ENV === 'production' ? process.env.GET_A_GAME! : '/';
-router.get(getAGameRoute, verifyJWT, getAGame);
+router.get("/", verifyJWT, getAGame);
 
 export default router;
