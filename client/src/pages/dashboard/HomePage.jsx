@@ -1,4 +1,6 @@
-import { Button, Card, CardBody, CardHeader, Flex, Heading, List, ListItem, Spacer } from "@chakra-ui/react";
+import { Button, Card, CardBody, CardHeader, Flex, FormControl, FormLabel, Heading, Input, InputGroup, List, ListItem, Spacer } from "@chakra-ui/react";
+import { useState } from "react";
+import CustomModal from "../../components/utils/CustomModal";
 import { useAuth } from "../../hooks/useAuth";
 
 export default function HomePage() {
@@ -27,6 +29,49 @@ export default function HomePage() {
     console.log("challengeAllies")
   }
 
+  const [leaderBoard, setLeaderBoard] = useState([
+    {
+      username: "Hacker101",
+      points: 1200,
+    },
+    {
+      username: "Hacker101",
+      points: 1200,
+    },
+    {
+      username: "Hacker101",
+      points: 1200,
+    },
+    {
+      username: "Hacker101",
+      points: 1200,
+    },
+    {
+      username: "Hacker101",
+      points: 1200,
+    },
+    {
+      username: "Hacker101",
+      points: 1200,
+    },
+    {
+      username: "Hacker101",
+      points: 1200,
+    },
+    {
+      username: "Hacker101",
+      points: 1200,
+    },
+    {
+      username: "Hacker101",
+      points: 1200,
+    },
+    {
+      username: "Hacker101",
+      points: 1200,
+    },
+  ])
+
   return (
     <>
       <Flex m={10} justifyContent={"space-evenly"}>
@@ -38,20 +83,16 @@ export default function HomePage() {
           </CardBody>
         </Card>
         <Spacer flex={1}></Spacer>
-        <Card minW={450} shadow={"lg"}>
+        <Card minW={350} shadow={"lg"} borderBottom="4px" borderBottomColor="purple.500">
           <CardBody>
             <Heading mb={3} size={"md"}>Leaderboard</Heading>
             <List>
-              <ListItem>1. aniket singh - </ListItem>
-              <ListItem>1. aniket singh - </ListItem>
-              <ListItem>1. aniket singh - </ListItem>
-              <ListItem>1. aniket singh - </ListItem>
-              <ListItem>1. aniket singh - </ListItem>
-              <ListItem>1. aniket singh - </ListItem>
-              <ListItem>1. aniket singh - </ListItem>
-              <ListItem>1. aniket singh - </ListItem>
-              <ListItem>1. aniket singh - </ListItem>
-              <ListItem>1. aniket singh - </ListItem>
+              {
+                leaderBoard.map((player, index) => (
+                  <ListItem>{index + 1} {player.username} - {player.points} </ListItem>
+                ))
+              }
+
             </List>
           </CardBody>
         </Card>
@@ -60,12 +101,54 @@ export default function HomePage() {
       <Flex m={10} py={3} borderRadius={"xl"} border={"2px dashed gray"} justifyContent={"space-evenly"}>
         <Card m={5} w={"fit-content"} shadow={"xl"}>
           <CardBody>
-            <Button colorScheme="purple" onClick={createGameHandler}>Create Game</Button>
+            <CustomModal
+              trigger={(onOpen) => {
+                return <>
+                  <Button colorScheme="purple" onClick={onOpen}>Create Game</Button>
+                </>
+              }}
+              title=" Create A Game"
+              footer={(onClose) => {
+                return <>
+                  <Button onClick={onClose}>Close</Button>
+                  <Spacer />
+                  <Button colorScheme="purple" onClick={createGameHandler}>Create Game</Button>
+                </>
+              }}
+            >
+              <FormControl isRequired>
+                <FormLabel>Game Name</FormLabel>
+                <InputGroup>
+                  <Input type={"text"} />
+                </InputGroup>
+              </FormControl>
+            </CustomModal>
           </CardBody>
         </Card>
         <Card m={5} w={"fit-content"} shadow={"xl"}>
           <CardBody>
-            <Button colorScheme="purple" onClick={joinGameHandler}>Join</Button>
+            <CustomModal
+              trigger={(onOpen) => {
+                return <>
+                  <Button colorScheme="purple" onClick={onOpen}>Join Game</Button>
+                </>
+              }}
+              title="Join A Game"
+              footer={(onClose) => {
+                return <>
+                  <Button onClick={onClose}>Close</Button>
+                  <Spacer />
+                  <Button colorScheme="purple" onClick={joinGameHandler}>Join Game</Button>
+                </>
+              }}
+            >
+              <FormControl isRequired>
+                <FormLabel>Game Id</FormLabel>
+                <InputGroup>
+                  <Input type={"text"} />
+                </InputGroup>
+              </FormControl>
+            </CustomModal>
           </CardBody>
         </Card>
         <Card m={5} w={"fit-content"} shadow={"xl"}>
