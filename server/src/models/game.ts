@@ -13,19 +13,19 @@ const gameSchema = new mongoose.Schema<Game>({
   },
   winner: {
     type: Schema.Types.ObjectId,
-    required: true,
+    // required: true,
   },
   score: {
     type: String,
-    required: true,
+    // required: true,
   },
   startTime: {
     type: Date,
-    required: true,
+    // required: true,
   },
   endTime: {
     type: Date,
-    required: true,
+    // required: true,
   },
 });
 

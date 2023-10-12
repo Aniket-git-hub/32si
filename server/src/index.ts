@@ -9,6 +9,7 @@ const PORT: string | number = process.env.PORT || 3000;
  *  cross-origin configuration
  *  prevents cross origin error and preflight error
  */
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 const prodOrigins = [
   getEnvironmentVariable('ORIGIN_1'),
@@ -46,7 +47,6 @@ app.use(
     extended: true,
   }),
 );
-import cookieParser from 'cookie-parser';
 app.use(cookieParser());
 
 /**
@@ -69,6 +69,9 @@ app.use('/auth', authRoute);
 
 import userRoute from './routes/user';
 app.use('/user', userRoute);
+
+import gameRoute from './routes/game';
+app.use('/game', gameRoute);
 
 import placesRoute from './routes/places';
 app.use('/places', placesRoute);

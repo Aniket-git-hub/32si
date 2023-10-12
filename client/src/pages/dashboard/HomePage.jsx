@@ -1,10 +1,15 @@
 import { Button, Card, CardBody, CardHeader, Flex, FormControl, FormLabel, Heading, Input, InputGroup, List, ListItem, Spacer } from "@chakra-ui/react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { createAGame } from '../../api/game';
 import CustomModal from "../../components/utils/CustomModal";
 import { useAuth } from "../../hooks/useAuth";
+import useSocket from "../../hooks/useSocket";
 
 export default function HomePage() {
   const { user } = useAuth()
+  const { socket } = useSocket()
+  const navigate = useNavigate()
   const greetings = [
     "Welcome! Challenge a friend, join a random game, or create your own board game adventure!",
     "Greetings, player! Engage in a strategic showdown. Create, join, or let fate decide your opponent!",
@@ -13,8 +18,14 @@ export default function HomePage() {
     "Hello, gamer! Dive into the action. Create a game, challenge a friend, or let destiny choose your rival!"
   ];
 
-  const createGameHandler = () => {
-    console.log("creating game")
+  const [createGameName, setCreateGameName] = useState('')
+  const createGameHandler = async () => {
+    try {
+      const response = await createAGame(createGameName)
+      navigate(`/game/${response.data.game._id}`)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   const joinGameHandler = () => {
@@ -92,7 +103,6 @@ export default function HomePage() {
                   <ListItem>{index + 1} {player.username} - {player.points} </ListItem>
                 ))
               }
-
             </List>
           </CardBody>
         </Card>
@@ -119,7 +129,7 @@ export default function HomePage() {
               <FormControl isRequired>
                 <FormLabel>Game Name</FormLabel>
                 <InputGroup>
-                  <Input type={"text"} />
+                  <Input type={"text"} onChange={(e) => setCreateGameName(e.target.value)} />
                 </InputGroup>
               </FormControl>
             </CustomModal>

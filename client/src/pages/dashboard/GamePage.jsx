@@ -1,26 +1,23 @@
 import { Box, Button, Card, CardBody, Grid, GridItem, HStack, Heading, Text, VStack, useToast } from "@chakra-ui/react";
 import { useEffect, useState } from 'react';
 import Confetti from "react-confetti";
+import { useParams } from "react-router-dom";
+import GameBoard from "../../components/game/GameBoard";
 import { useAuth } from "../../hooks/useAuth";
 import useSocket from "../../hooks/useSocket";
-import GameBoard from "./GameBoard";
 
-export default function GameScreen() {
+export default function GamePage() {
       const { user } = useAuth()
       const { socket } = useSocket()
       const alert = useToast()
+      const { gameId } = useParams()
 
       useEffect(() => {
-            if (user && socket) {
-                  const handleNewChallenge = (data) => {
-                        console.log(data)
-                  }
-
-                  socket.on("newChallenge", handleNewChallenge)
-
-                  return () => socket.off("newChallenge", handleNewChallenge)
+            if (socket) {
+                  console.log(gameId)
+                  socket.emit("createGame", { gameId })
             }
-      }, [user, socket])
+      }, [socket])
 
       const [windowDimensions, setWindowDimensions] = useState({
             width: window.innerWidth,
