@@ -63,7 +63,10 @@ const userSchema = new mongoose.Schema<User>({
   ],
   deletionToken: {
     type: String,
-  }
+  },
+  createdGames: [
+    { type: String }
+  ]
 
 });
 
