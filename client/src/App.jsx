@@ -14,7 +14,6 @@ import RegisterPage from './pages/auth/RegisterPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import AboutUs from './pages/dashboard/AboutUs';
 import Feedback from './pages/dashboard/Feedback';
-import GamePage from './pages/dashboard/GamePage';
 import HomePage from './pages/dashboard/HomePage';
 import Profile from './pages/dashboard/Profile';
 import Rivals from './pages/dashboard/Rivals';
@@ -62,7 +61,6 @@ function App() {
         <Route path="about-us" element={<AboutUs />} />
         <Route path="rivals" element={<Rivals />} />
         <Route path="profile/:username" element={<Profile />} />
-        <Route path="game/:gameId" element={<GamePage />} />
         <Route path="*" element={<Error404Page />} />
       </Route>
       <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate replace to="/" />} />

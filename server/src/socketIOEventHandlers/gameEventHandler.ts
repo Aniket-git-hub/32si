@@ -43,15 +43,21 @@ export const gameEventHandler = (socket: Socket, users: Map<string, User>) => {
       const lobby = lobbies.get(gameLobbyId);
       if (!lobby) {
         console.log('Lobby does not exist');
+        io.to(user.socketId).emit('lobbyDoesNotExist', { gameLobbyId });
         return;
       }
-      if (lobby.count >= 2) {
-        console.log('Room is full');
+      if (lobby.count >= 2 || lobby.users.includes(userId)) {
+        console.log('Room is full or user is already in the room');
+        io.to(user.socketId).emit('roomFull', { gameLobbyId });
         return;
+      }
+      // Emit an event to the creator asking for permission
+      const creator = users.get(lobby.creator)
+      if (creator) {
+        io.to(creator.socketId).emit('requestJoin', { userId, gameLobbyId });
       }
 
-      // Emit an event to the creator asking for permission
-      io.to(lobby.creator).emit('requestJoin', { userId, gameLobbyId });
+      io.to(user.socketId).emit('requestSubmitted', { gameLobbyId });
     }
   });
 
@@ -73,14 +79,20 @@ export const gameEventHandler = (socket: Socket, users: Map<string, User>) => {
   socket.on('leaveGame', ({ userId, gameLobbyId }) => {
     const user = users.get(userId);
     if (user) {
-      socket.leave(gameLobbyId);
-      console.log(`${userId} left the lobby ${gameLobbyId}`);
       const lobby = lobbies.get(gameLobbyId) || { users: [], count: 0, creator: '' };
       const index = lobby.users.indexOf(userId);
       if (index !== -1) {
+        // The user is in the lobby, remove them
+        socket.leave(gameLobbyId);
+        console.log(`${userId} left the lobby ${gameLobbyId}`);
         lobby.users.splice(index, 1);
         lobby.count--;
-        lobbies.set(gameLobbyId, lobby);
+        if (lobby.count === 0) {
+          // If the lobby is empty, delete it
+          lobbies.delete(gameLobbyId);
+        } else {
+          lobbies.set(gameLobbyId, lobby);
+        }
         io.to(user.socketId).emit('gameLeft', { gameLobbyId });
         socket.to(gameLobbyId).emit('userLeft', { userId });
       }

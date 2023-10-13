@@ -1,10 +1,10 @@
+import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
-import { AuthProvider } from './context/AuthContext.jsx'
-import { ChakraProvider, extendTheme } from '@chakra-ui/react'
+import App from './App.jsx'
 import { AllDataContextProvider } from './context/AllDataContext.jsx'
+import { AuthProvider } from './context/AuthContext.jsx'
 import { SocketProvider } from './context/SocketContext.jsx'
 
 const theme = extendTheme({

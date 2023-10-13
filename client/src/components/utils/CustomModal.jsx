@@ -1,18 +1,25 @@
-import { Button, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure } from "@chakra-ui/react"
-import React from "react";
-function CustomModal({ title, trigger, children, size, footer }) {
-      const { isOpen, onOpen, onClose } = useDisclosure()
+import { Button, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, useDisclosure } from "@chakra-ui/react";
+import React, { forwardRef, useImperativeHandle } from 'react';
+
+const CustomModal = forwardRef(({ title, trigger, children, size, footer, variant = 'default', closable = true }, ref) => {
+      const { isOpen, onOpen, onClose } = useDisclosure();
+
+      // Expose the onOpen function to parent components
+      useImperativeHandle(ref, () => ({
+            openModal: () => onOpen(),
+      }));
+
       return (
             <>
-                  {trigger(onOpen)}
-                  <Modal isCentered isOpen={isOpen} size={size} onClose={onClose}>
+                  {trigger && trigger(onOpen)}
+                  <Modal isOpen={isOpen} size={size} onClose={closable ? onClose : undefined}>
                         <ModalOverlay
-                              bg='blackAlpha.300'
+                              bg={variant === 'warning' ? 'orangeAlpha.300' : 'blackAlpha.300'}
                               backdropFilter='blur(10px) hue-rotate(90deg)'
                         />
                         <ModalContent>
                               <ModalHeader>{title}</ModalHeader>
-                              <ModalCloseButton />
+                              {closable && <ModalCloseButton />}
                               <ModalBody>
                                     {React.cloneElement(children, { onClose: onClose })}
                               </ModalBody>
@@ -28,7 +35,7 @@ function CustomModal({ title, trigger, children, size, footer }) {
                         </ModalContent>
                   </Modal>
             </>
-      )
-}
+      );
+});
 
 export default CustomModal;
