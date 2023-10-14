@@ -1,10 +1,11 @@
+import { ArrowForwardIcon } from "@chakra-ui/icons";
 import { Box, Button, Card, CardBody, Grid, GridItem, HStack, Heading, Text, VStack, useToast } from "@chakra-ui/react";
 import { useState } from 'react';
 import Confetti from "react-confetti";
 import GameBoard from "../../components/game/GameBoard";
 import { useAuth } from "../../hooks/useAuth";
 
-export default function GamePage({ playerOne, playerTwo }) {
+export default function GamePage({ onExit, onStateChange, gameLobbyId, playerTwo }) {
       const { user } = useAuth()
       const alert = useToast()
 
@@ -16,8 +17,8 @@ export default function GamePage({ playerOne, playerTwo }) {
       const [playerTwoScore, setPlayerTwoScore] = useState(16)
       const [playerOneColor, setPlayerOneColor] = useState("red")
       const [playerTwoColor, setPlayerTwoColor] = useState("blue")
-      const [playerOneName, setPlayerOneName] = useState("RED")
-      const [playerTwoName, setPlayerTwoName] = useState("BLUE")
+      const [playerOneName, setPlayerOneName] = useState(user?.username)
+      const [playerTwoName, setPlayerTwoName] = useState(playerTwo?.username)
       const [playerTurn, setPlayerTurn] = useState(playerOneName)
       const [winner, setWinner] = useState(null)
       const [confetti, setConfetti] = useState(false)
@@ -56,6 +57,7 @@ export default function GamePage({ playerOne, playerTwo }) {
             setPlayerTwoScore(blueScore)
             setPlayerTurn(currentPlayer == 1 ? playerOneName : playerTwoName)
             checkWinner(playerWon)
+            onStateChange()
       }
 
       return (
@@ -64,6 +66,14 @@ export default function GamePage({ playerOne, playerTwo }) {
                   <GridItem colSpan={2} >
                         <Box display={"flex"} justifyContent={"center"}>
                               <VStack >
+
+                                    <Card w={"100%"} boxShadow={"lg"} >
+                                          <CardBody>
+                                                <VStack>
+                                                      <Heading size={"md"}> {gameLobbyId && gameLobbyId} </Heading>
+                                                </VStack>
+                                          </CardBody>
+                                    </Card>
                                     <Card w={"100%"} boxShadow={"lg"} >
                                           <CardBody>
                                                 <VStack>
@@ -100,9 +110,13 @@ export default function GamePage({ playerOne, playerTwo }) {
 
                   <GridItem colSpan={2} >
                         <Box display={"flex"} justifyContent={"center"}>
+
                               <VStack >
                                     <Box w={"100%"}>
                                           <VStack>
+                                                <Button variant={"outline"} rightIcon={<ArrowForwardIcon />} onClick={onExit}>
+                                                      Exit
+                                                </Button>
                                                 <HStack bg={"white"} p={1} pl={3} borderRadius={4} boxShadow={"lg"}>
                                                       <Heading size={"md"} mx={2}> TURN </Heading>
                                                       {playerTurn === playerOneName ? (
@@ -127,6 +141,7 @@ export default function GamePage({ playerOne, playerTwo }) {
                                     </Box>
                               </VStack>
                         </Box>
+
                   </GridItem >
 
             </Grid >
