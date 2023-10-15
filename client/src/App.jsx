@@ -27,7 +27,7 @@ function App() {
 
   useEffect(() => {
     if (socket && user != null) {
-      socket.emit("userConnected", user._id, user.friends.map(f => f._id))
+      socket.emit("userConnected", user._id, user.friends.map(f => f._id), user.username)
       socket.on("friendsOnline", (data) => setOnlineFriends(data))
       socket.on("friendConnected", (data) => setOnlineFriends(prev => [...prev, data]))
       socket.on("friendDisconnected", (data) => setOnlineFriends(prev => prev.filter(f => f !== data)))

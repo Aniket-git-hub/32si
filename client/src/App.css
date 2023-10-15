@@ -68,6 +68,10 @@
     }
 }
 
+.rotate {
+    transform: rotate(180deg);
+}
+
 .breathing-circle {
     animation: breathe 1.5s infinite linear;
 }

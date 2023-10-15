@@ -1,7 +1,7 @@
+import { Button, Center, FormControl, FormErrorMessage, FormHelperText, FormLabel, Heading, Input, VStack } from '@chakra-ui/react'
+import { useNavigate } from 'react-router-dom'
 import { verifyOtp } from "../../api/auth"
 import { useFormValidation } from "../../hooks/useFormValidation"
-import { useNavigate } from 'react-router-dom'
-import { Box, Button, FormControl, FormLabel, Input, FormHelperText, FormErrorMessage, Heading, VStack, Center, useToast } from '@chakra-ui/react'
 
 export default function VerifyOtp({ email }) {
     const initialState = { otp: '' }

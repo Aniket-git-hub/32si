@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import Piece from "./Piece"
 import Spot from "./Spot"
 
-const GameBoard = ({ boardUpdate, setNewGame }) => {
+const GameBoard = ({ boardUpdate, setNewGame, creator, user }) => {
     const relations = {
         "01": ["02", "11"],
         "02": ["01", "03", "12"],
@@ -111,7 +111,7 @@ const GameBoard = ({ boardUpdate, setNewGame }) => {
         ],
     ]
 
-    const boardInitialState = [
+    let boardInitialState = [
         [0, 1, 1, 1, 0],
         [0, 1, 1, 1, 0],
         [1, 1, 1, 1, 1],
@@ -344,7 +344,7 @@ const GameBoard = ({ boardUpdate, setNewGame }) => {
     });
 
     return (
-        <svg className="board">
+        <svg className={`board ${creator === user.username && 'rotate'} `} >
             {/* {Object.entries(relations).map((row, index) => {
                 const [i, j] = row[0].split("")
                 let from = sizes[i][j]

@@ -5,7 +5,7 @@ import Confetti from "react-confetti";
 import GameBoard from "../../components/game/GameBoard";
 import { useAuth } from "../../hooks/useAuth";
 
-export default function GamePage({ onExit, onStateChange, gameLobbyId, playerTwo }) {
+export default function GamePage({ onExit, onStateChange, gameLobbyId, playerTwo, creator }) {
       const { user } = useAuth()
       const alert = useToast()
 
@@ -18,7 +18,7 @@ export default function GamePage({ onExit, onStateChange, gameLobbyId, playerTwo
       const [playerOneColor, setPlayerOneColor] = useState("red")
       const [playerTwoColor, setPlayerTwoColor] = useState("blue")
       const [playerOneName, setPlayerOneName] = useState(user?.username)
-      const [playerTwoName, setPlayerTwoName] = useState(playerTwo?.username)
+      const [playerTwoName, setPlayerTwoName] = useState(playerTwo)
       const [playerTurn, setPlayerTurn] = useState(playerOneName)
       const [winner, setWinner] = useState(null)
       const [confetti, setConfetti] = useState(false)
@@ -66,7 +66,6 @@ export default function GamePage({ onExit, onStateChange, gameLobbyId, playerTwo
                   <GridItem colSpan={2} >
                         <Box display={"flex"} justifyContent={"center"}>
                               <VStack >
-
                                     <Card w={"100%"} boxShadow={"lg"} >
                                           <CardBody>
                                                 <VStack>
@@ -104,7 +103,7 @@ export default function GamePage({ onExit, onStateChange, gameLobbyId, playerTwo
                   <GridItem colSpan={6}>
                         <Box display={"flex"} justifyContent={"center"}>
                               {confetti && <Confetti numberOfPieces={300} width={windowDimensions.width} height={windowDimensions.height} />}
-                              <GameBoard boardUpdate={handleBoardUpdate} setNewGame={newGame} />
+                              <GameBoard boardUpdate={handleBoardUpdate} setNewGame={newGame} user={user} creator={creator} />
                         </Box>
                   </GridItem>
 
