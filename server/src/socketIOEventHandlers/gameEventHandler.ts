@@ -75,8 +75,8 @@ export const gameEventHandler = (socket: Socket, users: Map<string, User>) => {
       const creator = users.get(lobby.creator)
       if (creator) {
         io.to(creator.socketId).emit('userJoined', { userId, username: user.username });
+        io.to(user.socketId).emit('gameJoined', { gameLobbyId, creator: creator.username });
       }
-      io.to(user.socketId).emit('gameJoined', { gameLobbyId });
     }
   });
 
