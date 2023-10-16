@@ -345,25 +345,6 @@ const GameBoard = ({ boardUpdate, setNewGame, creator, user }) => {
 
     return (
         <svg className={`board ${creator === user.username && 'rotate'} `} >
-            {/* {Object.entries(relations).map((row, index) => {
-                const [i, j] = row[0].split("")
-                let from = sizes[i][j]
-                return row[1].map((e, indexTwo) => {
-                    const [k, l] = e.split("")
-                    let to = sizes[k][l]
-                    return (
-                        <line
-                            key={`${index + indexTwo}`}
-                            x1={`${from.x}`}
-                            y1={`${from.y}`}
-                            x2={`${to.x}`}
-                            y2={`${to.y}`}
-                            stroke="white"
-                            strokeWidth="3px"
-                        />
-                    )
-                })
-            })} */}
             {linesArray}
             {beadsBoard}
         </svg>

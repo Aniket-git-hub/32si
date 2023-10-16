@@ -17,7 +17,7 @@ export default function GamePage({ onExit, onStateChange, gameLobbyId, playerTwo
       const [playerTwoScore, setPlayerTwoScore] = useState(16)
       const [playerOneColor, setPlayerOneColor] = useState("red")
       const [playerTwoColor, setPlayerTwoColor] = useState("blue")
-      const [playerOneName, setPlayerOneName] = useState(user?.username)
+      const [playerOneName, setPlayerOneName] = useState(creator)
       const [playerTwoName, setPlayerTwoName] = useState(playerTwo)
       const [playerTurn, setPlayerTurn] = useState(playerOneName)
       const [winner, setWinner] = useState(null)

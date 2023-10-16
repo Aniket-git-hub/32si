@@ -150,7 +150,7 @@ export default function HomePage() {
         setShowGame(true)
       });
 
-      socket.on('gameJoined', ({ gameLobbyId }) => {
+      socket.on('gameJoined', ({ gameLobbyId, creator }) => {
         alert({
           title: 'Joined Game',
           description: `Joining ${gameLobbyId}`,
@@ -162,6 +162,7 @@ export default function HomePage() {
         setGameLobbyId(gameLobbyId);
         setShowGame(true);
         setWaitingToJoin(false);
+        setCreator(creator)
       });
 
       socket.on('requestJoin', ({ userId, gameLobbyId }) => {
@@ -372,7 +373,7 @@ export default function HomePage() {
           onExit={exitGame}
           onStateChange={gameStateChanged}
           playerOne={user}
-          playerTwo={playerTwo}
+          playerTwo={creator === user.username ? playerTwo : user.username}
           gameLobbyId={gameLobbyId}
           creator={creator}
         />
