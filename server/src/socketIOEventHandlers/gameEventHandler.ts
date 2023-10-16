@@ -104,7 +104,7 @@ export const gameEventHandler = (socket: Socket, users: Map<string, User>) => {
   socket.on('gameChange', ({ userId, gameLobbyId, ...other }) => {
     const user = users.get(userId);
     if (user) {
-      console.log(`${userId} made a change in the game in lobby ${gameLobbyId} ${other} `);
+      console.log(`${userId} made a change in the ${gameLobbyId} in lobby ${gameLobbyId} ${other} `);
       // io.to(gameLobbyId).emit('gameChanged', { userId, ...other });
       socket.to(gameLobbyId).emit('gameChanged', { userId, ...other })
     }
