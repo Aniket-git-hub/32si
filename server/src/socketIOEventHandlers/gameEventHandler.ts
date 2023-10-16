@@ -3,6 +3,7 @@ import { getIO } from '../initializeSocket';
 
 interface User {
   socketId: string;
+  username: string,
   friendsList: string[];
 }
 interface Socket extends IOSocket {
@@ -29,7 +30,7 @@ export const gameEventHandler = (socket: Socket, users: Map<string, User>) => {
         return;
       }
       socket.join(gameLobbyId);
-      console.log(`${userId} join the lobby ${gameLobbyId}`);
+      console.log(`${user.username} join the lobby ${gameLobbyId}`);
       (lobby as Lobby).users.push(userId);
       lobby.count++;
       lobbies.set(gameLobbyId, lobby);
@@ -51,7 +52,6 @@ export const gameEventHandler = (socket: Socket, users: Map<string, User>) => {
         io.to(user.socketId).emit('roomFull', { gameLobbyId });
         return;
       }
-      // Emit an event to the creator asking for permission
       const creator = users.get(lobby.creator)
       if (creator) {
         io.to(creator.socketId).emit('requestJoin', { userId, gameLobbyId });
@@ -67,12 +67,16 @@ export const gameEventHandler = (socket: Socket, users: Map<string, User>) => {
     const lobby = lobbies.get(gameLobbyId);
     if (user && lobby && lobby.creator === socket.userId) {
       socket.join(gameLobbyId);
-      console.log(`${userId} join the lobby ${gameLobbyId}`);
+      console.log(`${user.username} join the lobby ${gameLobbyId}`);
       lobby.users.push(userId);
       lobby.count++;
       lobbies.set(gameLobbyId, lobby);
+      socket.to(gameLobbyId).emit('userJoined', { userId, username: user.username });
+      const creator = users.get(lobby.creator)
+      if (creator) {
+        io.to(creator.socketId).emit('userJoined', { userId, username: user.username });
+      }
       io.to(user.socketId).emit('gameJoined', { gameLobbyId });
-      socket.to(gameLobbyId).emit('userJoined', { userId });
     }
   });
 
@@ -82,19 +86,17 @@ export const gameEventHandler = (socket: Socket, users: Map<string, User>) => {
       const lobby = lobbies.get(gameLobbyId) || { users: [], count: 0, creator: '' };
       const index = lobby.users.indexOf(userId);
       if (index !== -1) {
-        // The user is in the lobby, remove them
         socket.leave(gameLobbyId);
         console.log(`${userId} left the lobby ${gameLobbyId}`);
         lobby.users.splice(index, 1);
         lobby.count--;
         if (lobby.count === 0) {
-          // If the lobby is empty, delete it
           lobbies.delete(gameLobbyId);
         } else {
           lobbies.set(gameLobbyId, lobby);
         }
         io.to(user.socketId).emit('gameLeft', { gameLobbyId });
-        socket.to(gameLobbyId).emit('userLeft', { userId });
+        socket.to(gameLobbyId).emit('userLeft', { userId, username: user.username });
       }
     }
   });
