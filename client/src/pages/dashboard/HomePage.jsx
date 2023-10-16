@@ -117,7 +117,7 @@ export default function HomePage() {
 
   const gameStateChanged = () => {
     if (socket) {
-      socket.emit('gameChange', { userId: user._id, someData: { HelloWord: 'hi' } });
+      socket.emit('gameChange', { gameLobbyId, userId: user._id, someData: { HelloWord: 'hi' } });
     }
   };
 
