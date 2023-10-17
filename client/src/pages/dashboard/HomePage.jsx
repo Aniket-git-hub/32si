@@ -40,20 +40,20 @@ export default function HomePage() {
         setCountdown((prevCountdown) => prevCountdown - 1);
       }, 1000);
     }
-    deleteTimeout = setTimeout(() => {
-      // exitGame();
-      // alert({
-      //   title: 'Game Deleted',
-      //   description: 'No players joined in time. The game lobby has been deleted.',
-      //   position: 'top',
-      //   status: 'error',
-      //   duration: 3000,
-      //   isClosable: true,
-      // });
-      // setWaitingToJoin(false);
+    if (countdown === 120) {
+      alert({
+        title: 'Game Deleted',
+        description: 'No players joined in time. The game lobby has been deleted.',
+        position: 'top',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      setWaitingToJoin(false);
+      exitGame();
       clearInterval(countdownInterval);
       setCountdown(120);
-    }, 12000);
+    }
     return () => {
       clearInterval(countdownInterval);
       clearTimeout(deleteTimeout);
