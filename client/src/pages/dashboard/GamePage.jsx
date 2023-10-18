@@ -55,7 +55,7 @@ export default function GamePage({ onExit, onStateChange, gameLobbyId, playerTwo
       const handleBoardUpdate = (currentPlayer, redScore, blueScore, playerWon) => {
             setPlayerOneScore(redScore)
             setPlayerTwoScore(blueScore)
-            setPlayerTurn(currentPlayer == 1 ? playerOneName : playerTwoName)
+            setPlayerTurn(currentPlayer)
             checkWinner(playerWon)
             onStateChange()
       }

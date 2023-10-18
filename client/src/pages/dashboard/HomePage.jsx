@@ -40,7 +40,7 @@ export default function HomePage() {
         setCountdown((prevCountdown) => prevCountdown - 1);
       }, 1000);
     }
-    if (countdown === 120) {
+    if (countdown < 0) {
       alert({
         title: 'Game Deleted',
         description: 'No players joined in time. The game lobby has been deleted.',
@@ -58,7 +58,7 @@ export default function HomePage() {
       clearInterval(countdownInterval);
       clearTimeout(deleteTimeout);
     };
-  }, [waitingToJoin]);
+  }, [waitingToJoin, countdown]);
 
   const createGameHandler = async (onClose) => {
     try {

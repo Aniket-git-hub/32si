@@ -140,10 +140,13 @@ const GameBoard = ({ boardUpdate, setNewGame, creator, user }) => {
     const [lastClickedSpot, setLastClickedSpot] = useState(null);
     const [firstClick, setFirstClick] = useState(false)
     const [currentPlayer, setCurrentPlayer] = useState(1);
+    const [currentPlayerName, setCurrentPlayerName] = useState(null);
     const [redScore, setRedScore] = useState(16);
     const [blueScore, setBlueScore] = useState(16);
 
     function spotOnClickHandler(e, spot) {
+        console.log(currentPlayer, creator)
+        console.log(currentPlayerName, creator)
         if (spot.piece && spot.piece.props.value !== currentPlayer) {
             return;
         }
@@ -186,24 +189,22 @@ const GameBoard = ({ boardUpdate, setNewGame, creator, user }) => {
             if (!neighbouringSpot.props.piece) {
                 newPossibleMoves[firstLevelNeighbourI][firstLevelNeighbourJ] = true;
             } else {
-                if (spot.piece.props.value !== neighbouringSpot.props.piece.props.value) {
-                    console.log("filled", neighbouringSpot.props.boardPosition)
+                if (neighbouringSpot.props.piece.value === spot.piece.value) {
                     neighbouringSpot.props.relations.forEach(p2 => {
                         let [secondLevelNeighbourI, secondLevelNeighbourJ] = p2.split("");
-                        let neighbouringNeighbouringSpot = beadsBoard[secondLevelNeighbourI][secondLevelNeighbourJ]
                         if (currentI == firstLevelNeighbourI || currentJ == firstLevelNeighbourJ) {
                             if ((currentI == firstLevelNeighbourI && firstLevelNeighbourI == secondLevelNeighbourI) ||
                                 (currentJ == firstLevelNeighbourJ && firstLevelNeighbourJ === secondLevelNeighbourJ)) {
+                                let neighbouringNeighbouringSpot = beadsBoard[secondLevelNeighbourI][secondLevelNeighbourJ]
                                 if (!neighbouringNeighbouringSpot.props.piece) {
                                     newPossibleMoves[secondLevelNeighbourI][secondLevelNeighbourJ] = true;
                                 }
                             }
                         } else {
                             if ((firstLevelNeighbourI != secondLevelNeighbourI && firstLevelNeighbourJ != secondLevelNeighbourJ) &&
-                                (currentI != secondLevelNeighbourI && currentJ != secondLevelNeighbourJ)) {
-                                if (neighbouringNeighbouringSpot.props.piece.value === spot.piece.props.value) {
-                                    newPossibleMoves[secondLevelNeighbourI][secondLevelNeighbourJ] = true;
-                                }
+                                (currentI != secondLevelNeighbourI && currentJ != secondLevelNeighbourJ)
+                            ) {
+                                newPossibleMoves[secondLevelNeighbourI][secondLevelNeighbourJ] = true;
                             }
                         }
                     });
@@ -253,6 +254,8 @@ const GameBoard = ({ boardUpdate, setNewGame, creator, user }) => {
             setPossibleMoves(possibleMoves.map(row => row.map(() => false)));
             setLastClickedSpot(null);
             setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
+            setCurrentPlayerName(currentPlayer == 1 ? user.username : creator)
+
         }
 
     }
@@ -282,7 +285,8 @@ const GameBoard = ({ boardUpdate, setNewGame, creator, user }) => {
 
     useEffect(() => {
         let winner = redScore === 0 ? 2 : blueScore === 0 ? 1 : null
-        boardUpdate(currentPlayer, redScore, blueScore, winner)
+        setCurrentPlayerName(currentPlayer == 1 ? user.username : creator)
+        boardUpdate(currentPlayerName, redScore, blueScore, winner)
     }, [blueScore, redScore, currentPlayer])
 
     boardInitialState.forEach((row, i) => {
