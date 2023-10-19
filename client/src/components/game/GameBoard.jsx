@@ -145,8 +145,6 @@ const GameBoard = ({ boardUpdate, setNewGame, creator, user }) => {
     const [blueScore, setBlueScore] = useState(16);
 
     function spotOnClickHandler(e, spot) {
-        console.log(currentPlayer, creator)
-        console.log(currentPlayerName, creator)
         if (spot.piece && spot.piece.props.value !== currentPlayer) {
             return;
         }
@@ -212,7 +210,6 @@ const GameBoard = ({ boardUpdate, setNewGame, creator, user }) => {
 
             }
         });
-
         setFirstClick(true)
         setPossibleMoves(newPossibleMoves);
         setLastClickedSpot(spot);
