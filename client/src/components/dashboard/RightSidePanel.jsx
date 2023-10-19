@@ -1,4 +1,4 @@
-import { AvatarBadge, Box, Center, HStack, Heading, Input, InputGroup, InputLeftElement, List, ListItem, Stack, Text } from "@chakra-ui/react";
+import { AvatarBadge, Box, Center, HStack, Heading, Input, InputGroup, InputLeftElement, List, ListItem, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 import React from 'react';
 import { FiSearch } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +13,7 @@ function RightSidePanel() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { onlineFriends } = useAllData()
+  const hoverColor = useColorModeValue("gray.100", "gray.700")
 
   return (
     <Box minH="100%" p={5}>
@@ -38,7 +39,12 @@ function RightSidePanel() {
         <Heading size={"md"}> Allies </Heading>
         <List>
           {user.friends && user.friends.map(friend => (
-            <ListItem key={friend._id} _hover={{ bg: "gray.100", cursor: "pointer" }} px={3} py={2} borderRadius={5}
+            <ListItem
+              key={friend._id}
+              _hover={{ bg: hoverColor, cursor: "pointer" }}
+              px={3}
+              py={2}
+              borderRadius={5}
               onClick={() => navigate(`/profile/@${friend.username}`, { state: { friend } })}
             >
               <HStack>

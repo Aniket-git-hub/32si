@@ -1,4 +1,4 @@
-import { Box, Container, Flex, FormControl, IconButton, Input, Text } from "@chakra-ui/react"
+import { Box, Container, Flex, FormControl, IconButton, Input, Text, useColorModeValue } from "@chakra-ui/react"
 import { useState } from "react"
 import { VscSend } from "react-icons/vsc"
 function ChatComponent() {
@@ -10,6 +10,7 @@ function ChatComponent() {
         { message: "aww", sender: 'me', time: '10:45' },
     ])
     const [text, setText] = useState('')
+    const textColor = useColorModeValue("blue.400", "blue.700")
     return (
         <>
             <Container>
@@ -24,7 +25,7 @@ function ChatComponent() {
                         message ?
                             message.map(text => (
                                 <Flex w={"full"} justifyContent={text.sender === "me" ? "end" : "start"} px={2}>
-                                    <Text p={2} bg={"blue.100"} my={1} rounded={"lg"} minW={"10"}>{text.message}</Text>
+                                    <Text p={2} bg={textColor} color={"white"} my={1} rounded={"lg"} minW={"10"}>{text.message}</Text>
                                 </Flex>
                             ))
                             :
