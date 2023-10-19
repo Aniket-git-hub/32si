@@ -7,6 +7,7 @@ import { useAllData } from "../../hooks/useAllData";
 import { useAuth } from "../../hooks/useAuth";
 import AvatarWithPreview from "../utils/AvatarWithPreview";
 import NotificationButton from "../utils/NotificationButton";
+import ThemeToggleButton from "../utils/ThemeToggleButton";
 function TopNavBar() {
     const { user, setUser, remove } = useAuth()
     const { resetData } = useAllData()
@@ -36,7 +37,7 @@ function TopNavBar() {
         <>
             <Flex as="nav" p=".5rem" pr="1rem" justifyContent="end" alignItems="center">
                 <HStack spacing={{ base: 0, md: 6 }}>
-
+                    <ThemeToggleButton />
                     <NotificationButton />
 
                     <Flex alignItems={'center'}>
