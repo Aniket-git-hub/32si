@@ -56,20 +56,23 @@ export const userEventsHandler = (socket: Socket, users: Map<string, User>) => {
   });
 
   socket.on('connectionRequest', ({ userTo, ...rest }) => {
-    if (users.has(userTo._id)) {
-      const user = users.get(userTo._id);
-      if (user) {
-        io.to(user.socketId).emit('connectionRequest', { userTo, ...rest });
-      }
+    const user = users.get(userTo._id);
+    if (user) {
+      io.to(user.socketId).emit('connectionRequest', { userTo, ...rest });
     }
   });
 
   socket.on('connectionRequestAccepted', ({ userTo, ...rest }) => {
-    if (users.has(userTo._id)) {
-      const user = users.get(userTo._id);
-      if (user) {
-        io.to(user.socketId).emit('connectionRequestAccepted', { userTo, ...rest });
-      }
+    const user = users.get(userTo._id);
+    if (user) {
+      io.to(user.socketId).emit('connectionRequestAccepted', { userTo, ...rest });
     }
   });
+
+  socket.on('message', ({ userToId, ...rest }) => {
+    const user = users.get(userToId)
+    if (user) {
+      io.to(user.socketId).emit('message', rest)
+    }
+  })
 };
