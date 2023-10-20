@@ -1,4 +1,4 @@
-![Dashboard](/dashboard.png)
+![Dashboard](/dashboard_1.png)
 
 # 32 Beads Board Game 🎲
 
@@ -14,7 +14,6 @@
 8. Disclaimer
 9. Contributions
 
-
 ## Introduction 📖
 
 32 Beads is an ancient board game played in the eastern part of Bharat (India). This project is a web-based implementation of the game, built using React for the frontend and Node.js for the backend. The game is hosted on Vercel, and the server is hosted on Render.com.
@@ -25,19 +24,19 @@
 
 ## How to Play 🎮
 
-- Two players can play live together online.
-- Each player takes turns placing a bead on any hole on the board.
-- A player can eliminate an opponent's bead if their bead is next to the opponent's bead and the spot beyond the opponent's bead (in a straight line or diagonally) is empty. The opponent's bead is then removed from the board.
-- The first player to eliminate all of their opponent's beads wins.
+-   Two players can play live together online.
+-   Each player takes turns placing a bead on any hole on the board.
+-   A player can eliminate an opponent's bead if their bead is next to the opponent's bead and the spot beyond the opponent's bead (in a straight line or diagonally) is empty. The opponent's bead is then removed from the board.
+-   The first player to eliminate all of their opponent's beads wins.
 
 (Note: An AI opponent feature is currently under development.)
 
 ## Features ⭐
 
-- User registration and login 🔑
-- Password reset functionality with OTP verification via email 📧
-- Email notifications on account creation 🎉
-- Real-time communication using WebSockets 💬
+-   User registration and login 🔑
+-   Password reset functionality with OTP verification via email 📧
+-   Email notifications on account creation 🎉
+-   Real-time communication using WebSockets 💬
 
 ## Future Enhancements 🚀
 
@@ -45,10 +44,10 @@ We are planning to add more features in the coming days, including an AI opponen
 
 ## Tech Stack 💻
 
-- Frontend: React
-- Backend: Node.js
-- Database: MongoDB
-- Hosting: Vercel (frontend), Render.com (backend)
+-   Frontend: React
+-   Backend: Node.js
+-   Database: MongoDB
+-   Hosting: Vercel (frontend), Render.com (backend)
 
 ## License 📄
 
@@ -56,7 +55,7 @@ We are planning to add more features in the coming days, including an AI opponen
 
 ## Disclaimer ⚠️
 
-This project is intended to showcase my capabilities as a developer. 
+This project is intended to showcase my capabilities as a developer.
 
 ## Contributions 👥
 
