@@ -1,6 +1,6 @@
-import { AvatarBadge, Box, Center, HStack, Heading, Input, InputGroup, InputLeftElement, List, ListItem, Stack, Text, useColorModeValue } from "@chakra-ui/react";
+import { AvatarBadge, Box, Center, Flex, Heading, IconButton, Input, InputGroup, InputLeftElement, List, ListItem, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 import React from 'react';
-import { FiSearch } from "react-icons/fi";
+import { FiMessageCircle, FiSearch } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { getProfilePicture, getSmallProfilePicture } from '../../api/user';
 import { useAllData } from "../../hooks/useAllData";
@@ -45,23 +45,23 @@ function RightSidePanel() {
               px={3}
               py={2}
               borderRadius={5}
-              onClick={() => navigate(`/profile/@${friend.username}`, { state: { friend } })}
             >
-              <HStack>
-                <AvatarWithPreview
-                  size={"sm"}
-                  name={friend?.name}
-                  smallURL={getSmallProfilePicture(friend?.profilePhoto)}
-                  largeURL={getProfilePicture(friend?.profilePhoto)}
-                >
-                  {onlineFriends?.includes(friend._id) && (
-                    <AvatarBadge boxSize='1.25em' bg='green.500' title={`${friend.username} is online`} ></AvatarBadge>
-                  )}
-                </AvatarWithPreview>
-                <Center>
-                  <Text>  {friend?.username}</Text>
+              <Flex justifyContent={"space-between"}>
+                <Center onClick={() => navigate(`/profile/@${friend.username}`, { state: { friend } })}>
+                  <AvatarWithPreview
+                    size={"sm"}
+                    name={friend?.name}
+                    smallURL={getSmallProfilePicture(friend?.profilePhoto)}
+                    largeURL={getProfilePicture(friend?.profilePhoto)}
+                  >
+                    {onlineFriends?.includes(friend._id) && (
+                      <AvatarBadge boxSize='1.25em' bg='green.500' title={`${friend.username} is online`} ></AvatarBadge>
+                    )}
+                  </AvatarWithPreview>
+                  <Text ml={2}>  {friend?.username}</Text>
                 </Center>
-              </HStack>
+                <IconButton _hover={{}} variant={"ghost"} icon={<FiMessageCircle />} onClick={() => navigate(`/chat/${friend.username}`)} />
+              </Flex>
             </ListItem>
           ))}
         </List>

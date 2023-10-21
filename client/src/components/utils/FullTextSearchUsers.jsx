@@ -1,4 +1,4 @@
-import { Box, Flex, Input, InputGroup, InputLeftElement, List, ListItem, Text } from '@chakra-ui/react';
+import { Box, Flex, Input, InputGroup, InputLeftElement, List, ListItem, Text, useColorModeValue } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { FiSearch } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
@@ -51,6 +51,7 @@ function FullTextSearchUsers({ onClose }) {
       const handleInputChange = (event) => {
             setInputValue(event.target.value)
       };
+      const hoverColor = useColorModeValue("gray.100", "gray.700")
 
       return (
             <Box>
@@ -73,7 +74,7 @@ function FullTextSearchUsers({ onClose }) {
                               {searchResults.length > 0 ? searchResults.map((e, i) => {
                                     return <>
                                           <ListItem
-                                                _hover={{ bg: "gray.100", cursor: "pointer" }}
+                                                _hover={{ bg: hoverColor, cursor: "pointer" }}
                                                 px={3}
                                                 py={2}
                                                 m={1}
@@ -82,7 +83,7 @@ function FullTextSearchUsers({ onClose }) {
                                                       onClose()
                                                       navigate(`/profile/@${e.username}`)
                                                 }}
-                                                key={e.username + i}
+                                                key={i}
                                           >
                                                 <Flex>
                                                       <AvatarWithPreview

@@ -1,9 +1,14 @@
-import { Box, Center, Container, Flex, FormControl, IconButton, Input, Text, useColorModeValue } from "@chakra-ui/react"
+import { AvatarBadge, Box, Center, Container, Divider, Flex, FormControl, IconButton, Input, Text, useColorModeValue } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
+import { FiVideo } from "react-icons/fi"
 import { VscSend } from "react-icons/vsc"
 import { useNavigate, useParams } from "react-router-dom"
+import { getProfilePicture, getSmallProfilePicture } from "../../api/user"
+import AvatarWithPreview from "../../components/utils/AvatarWithPreview"
+import { useAllData } from "../../hooks/useAllData"
 import { useAuth } from "../../hooks/useAuth"
 import useSocket from "../../hooks/useSocket"
+
 function ChatPage() {
     const { username } = useParams()
     const { user } = useAuth()
@@ -13,6 +18,7 @@ function ChatPage() {
     const [text, setText] = useState('')
     const textColor = useColorModeValue("blue.400", "blue.700")
     const navigate = useNavigate()
+    const { onlineFriends } = useAllData()
     useEffect(() => {
         let f = user.friends.filter(friend => friend.username === username)[0]
         if (!f) navigate(-1)
@@ -28,7 +34,7 @@ function ChatPage() {
                 socket.off("message")
             }
         }
-    }, [socket])
+    }, [socket, username])
     const handleMessageSent = () => {
         setMessage(prev => [...prev, { sender: user._id, userTo: friend._Id, message: text }])
         socket.emit("message", { sender: user._id, userToId: friend._id, message: text })
@@ -37,6 +43,23 @@ function ChatPage() {
     return (
         <>
             <Container>
+                <Flex justifyContent={"space-between"} >
+                    <Center onClick={() => navigate(`/profile/@${friend.username}`, { state: { friend } })}>
+                        <AvatarWithPreview
+                            size={"sm"}
+                            name={friend?.name}
+                            smallURL={getSmallProfilePicture(friend?.profilePhoto)}
+                            largeURL={getProfilePicture(friend?.profilePhoto)}
+                        >
+                            {onlineFriends?.includes(friend?._id) && (
+                                <AvatarBadge boxSize='1.25em' bg='green.500' title={`${friend.username} is online`} ></AvatarBadge>
+                            )}
+                        </AvatarWithPreview>
+                        <Text ml={2}>  {friend?.username}</Text>
+                    </Center>
+                    <IconButton _hover={{}} variant={"ghost"} icon={<FiVideo />} onClick={() => navigate(`/chat/${friend.username}`)} />
+                </Flex>
+                <Divider my={2}></Divider>
                 <Box minH={"70vh"} maxH={"70vh"} overflowY={"scroll"} sx={
                     {
                         '::-webkit-scrollbar': {

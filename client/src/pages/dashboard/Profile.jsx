@@ -1,14 +1,14 @@
-import { Center, Flex, Heading, Stack, Text, Button, Image, Box, SkeletonText, Skeleton, HStack, } from "@chakra-ui/react";
-import { useAuth } from "../../hooks/useAuth";
-import { useParams } from "react-router-dom";
+import { AtSignIcon } from "@chakra-ui/icons";
+import { Box, Button, Center, Flex, HStack, Heading, Skeleton, SkeletonText, Stack, Text } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
-import { acceptConnection, connectUser, disconnectUser, getAUserByUsername, getProfilePicture, getSmallProfilePicture } from "../../api/user";
-import { MdPlace } from "react-icons/md"
-import { AtSignIcon } from "@chakra-ui/icons"
-import { HiOutlineRectangleGroup } from "react-icons/hi2";
 import { BsPeople } from "react-icons/bs";
-import useSocket from "../../hooks/useSocket";
+import { HiOutlineRectangleGroup } from "react-icons/hi2";
+import { MdPlace } from "react-icons/md";
+import { useParams } from "react-router-dom";
+import { acceptConnection, connectUser, disconnectUser, getAUserByUsername, getProfilePicture, getSmallProfilePicture } from "../../api/user";
 import ImageWithPreview from "../../components/utils/ImageWithPreview";
+import { useAuth } from "../../hooks/useAuth";
+import useSocket from "../../hooks/useSocket";
 
 export default function Profile() {
     const { socket } = useSocket()
@@ -145,7 +145,6 @@ export default function Profile() {
                 w={{ sm: "100%", md: "540px" }}
                 height={{ sm: "fit-content", md: '320px' }}
                 direction={{ base: 'column', md: "row" }}
-                bg={'gray.50'}
                 boxShadow={'2xl'}
                 padding={4}
             >
