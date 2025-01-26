@@ -1,4 +1,4 @@
-import { Box, Flex, HStack, Link, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Text, VStack, useToast } from "@chakra-ui/react";
+import { Box, Flex, HStack, Link, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Text, VStack, useColorModeValue, useToast } from "@chakra-ui/react";
 import { FiChevronDown } from 'react-icons/fi';
 import { NavLink } from 'react-router-dom';
 import { logoutUser } from "../../api/auth";
@@ -7,6 +7,7 @@ import { useAllData } from "../../hooks/useAllData";
 import { useAuth } from "../../hooks/useAuth";
 import AvatarWithPreview from "../utils/AvatarWithPreview";
 import NotificationButton from "../utils/NotificationButton";
+import ThemeToggleButton from "../utils/ThemeToggleButton";
 function TopNavBar() {
     const { user, setUser, remove } = useAuth()
     const { resetData } = useAllData()
@@ -31,12 +32,13 @@ function TopNavBar() {
             })
         }
     }
+    const menuBgColor = useColorModeValue("white", "gray.700")
 
     return (
         <>
             <Flex as="nav" p=".5rem" pr="1rem" justifyContent="end" alignItems="center">
                 <HStack spacing={{ base: 0, md: 6 }}>
-
+                    <ThemeToggleButton />
                     <NotificationButton />
 
                     <Flex alignItems={'center'}>
@@ -63,7 +65,7 @@ function TopNavBar() {
                                 </HStack>
                             </MenuButton>
                             <MenuList
-                                bg="white"
+                                bg={menuBgColor}
                                 borderColor="gray.200"
                             >
                                 <Link as={NavLink} to={`/profile/@${username}`} _hover={{}} >

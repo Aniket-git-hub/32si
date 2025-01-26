@@ -61,11 +61,17 @@ const userSchema = new mongoose.Schema<User>({
       ref: 'user',
     },
   ],
+  deletionToken: {
+    type: String,
+  },
+  createdGames: [
+    { type: String }
+  ]
+
 });
 
 userSchema.index({ location: '2dsphere' });
-userSchema.index({ username: 'text' });
-userSchema.index({ name: 'text' });
+userSchema.index({ username: 'text', name: 'text' });
 
 const USER = mongoose.model<User>('user', userSchema);
 export default USER;

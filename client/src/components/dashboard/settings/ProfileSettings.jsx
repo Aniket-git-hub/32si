@@ -1,22 +1,24 @@
-import { Box, Heading, Stack, Flex, Image, Button, FormControl, InputGroup, FormLabel, Input, FormErrorMessage, IconButton, InputLeftElement, Icon, useToast } from "@chakra-ui/react";
-import { useFormValidation } from "../../../hooks/useFormValidation";
-import { useAuth } from "../../../hooks/useAuth.jsx";
-import { FiEdit, FiFile, FiImage } from "react-icons/fi";
 import { CloseIcon } from "@chakra-ui/icons";
-import { useState } from "react";
-import { useEffect } from "react";
-import useDebounce from "../../../hooks/useDebounce.jsx";
+import { Box, Button, Divider, Flex, FormControl, FormErrorMessage, FormLabel, Heading, Icon, IconButton, Image, Input, InputGroup, InputLeftElement, Spacer, Stack, useToast } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+import { FiEdit, FiImage } from "react-icons/fi";
+import { logoutUser } from "../../../api/auth";
 import getPlaces from "../../../api/getPlaces";
-import ComboBox from "../../utils/locationSelector";
-import { deleteProfilePicture, getProfilePicture, getSmallProfilePicture, updateProfilePicture, updateUser } from "../../../api/user";
+import { deleteAccountRequest, deleteProfilePicture, getProfilePicture, getSmallProfilePicture, updateProfilePicture, updateUser } from "../../../api/user";
+import { useAllData } from "../../../hooks/useAllData";
+import { useAuth } from "../../../hooks/useAuth.jsx";
+import useDebounce from "../../../hooks/useDebounce.jsx";
+import { useFormValidation } from "../../../hooks/useFormValidation";
+import CustomAlertDialog from "../../utils/CustomAlertDialog";
 import ImageWithPreview from "../../utils/ImageWithPreview";
+import ComboBox from "../../utils/locationSelector";
 export default function ProfileSettings() {
     const alert = useToast()
-    const { user, save } = useAuth();
+    const { user, save, remove } = useAuth();
+    const { resetData } = useAllData()
     let initialState = {
         name: user?.name || "",
         username: user?.username || "",
-        email: user?.email,
         bio: user?.bio || "",
         location: user?.location || ""
     };
@@ -152,6 +154,38 @@ export default function ProfileSettings() {
             setSelectedImage(null)
         }
     }
+    const [deleting, setdeleting] = useState(false)
+    const handleDeleteAccountRequest = async () => {
+        try {
+            setdeleting(true)
+            await deleteAccountRequest()
+            alert({
+                title: "Account Deletion Request",
+                description: `Account deletion confirmation email sent to ${user.email}`,
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+                position: "top",
+            })
+            await logoutUser()
+            resetData()
+            remove()
+        } catch (error) {
+            if (error.code === "ERR_NETWORK") {
+                alert({
+                    title: "Network Error",
+                    description: error.message,
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                    position: "top",
+                })
+            }
+            console.log(error)
+        } finally {
+            setdeleting(false)
+        }
+    }
 
     return (
         <Box
@@ -160,11 +194,19 @@ export default function ProfileSettings() {
             padding={5}
             borderRadius={5}
             height={"450px"}
+            overflowY={"scroll"}
+            minH={"80vh"}
+            sx={
+                {
+                    '::-webkit-scrollbar': {
+                        display: 'none'
+                    }
+                }
+            }
         >
             <Heading size="md">Update Profile</Heading>
             <Flex
                 w="100%"
-                height={{ sm: "fit-content", md: "320px" }}
                 direction={{ base: "column", md: "row" }}
                 padding={2}
             >
@@ -276,22 +318,7 @@ export default function ProfileSettings() {
                             </InputGroup>
                             <FormErrorMessage> {errors.bio}</FormErrorMessage>
                         </FormControl>
-                        <FormControl
-                            id="email"
-                            isInvalid={errors.email}
-                            isReadOnly={!editProfile}
-                            isDisabled={!editProfile}
-                        >
-                            <FormLabel>Email</FormLabel>
-                            <InputGroup>
-                                <Input
-                                    name="email"
-                                    value={values.email}
-                                    onChange={handleChange}
-                                />
-                            </InputGroup>
-                            <FormErrorMessage> {errors.username}</FormErrorMessage>
-                        </FormControl>
+
                         <ComboBox
                             isDisabled={!editProfile}
                             places={places}
@@ -328,6 +355,70 @@ export default function ProfileSettings() {
                     </form>
                 </Stack>
             </Flex >
+
+            <Heading size="md" my={1}>Danger</Heading>
+            <Box p={5}>
+                <form>
+                    <Flex justifyContent={"space-between "} alignItems="flex-end">
+                        <FormControl flex={20} >
+                            <FormLabel>Email</FormLabel>
+                            <InputGroup>
+                                <Input
+                                    value={user.email}
+                                    onChange={() => alert({ description: "comming soom" })}
+                                />
+                            </InputGroup>
+                            <FormErrorMessage> </FormErrorMessage>
+                        </FormControl>
+                        <Spacer flex={1} />
+                        <Button isDisabled isReadOnly flex={2} colorScheme="red" variant={"outline"} onClick={() => alert({ description: "comming soon" })}>Update</Button>
+                    </Flex>
+                </form>
+
+                <Divider my={5}></Divider>
+
+                <CustomAlertDialog
+                    title={"Warning"}
+                    trigger={(onOpen) => {
+                        return <>
+                            <Button
+                                colorScheme="red"
+                                w={"full"}
+                                onClick={onOpen}
+                                loadingText={"Deleting..."}
+                                isLoading={deleting}
+                                isDisabled={deleting}
+                            >
+                                Delete Account Request
+                            </Button>
+                        </>
+                    }}
+
+                    footer={(onClose) => (
+                        <>
+                            <Flex justifyContent={"space-between "} alignItems="center">
+                                <Button flex={2} onClick={onClose}>Cancel</Button>
+                                <Spacer flex={1}></Spacer>
+                                <Button flex={2} onClick={() => { handleDeleteAccountRequest(); onClose(); }} colorScheme="red">Delete</Button>
+                            </Flex>
+                        </>
+                    )}
+                >
+                    <p>Are you sure you want to delete you account?</p>
+                </CustomAlertDialog>
+                {/* <Button
+                    colorScheme="red"
+                    w={"full"}
+                    onClick={handleDeleteAccountRequest}
+                    loadingText={"Deleting..."}
+                    isLoading={deleting}
+                    isDisabled={deleting}
+                >
+                    Delete Account Request
+                </Button> */}
+
+            </Box>
+
         </Box >
     );
 }

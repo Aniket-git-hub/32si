@@ -18,7 +18,7 @@ export default function ForgotPasswordPage() {
             await forgotPassword(values)
             setVerifyOTP(true)
             setCountdown(120)
-            return { title: `Email sent`, message: `OTP sent : ${ email }` }
+            return { title: `Email sent`, message: `OTP sent : ${email}` }
         } catch (error) {
             throw error
         }
@@ -39,34 +39,34 @@ export default function ForgotPasswordPage() {
 
     return (
         <>
-        <Container as="section" my="50px" maxW="400px">
-            <Card borderBottom="4px" borderBottomColor="purple.500">
-                <CardBody>
-                    <Center>
-                        <Heading mb="30px">32 Beads Account Password Reset</Heading>
-                    </Center>
-                    <form onSubmit={handleSubmit} className={verifyOTP ? 'disabled' : ''}>
-                        <FormControl isInvalid={errors.email} isRequired mb=".8rem">
-                            <FormLabel>Email</FormLabel>
-                            <Input type='email' name="email" value={values.email} onChange={handleChange} />
-                            <FormHelperText> Enter email that you used to created account.</FormHelperText>
-                            <FormErrorMessage>{errors.email}</FormErrorMessage>
-                        </FormControl>
-                        <Center mt="1.5rem">
-                            <VStack>
-                                <Button type="submit" colorScheme='purple' isLoading={isSubmitting} loadingText="Sending..." disabled={isSubmitting}>
+            <Container as="section" my="50px" maxW="400px">
+                <Card borderBottom="4px" borderBottomColor="purple.500">
+                    <CardBody>
+                        <Center>
+                            <Heading mb="30px">32 Beads Account Password Reset</Heading>
+                        </Center>
+                        <form onSubmit={handleSubmit} className={verifyOTP ? 'disabled' : ''}>
+                            <FormControl isInvalid={errors.email} isRequired mb=".8rem">
+                                <FormLabel>Email</FormLabel>
+                                <Input type='email' name="email" value={values.email} onChange={handleChange} />
+                                <FormHelperText> Enter email that you used to created account.</FormHelperText>
+                                <FormErrorMessage>{errors.email}</FormErrorMessage>
+                            </FormControl>
+                            <Center mt="1.5rem">
+                                <VStack>
+                                    <Button type="submit" colorScheme='purple' isLoading={isSubmitting} loadingText="Sending..." disabled={isSubmitting}>
                                         {verifyOTP ? `Resend OTP (${countdown})` : 'Send OTP'}
                                     </Button>
                                     <p> back to  <Link href="/login">login</Link></p>
-                            </VStack>
-                        </Center>
+                                </VStack>
+                            </Center>
                         </form>
                         {verifyOTP && <VerifyOtp email={email} />}
-                </CardBody>
-            </Card>
-        </Container>
-       
-        
+                    </CardBody>
+                </Card>
+            </Container>
+
+
         </>
     )
 }

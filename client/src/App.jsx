@@ -1,18 +1,14 @@
 import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
-import { useAllData } from './hooks/useAllData';
-import { useAuth } from './hooks/useAuth';
-import useSocket from './hooks/useSocket';
-import RootLayout from './layouts/RootLayout';
-import Error404Page from './pages/auth/Error404Page';
-import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
-import AboutUs from './pages/dashboard/AboutUs';
+import Settings from './pages/dashboard/Settings';
+import Stats from './pages/dashboard/Stats';
 import Feedback from './pages/dashboard/Feedback';
-import GamePage from './pages/dashboard/GamePage';
+import RootLayout from './layouts/RootLayout'
 import HomePage from './pages/dashboard/HomePage';
 import Profile from './pages/dashboard/Profile';
 import Rivals from './pages/dashboard/Rivals';
@@ -26,7 +22,7 @@ function App() {
 
   useEffect(() => {
     if (socket && user != null) {
-      socket.emit("userConnected", user._id, user.friends.map(f => f._id))
+      socket.emit("userConnected", user._id, user.friends.map(f => f._id), user.username)
       socket.on("friendsOnline", (data) => setOnlineFriends(data))
       socket.on("friendConnected", (data) => setOnlineFriends(prev => [...prev, data]))
       socket.on("friendDisconnected", (data) => setOnlineFriends(prev => prev.filter(f => f !== data)))
@@ -61,12 +57,15 @@ function App() {
         <Route path="about-us" element={<AboutUs />} />
         <Route path="rivals" element={<Rivals />} />
         <Route path="profile/:username" element={<Profile />} />
+        <Route path="chat/:username" element={<ChatPage />} />
         <Route path="*" element={<Error404Page />} />
       </Route>
       <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate replace to="/" />} />
       <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate replace to="/" />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage verifyOTP={verifyOTP} />} />
       <Route path="/reset-password" element={verifyOTP ? <ResetPasswordPage /> : <Error404Page />} />
+      <Route path="/delete-account/:deletionToken" element={!user ? <DeleteAccountConfirmationPage /> : <Error404Page />} />
+      <Route path="/cancel-delete-account/:deletionToken" element={<CancelDeleteAccountRequestPage />} />
       <Route path="*" element={<Error404Page />} />
     </Routes>
   )

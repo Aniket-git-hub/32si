@@ -1,19 +1,21 @@
-import { HiOutlineUserGroup, HiOutlineRectangleGroup } from "react-icons/hi2";
-import { IoStatsChartOutline } from "react-icons/io5";
-import { FiSettings } from "react-icons/fi";
-import { MdOutlineFeedback } from "react-icons/md";
-import { SiAboutdotme } from "react-icons/si";
 import {
+  Badge,
   Box,
-  Heading,
-  Text,
-  List,
-  ListItem,
-  VStack,
   Divider,
   HStack,
-  Link
+  Heading,
+  Link,
+  List,
+  ListItem,
+  Text,
+  VStack,
+  useColorModeValue
 } from "@chakra-ui/react";
+import { FiSettings } from "react-icons/fi";
+import { HiOutlineRectangleGroup, HiOutlineUserGroup } from "react-icons/hi2";
+import { IoStatsChartOutline } from "react-icons/io5";
+import { MdOutlineFeedback } from "react-icons/md";
+import { SiAboutdotme } from "react-icons/si";
 import { NavLink } from "react-router-dom";
 
 function LeftSidePanel() {
@@ -24,17 +26,21 @@ function LeftSidePanel() {
     { name: "Settings", icon: <FiSettings size="20" />, path: "/settings" },
   ];
 
+  const hoverColor = useColorModeValue("gray.100", "gray.700")
+
   return (
     <Box minH="100vh" p={3}>
       <VStack>
-        <Heading p={5}>32 Beads</Heading>
+        <Heading p={5}>32 Beads
+          <Badge colorScheme='purple'>Alpha</Badge>
+        </Heading>
         <List w="100%">
           {sideBarListItems.map((item, index) => {
             return (
               <ListItem
                 my={2}
                 key={index}
-                _hover={{ bg: "gray.100" }}
+                _hover={{ bg: hoverColor }}
                 borderRadius={5}
               >
                 <Link as={NavLink} to={item.path} _activeLink={{ fontWeight: "bold", fontSize: "lg" }} _hover={{}}>
@@ -49,7 +55,7 @@ function LeftSidePanel() {
             );
           })}
           <Divider orientation="horizontal" />
-          <ListItem my={2} _hover={{ bg: "gray.100" }} borderRadius={5}>
+          <ListItem my={2} _hover={{ bg: hoverColor }} borderRadius={5}>
             <Link as={NavLink} to="/about-us" _activeLink={{ fontWeight: "bold", fontSize: "lg" }} _hover={{}}>
               <HStack px={5}>
                 <SiAboutdotme size="20" />
@@ -59,8 +65,8 @@ function LeftSidePanel() {
               </HStack>
             </Link>
           </ListItem>
-          <ListItem my={2} _hover={{ bg: "gray.100" }} borderRadius={5}>
-            <Link as={NavLink} to="/feedback" _activeLink={{fontWeight: "bold", fontSize: "lg" }} _hover={{}}>
+          <ListItem my={2} _hover={{ bg: hoverColor }} borderRadius={5}>
+            <Link as={NavLink} to="/feedback" _activeLink={{ fontWeight: "bold", fontSize: "lg" }} _hover={{}}>
               <HStack px={5}>
                 <MdOutlineFeedback size="20" />
                 <Text py={2} borderRadius={5}>

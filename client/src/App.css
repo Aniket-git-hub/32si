@@ -20,7 +20,7 @@
 
 @keyframes breathe {
     0% {
-        r: 11;
+        r: 12;
     }
 
     50% {
@@ -28,13 +28,21 @@
     }
 
     100% {
-        r: 11;
+        r: 12;
     }
 }
 
 @keyframes rotate {
+    /* 0% {
+        transform: rotate(0deg);
+    }
+
     50% {
         transform: rotate(180deg);
+    } */
+
+    100% {
+        transform: rotate(360deg);
     }
 }
 
@@ -60,13 +68,16 @@
     }
 }
 
+.rotate {
+    transform: rotate(180deg);
+}
+
 .breathing-circle {
-    animation: breathe 1s infinite ease-in-out;
+    animation: breathe 1.5s infinite linear;
 }
 
 .rotating-circle {
-    stroke: rgb(45, 45, 45);
-    stroke-width: 4;
+    stroke: rgb(0, 83, 21);
+    stroke-width: 2;
     stroke-dasharray: 10, 10;
-
 }

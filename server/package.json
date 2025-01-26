@@ -36,7 +36,8 @@
     "multer-gridfs-storage": "^5.0.2",
     "nodemailer": "^6.9.4",
     "sharp": "^0.32.6",
-    "socket.io": "^4.7.2"
+    "socket.io": "^4.7.2",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.22.20",
@@ -51,6 +52,7 @@
     "@types/multer-gridfs-storage": "^4.0.5",
     "@types/node": "^20.6.3",
     "@types/nodemailer": "^6.4.10",
+    "@types/uuid": "^9.0.5",
     "@typescript-eslint/eslint-plugin": "^6.7.2",
     "@typescript-eslint/parser": "^6.7.2",
     "babel-jest": "^29.7.0",
