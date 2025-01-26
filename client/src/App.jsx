@@ -1,22 +1,23 @@
+import { useEffect } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAllData } from './hooks/useAllData';
+import { useAuth } from './hooks/useAuth';
+import useSocket from './hooks/useSocket';
+import RootLayout from './layouts/RootLayout';
+import Error404Page from './pages/auth/Error404Page';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
-import Error404Page from './pages/auth/Error404Page';
-import { useAuth } from './hooks/useAuth';
-import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
-import Settings from './pages/dashboard/Settings';
-import Stats from './pages/dashboard/Stats';
-import Feedback from './pages/dashboard/Feedback';
-import RootLayout from './layouts/RootLayout'
-import HomePage from './pages/dashboard/HomePage';
 import AboutUs from './pages/dashboard/AboutUs';
+import Feedback from './pages/dashboard/Feedback';
+import GamePage from './pages/dashboard/GamePage';
+import HomePage from './pages/dashboard/HomePage';
 import Profile from './pages/dashboard/Profile';
 import Rivals from './pages/dashboard/Rivals';
-import { useAllData } from './hooks/useAllData';
-import { useEffect } from 'react';
-import useSocket from './hooks/useSocket'
+import Settings from './pages/dashboard/Settings';
+import Stats from './pages/dashboard/Stats';
 
 function App() {
   const { user, setUser, isAuthenticated, verifyOTP } = useAuth()
@@ -53,6 +54,7 @@ function App() {
     <Routes>
       <Route path="/" exact element={isAuthenticated ? <RootLayout /> : <Navigate replace to="/login" />}>
         <Route index element={<HomePage />} />
+        <Route path="game" element={<GamePage />} />
         <Route path="settings" element={<Settings />} />
         <Route path="stats" element={<Stats />} />
         <Route path="feedback" element={<Feedback />} />

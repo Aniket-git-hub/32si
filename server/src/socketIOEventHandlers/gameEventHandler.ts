@@ -1,5 +1,5 @@
-import { getIO } from '../initializeSocket';
 import { Server, Socket } from 'socket.io';
+import { getIO } from '../initializeSocket';
 
 interface User {
   _id: string;

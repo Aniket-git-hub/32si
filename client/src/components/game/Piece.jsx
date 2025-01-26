@@ -1,25 +1,47 @@
-const Piece = ({ value, position, size }) => {
-  if (value !== 1 && value !== 2) {
-    return null
-  }
+import { motion } from "framer-motion";
 
-  let fillColor = value === 1 ? "red" : "blue"
+const Piece = ({ x, y, color, isSelected }) => (
+  <motion.g>
+    {/* Shadow effect */}
+    <motion.circle
+      cx={x}
+      cy={y}
+      r="15"
+      fill="rgba(0,0,0,0.3)"
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{
+        scale: isSelected ? 1.3 : 1,
+        opacity: isSelected ? 0.5 : 0,
+        y: isSelected ? 5 : 0
+      }}
+      transition={{ type: "spring", stiffness: 300 }}
+    />
 
-  return (
-    <g>
-      <circle
-        style={{
-          cursor: "pointer",
-        }}
-        cx={position.x}
-        cy={position.y}
-        r={size}
-        stroke="black"
-        strokeWidth="1"
-        fill={fillColor}
-      />
-    </g>
-  )
-}
+    {/* Main piece */}
+    <motion.circle
+      cx={x}
+      cy={y}
+      r="15"
+      fill={color}
+      initial={{ scale: 0 }}
+      animate={{
+        scale: isSelected ? 1.2 : 1,
+        boxShadow: isSelected
+          ? "0 0 10px rgba(255,255,255,0.5)"
+          : "none"
+      }}
+      whileHover={{ scale: 1.1 }}
+      transition={{
+        type: "spring",
+        stiffness: 300,
+        damping: 10
+      }}
+      style={{
+        cursor: 'pointer',
+        border: isSelected ? '2px solid white' : 'none'
+      }}
+    />
+  </motion.g>
+);
 
-export default Piece
+export default Piece;

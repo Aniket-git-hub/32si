@@ -1,12 +1,12 @@
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import transporter from '../config/mailer.config';
 import accountDeletionEmailTemplate from './emailTemplates/accountDeletionTemplate';
+import feedbackReceivedTemplate from './emailTemplates/feedbackReceivedTempate';
+import newFeedbackReceivedTemplate from './emailTemplates/newFeedbackReceivedTemplate';
 import otpEmailTemplate from './emailTemplates/otpEmailTemplate';
 import passwordResetInitiatedTemplate from './emailTemplates/passwordResetInitiatedTemplate';
 import passwordResetSuccessfulTemplate from './emailTemplates/passwordResetSuccessfulTemplate';
 import registrationSuccessfulTemplate from './emailTemplates/registrationSuccessfulTemplate';
-import feedbackReceivedTemplate from './emailTemplates/feedbackReceivedTempate';
-import newFeedbackReceivedTemplate from './emailTemplates/newFeedbackReceivedTemplate';
 
 interface EmailResponse {
   success: boolean;
@@ -37,9 +37,9 @@ export const sendPasswordResetSuccessfulEmail = (receiverEmail: string, name: st
 export const sendRegistrationSuccessfulEmail = (receiverEmail: string, name: string) =>
   sendEmail(receiverEmail, 'Welcome to B2 Beads Board Game!', registrationSuccessfulTemplate(name));
 export const sendAccountDeletionEmail = (receiverEmail: string, name: string) =>
-  sendEmail(receiverEmail, ' Your Account Deletion Request', accountDeletionEmailTemplate(name));
+  sendEmail(receiverEmail, ' Your Account Deletion Request', accountDeletionEmailTemplate(name, receiverEmail));
 export const sendFeedbackReceivedEmail = (receiverEmail: string, name: string) =>
-  sendEmail(receiverEmail, 'Thank You for Your Valuable Feedback!', feedbackReceivedTemplate(name));
+  sendEmail(receiverEmail, `🌟 Thank You for Your Valuable Feedback, ${name}!`, feedbackReceivedTemplate(name));
 export const sendNewFeedbackReceivedEmail = (
   receiverEmail: string,
   userName: string,
