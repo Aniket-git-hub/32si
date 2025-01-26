@@ -1,8 +1,7 @@
-import { useFormValidation } from "../../hooks/useFormValidation"
-import { useNavigate, useParams } from 'react-router-dom'
-import { Box, Button, FormControl, FormLabel, Input, FormHelperText, FormErrorMessage, Heading, VStack, Center, useToast, Container, useOptionalPart } from '@chakra-ui/react'
-import { cancelAccountDeleteRequest, confirmAccountDeletion, deleteProfilePicture } from "../../api/user"
+import { Center, Container, Heading, useToast } from '@chakra-ui/react'
 import { useEffect, useState } from "react"
+import { useNavigate, useParams } from 'react-router-dom'
+import { cancelAccountDeleteRequest } from "../../api/user"
 import Error404Page from "./Error404Page"
 
 export default function CancelDeleteAccountRequestPage() {

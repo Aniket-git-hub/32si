@@ -1,14 +1,20 @@
 import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import './App.css';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAllData } from './hooks/useAllData';
+import { useAuth } from './hooks/useAuth';
+import useSocket from './hooks/useSocket';
+import RootLayout from './layouts/RootLayout';
+import CancelDeleteAccountRequestPage from './pages/auth/CancelDeleteAccountRequestPage';
+import Error404Page from './pages/auth/Error404Page';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
-import Settings from './pages/dashboard/Settings';
-import Stats from './pages/dashboard/Stats';
+import AboutUs from './pages/dashboard/AboutUs';
+import ChatPage from './pages/dashboard/ChatPage';
 import Feedback from './pages/dashboard/Feedback';
-import RootLayout from './layouts/RootLayout'
+import GamePage from './pages/dashboard/GamePage';
 import HomePage from './pages/dashboard/HomePage';
 import Profile from './pages/dashboard/Profile';
 import Rivals from './pages/dashboard/Rivals';
