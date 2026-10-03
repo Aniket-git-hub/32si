@@ -5,23 +5,54 @@ import { useNavigate } from 'react-router-dom';
 import { useAllData } from "../../hooks/useAllData";
 import { useAuth } from "../../hooks/useAuth";
 import CustomModal from "./CustomModal";
-function NotificationButton() {
-      const { user, } = useAuth()
+// CustomModal passes its onClose to this child, so items can close the modal before navigating.
+function NotificationList({ notifications, onClose }) {
       const navigate = useNavigate()
-      const { notifications, setNotifications } = useAllData()
 
-      const handleVisitProfile = async (username) => {
-            onClose()
+      const visitProfile = (username) => {
+            onClose?.()
             navigate(`/profile/@${username}`)
       }
 
-      const handleClickOnNotificationItem = (action) => {
-            if (action.redirect) {
-                  console.log(action.redirect)
-                  onClose()
-                  navigate(`/profile/@${action.redirect}`)
-            }
+      if (!notifications.length) {
+            return (
+                  <Center>
+                        <Text> No Notifications </Text>
+                  </Center>
+            )
       }
+
+      return (
+            <List spacing={3}>
+                  {notifications.map((item, index) => (
+                        <ListItem
+                              onClick={() => item?.action?.redirect && visitProfile(item.action.redirect)}
+                              key={`${item.message}${index}`}
+                              _hover={{ bg: "purple.50" }}
+                              borderRadius={5} p={3}
+                              cursor="pointer"
+                        >
+                              <HStack>
+                                    <Text>
+                                          {item.message}
+                                    </Text>
+                                    <Button
+                                          onClick={(e) => {
+                                                e.stopPropagation()
+                                                visitProfile(item.key)
+                                          }}
+                                          variant={"outline"}
+                                          colorScheme="purple">Visit Profile</Button>
+                              </HStack>
+                        </ListItem>
+                  ))}
+            </List>
+      )
+}
+
+function NotificationButton() {
+      const { user, } = useAuth()
+      const { notifications, setNotifications } = useAllData()
 
       useEffect(() => {
             if (user.connectionRequests?.length !== 0) {
@@ -76,33 +107,7 @@ function NotificationButton() {
                               </>
                         }}
                   >
-                        <List spacing={3}>
-                              {notifications.length > 0 ? notifications.map((item, index) => (
-                                    <ListItem
-                                          onClick={(e) => handleClickOnNotificationItem(item?.action)}
-                                          key={`${item.message}${index}`}
-                                          _hover={{ bg: "purple.50" }}
-                                          borderRadius={5} p={3}
-                                    >
-                                          <HStack>
-                                                <Text>
-                                                      {item.message}
-                                                </Text>
-                                                <Button
-                                                      onClick={(e) => handleVisitProfile(item.key)}
-                                                      variant={"outline"}
-                                                      colorScheme="purple">Visit Profile</Button>
-                                          </HStack>
-                                    </ListItem>
-                              ))
-                                    :
-                                    <>
-                                          <Center>
-                                                <Text> No Notifications </Text>
-                                          </Center>
-                                    </>
-                              }
-                        </List>
+                        <NotificationList notifications={notifications} />
 
                   </CustomModal>
 

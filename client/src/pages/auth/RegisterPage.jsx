@@ -1,4 +1,4 @@
-import { Button, FormControl, FormLabel, Input, Link, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Flex, VStack, Center } from '@chakra-ui/react'
+import { Button, FormControl, FormLabel, Input, Link, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, VStack, Center } from '@chakra-ui/react'
 import { registerUser } from '../../api/auth';
 import { useAuth } from '../../hooks/useAuth';
 import { useFormValidation } from '../../hooks/useFormValidation';
@@ -12,14 +12,10 @@ export default function RegisterPage() {
   const { save } = useAuth()
   
   const register = async (values) => {
-    try {
-      const response = await registerUser(values)
-      const { user, accessToken } = response.data 
-      save(user, accessToken)
-      return { title:`Registration Successful`, message:`Welcome ${user.name && user.name} to 32 Beads Community.`}
-    } catch (error) {
-      throw error
-    }
+    const response = await registerUser(values)
+    const { user, accessToken } = response.data 
+    save(user, accessToken)
+    return { title:`Registration Successful`, message:`Welcome ${user.name && user.name} to 32 Beads Community.`}
   }
 
   const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, register)

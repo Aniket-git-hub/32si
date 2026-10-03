@@ -8,6 +8,7 @@ module.exports = {
     "plugin:react-hooks/recommended",
   ],
   ignorePatterns: ["dist", ".eslintrc.cjs"],
+  overrides: [{ files: ["**/*.test.js"], env: { node: true } }],
   parserOptions: { ecmaVersion: "latest", sourceType: "module" },
   settings: { react: { version: "18.2" } },
   plugins: ["react-refresh"],
@@ -16,6 +17,7 @@ module.exports = {
       "warn",
       { allowConstantExport: true },
     ],
-    'prettier/prettier': ['error'],
+    // Components are not typed with prop-types in this project.
+    "react/prop-types": "off",
   },
 }

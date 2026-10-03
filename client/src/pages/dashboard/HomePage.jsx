@@ -27,7 +27,7 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     FaGamepad,
     FaHistory,
@@ -39,7 +39,13 @@ import {
     FaUsers
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { GiCrossedSwords } from 'react-icons/gi';
+import { useAllData } from '../../hooks/useAllData';
+import { useAuth } from '../../hooks/useAuth';
+import useChallenge from '../../hooks/useChallenge';
 import useSocket from '../../hooks/useSocket';
+import { getGameOverview, getGameStats } from '../../api/game';
+import { getSmallProfilePicture } from '../../api/user';
 
 // Accepts a bare code or a pasted invite link (…/game/online/ABC123).
 const parseGameCode = (input) => input.trim().split('/').filter(Boolean).pop()?.toUpperCase() ?? '';
@@ -51,6 +57,10 @@ const HomePage = () => {
     const navigate = useNavigate();
     const toast = useToast();
     const { socket } = useSocket();
+    const { user } = useAuth();
+    const { onlineFriends } = useAllData();
+    const { challenge, pendingId } = useChallenge();
+    const friendsOnline = (user?.friends ?? []).filter((f) => onlineFriends?.includes(f._id));
     const [gameCode, setGameCode] = useState('');
     const [isCreating, setIsCreating] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
@@ -68,19 +78,41 @@ const HomePage = () => {
     );
     const statsBg = useColorModeValue('whiteAlpha.900', 'whiteAlpha.200');
 
-    // Mock statistics data
-    const stats = {
-        totalGames: 156,
-        onlinePlayers: 24,
-        activeGames: 8
-    };
+    // Live site numbers, refreshed every 30 seconds.
+    const [stats, setStats] = useState(null);
+    useEffect(() => {
+        let controller;
+        const load = () => {
+            controller?.abort();
+            controller = new AbortController();
+            getGameOverview(controller.signal)
+                .then((res) => setStats(res.data))
+                .catch(() => {});
+        };
+        load();
+        const id = setInterval(load, 30_000);
+        return () => {
+            clearInterval(id);
+            controller?.abort();
+        };
+    }, []);
 
-    // Mock recent players
-    const recentPlayers = [
-        { id: 1, name: 'Player 1', avatar: '' },
-        { id: 2, name: 'Player 2', avatar: '' },
-        { id: 3, name: 'Player 3', avatar: '' }
-    ];
+    // People you played online most recently.
+    const [recentPlayers, setRecentPlayers] = useState([]);
+    useEffect(() => {
+        const controller = new AbortController();
+        getGameStats({ limit: 30 }, controller.signal)
+            .then((res) => {
+                const seen = new Map();
+                for (const row of res.data.history) {
+                    const o = row.opponent;
+                    if (o?.username && o.username !== 'Deleted player' && !seen.has(o._id)) seen.set(o._id, o);
+                }
+                setRecentPlayers([...seen.values()].slice(0, 8));
+            })
+            .catch(() => {});
+        return () => controller.abort();
+    }, []);
 
     const showError = (title) => toast({ title, status: 'error', duration: 3000, isClosable: true, position: 'top' });
 
@@ -197,7 +229,7 @@ const HomePage = () => {
                     >
                         <Stat>
                             <StatLabel>Total Games</StatLabel>
-                            <StatNumber>{stats.totalGames}</StatNumber>
+                            <StatNumber>{stats ? stats.totalGames : '–'}</StatNumber>
                         </Stat>
                     </MotionBox>
                     <MotionBox
@@ -210,7 +242,7 @@ const HomePage = () => {
                     >
                         <Stat>
                             <StatLabel>Online Players</StatLabel>
-                            <StatNumber>{stats.onlinePlayers}</StatNumber>
+                            <StatNumber>{stats ? stats.onlinePlayers : '–'}</StatNumber>
                         </Stat>
                     </MotionBox>
                     <MotionBox
@@ -223,7 +255,7 @@ const HomePage = () => {
                     >
                         <Stat>
                             <StatLabel>Active Games</StatLabel>
-                            <StatNumber>{stats.activeGames}</StatNumber>
+                            <StatNumber>{stats ? stats.activeGames : '–'}</StatNumber>
                         </Stat>
                     </MotionBox>
                 </Grid>
@@ -318,20 +350,31 @@ const HomePage = () => {
                             <Text>Recent Players</Text>
                         </HStack>
                     </Heading>
-                    <HStack spacing={4} overflowX="auto" py={2}>
-                        {recentPlayers.map((player) => (
-                            <MotionBox
-                                key={player.id}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                            >
-                                <VStack>
-                                    <Avatar name={player.name} src={player.avatar} />
-                                    <Text fontSize="sm">{player.name}</Text>
-                                </VStack>
-                            </MotionBox>
-                        ))}
-                    </HStack>
+                    {recentPlayers.length === 0 ? (
+                        <Text color="gray.500" fontSize="sm">
+                            Players you meet online will show up here, ready for a rematch.
+                        </Text>
+                    ) : (
+                        <HStack spacing={4} overflowX="auto" py={2}>
+                            {recentPlayers.map((player) => (
+                                <MotionBox
+                                    key={player._id}
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    cursor="pointer"
+                                    onClick={() => navigate(`/profile/@${player.username}`)}
+                                >
+                                    <VStack>
+                                        <Avatar
+                                            name={player.username}
+                                            src={player.profilePhoto ? getSmallProfilePicture(player.profilePhoto) : undefined}
+                                        />
+                                        <Text fontSize="sm">{player.username}</Text>
+                                    </VStack>
+                                </MotionBox>
+                            ))}
+                        </HStack>
+                    )}
                 </MotionBox>
             </MotionFlex>
 
@@ -426,12 +469,46 @@ const HomePage = () => {
                         <ModalHeader>Challenge Rivals</ModalHeader>
                         <ModalCloseButton />
                         <ModalBody pb={6}>
-                            <VStack spacing={4} align="center">
-                                <FaUserFriends size="48px" />
-                                <Text>Rival challenge system coming soon!</Text>
-                                <Text fontSize="sm" color="gray.500">
-                                    Challenge your friends and track your rivalry stats
-                                </Text>
+                            <VStack spacing={3} align="stretch">
+                                {friendsOnline.length === 0 ? (
+                                    <VStack spacing={3} py={4}>
+                                        <FaUserFriends size="40px" />
+                                        <Text textAlign="center">None of your allies are online right now.</Text>
+                                        <Button
+                                            colorScheme="purple"
+                                            variant="outline"
+                                            onClick={() => {
+                                                challengeRivalsModal.onClose();
+                                                navigate('/rivals');
+                                            }}
+                                        >
+                                            Find rivals to challenge
+                                        </Button>
+                                    </VStack>
+                                ) : (
+                                    <>
+                                        <Text fontSize="sm" color="gray.500">
+                                            Allies online now
+                                        </Text>
+                                        {friendsOnline.map((friend) => (
+                                            <HStack key={friend._id} justify="space-between">
+                                                <HStack>
+                                                    <Avatar size="sm" name={friend.name ?? friend.username} />
+                                                    <Text fontWeight="medium">{friend.username}</Text>
+                                                </HStack>
+                                                <Button
+                                                    size="sm"
+                                                    colorScheme="purple"
+                                                    leftIcon={<GiCrossedSwords />}
+                                                    isLoading={pendingId === friend._id}
+                                                    onClick={() => challenge(friend._id)}
+                                                >
+                                                    Challenge
+                                                </Button>
+                                            </HStack>
+                                        ))}
+                                    </>
+                                )}
                             </VStack>
                         </ModalBody>
                     </ModalContent>

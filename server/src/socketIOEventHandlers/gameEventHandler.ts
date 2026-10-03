@@ -1,3 +1,4 @@
+import { isValidObjectId } from 'mongoose';
 import { DRAW, RED, BLUE, capturedBy } from '../game/engine';
 import { GameRooms, Result, Room } from '../game/rooms';
 import { AuthenticatedSocket as Socket, getIO } from '../initializeSocket';
@@ -17,11 +18,15 @@ import USER from '../models/user';
  *    game:leave       { code }        leaving a running game forfeits it
  *    game:quickMatch                  find a random opponent              -> { code } or { waiting: true }
  *    game:cancelQuickMatch
+ *    game:challenge   { userId }      challenge another (online) player   -> { code }
+ *    game:declineChallenge { code }
  *
  *  server -> client
  *    game:state       room view       sent after every change
  *    game:closed      { code, reason }
  *    game:matched     { code }        quick match found an opponent
+ *    game:challenged  { code, from }  someone challenged you
+ *    game:challengeCancelled { code, reason }  a challenge to you was withdrawn, declined or expired
  */
 
 const channel = (code: string) => `game:${code}`;
@@ -55,7 +60,14 @@ const saveFinishedGame = async (room: Room) => {
 
 let rooms: GameRooms | null = null;
 
-const getRooms = (): GameRooms => {
+/** Number of distinct users with at least one connected socket. */
+export const countOnlineUsers = (): number => {
+  let n = 0;
+  for (const name of getIO().of('/').adapter.rooms.keys()) if (name.startsWith('user:')) n++;
+  return n;
+};
+
+export const getRooms = (): GameRooms => {
   if (rooms) return rooms;
   const io = getIO();
   const created = new GameRooms({
@@ -67,10 +79,13 @@ const getRooms = (): GameRooms => {
     },
     closed: (room, reason) => {
       io.to(channel(room.code)).emit('game:closed', { code: room.code, reason });
+      if (room.invited && room.status === 'waiting') {
+        io.to(userChannel(room.invited.userId)).emit('game:challengeCancelled', { code: room.code, reason });
+      }
       io.in(channel(room.code)).socketsLeave(channel(room.code));
     },
   });
-  setInterval(() => created.sweep(), 60_000).unref();
+  setInterval(() => created.sweep(), 15_000).unref();
   rooms = created;
   return created;
 };
@@ -134,6 +149,32 @@ export const gameEventHandler = (socket: Socket) => {
   socket.on('game:cancelQuickMatch', (_payload: unknown, ackFn?: unknown) => {
     store.cancelQuickMatch(userId);
     safeAck(typeof _payload === 'function' ? _payload : ackFn)({ ok: true });
+  });
+
+  socket.on('game:challenge', async (payload: { userId?: unknown } = {}, ackFn?: unknown) => {
+    const ack = safeAck(ackFn);
+    const targetId = String(payload?.userId ?? '');
+    if (!isValidObjectId(targetId)) return ack({ ok: false, error: 'Player not found.' });
+    try {
+      const target = await USER.findById(targetId).select('username');
+      if (!target) return ack({ ok: false, error: 'Player not found.' });
+      const io = getIO();
+      const online = (await io.in(userChannel(targetId)).fetchSockets()).length > 0;
+      if (!online) return ack({ ok: false, error: `${target.username} is offline right now.` });
+      const result = store.challenge(seat, { userId: targetId, username: target.username }, socket.id);
+      if (!result.ok) return ack({ ok: false, error: result.error });
+      socket.join(channel(result.value.code));
+      io.to(userChannel(targetId)).emit('game:challenged', { code: result.value.code, from: seat });
+      ack({ ok: true, code: result.value.code });
+    } catch (error) {
+      console.error('[game] challenge failed', error);
+      ack({ ok: false, error: 'Could not send the challenge.' });
+    }
+  });
+
+  socket.on('game:declineChallenge', (payload: { code?: unknown } = {}, ackFn?: unknown) => {
+    const result = store.decline(String(payload?.code ?? ''), userId);
+    safeAck(ackFn)(result.ok ? { ok: true } : { ok: false, error: result.error });
   });
 
   socket.on('disconnect', () => store.disconnect(userId, socket.id));

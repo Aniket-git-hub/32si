@@ -9,9 +9,9 @@ import AvatarWithPreview from "../utils/AvatarWithPreview";
 import NotificationButton from "../utils/NotificationButton";
 import ThemeToggleButton from "../utils/ThemeToggleButton";
 function TopNavBar() {
-    const { user, setUser, remove } = useAuth()
+    const { user, remove } = useAuth()
     const { resetData } = useAllData()
-    const { username, name, email, profilePhoto } = user
+    const { username, name } = user
     const alert = useToast()
 
     const handleLogout = async () => {

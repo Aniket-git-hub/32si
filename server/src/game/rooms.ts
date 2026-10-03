@@ -39,6 +39,8 @@ export interface Room {
   abandonTimers: Map<string, NodeJS.Timeout>;
   // userId -> timestamp when the user forfeits unless they reconnect
   abandonDeadlines: Map<string, number>;
+  // Set for a direct challenge: only this user may take the second seat.
+  invited: Seat | null;
 }
 
 export interface SeatView extends Seat {
@@ -53,6 +55,7 @@ export interface RoomView {
   players: Record<Player, SeatView | null>;
   state: GameState;
   rematch: string[];
+  invited: Seat | null;
 }
 
 export type Result<T> = { ok: true; value: T } | { ok: false; error: string };
@@ -70,6 +73,7 @@ export interface RoomOptions {
   abandonMs: number;
   waitingTtlMs: number;
   finishedTtlMs: number;
+  challengeTtlMs: number;
 }
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O or 1/I to avoid typos
@@ -79,6 +83,7 @@ const DEFAULT_OPTIONS: RoomOptions = {
   abandonMs: 60_000,
   waitingTtlMs: 30 * 60_000,
   finishedTtlMs: 15 * 60_000,
+  challengeTtlMs: 2 * 60_000,
 };
 
 const ok = <T>(value: T): Result<T> => ({ ok: true, value });
@@ -125,6 +130,7 @@ export class GameRooms {
       players: { [RED]: seat(RED), [BLUE]: seat(BLUE) } as Record<Player, SeatView | null>,
       state: room.state,
       rematch: [...room.rematch],
+      invited: room.invited,
     };
   }
 
@@ -150,6 +156,7 @@ export class GameRooms {
       connections: new Map(),
       abandonTimers: new Map(),
       abandonDeadlines: new Map(),
+      invited: null,
     };
     this.rooms.set(room.code, room);
     return room;
@@ -182,6 +189,27 @@ export class GameRooms {
     return room;
   }
 
+  /** Creates a private game where `from` plays RED and only `to` may join. */
+  challenge(from: Seat, to: Seat, socketId: string): Result<Room> {
+    if (from.userId === to.userId) return fail("You can't challenge yourself.");
+    const existing = [...this.rooms.values()].find(
+      (r) => r.status === 'waiting' && r.invited?.userId === to.userId && r.seats[RED]?.userId === from.userId,
+    );
+    if (existing) return ok(existing);
+    const room = this.create(from, socketId);
+    room.invited = to;
+    return ok(room);
+  }
+
+  /** The invited player turned the challenge down. */
+  decline(code: string, userId: string): Result<null> {
+    const room = this.get(code);
+    if (!room || room.status !== 'waiting') return ok(null);
+    if (room.invited?.userId !== userId) return fail('This challenge is not for you.');
+    this.close(room, `${room.invited.username} declined your challenge.`);
+    return ok(null);
+  }
+
   /** Joins (or re-joins after a refresh / lost connection) the game with this code. */
   join(code: string, seat: Seat, socketId: string): Result<Room> {
     const room = this.get(code);
@@ -189,6 +217,8 @@ export class GameRooms {
 
     if (this.colorOf(room, seat.userId) === null) {
       if (room.status !== 'waiting' || room.seats[BLUE]) return fail('This game already has two players.');
+      if (room.invited && room.invited.userId !== seat.userId)
+        return fail('This is a private challenge for another player.');
       room.seats[BLUE] = seat;
       room.status = 'playing';
       room.startedAt = Date.now();
@@ -339,7 +369,9 @@ export class GameRooms {
   sweep(now = Date.now()) {
     for (const room of [...this.rooms.values()]) {
       const nobodyHere = [...room.connections.values()].every((s) => s.size === 0);
-      if (room.status === 'waiting' && now - room.createdAt > this.options.waitingTtlMs) {
+      if (room.status === 'waiting' && room.invited && now - room.createdAt > this.options.challengeTtlMs) {
+        this.close(room, `${room.invited.username} didn't answer the challenge.`);
+      } else if (room.status === 'waiting' && now - room.createdAt > this.options.waitingTtlMs) {
         this.close(room, 'The game expired before anyone joined.');
       } else if (
         room.status === 'finished' &&
@@ -360,5 +392,12 @@ export class GameRooms {
 
   size() {
     return this.rooms.size;
+  }
+
+  /** Number of games currently being played. */
+  activeGames() {
+    let n = 0;
+    for (const room of this.rooms.values()) if (room.status === 'playing') n++;
+    return n;
   }
 }

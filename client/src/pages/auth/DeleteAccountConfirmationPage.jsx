@@ -1,6 +1,6 @@
 import { useFormValidation } from "../../hooks/useFormValidation"
 import { useNavigate, useParams } from 'react-router-dom'
-import { Box, Button, FormControl, FormLabel, Input, FormHelperText, FormErrorMessage, Heading, VStack, Center, useToast, Container } from '@chakra-ui/react'
+import { Button, FormControl, FormLabel, Input, FormHelperText, FormErrorMessage, Heading, VStack, Center, Container } from '@chakra-ui/react'
 import { confirmAccountDeletion } from "../../api/user"
 
 export default function DeleteAccountConfirmationPage() {
@@ -10,15 +10,11 @@ export default function DeleteAccountConfirmationPage() {
       const { deletionToken } = useParams()
 
       const submit = async (values) => {
-            try {
-                  console.log({ otp: String(values.otp), deletionToken })
-                  const response = await confirmAccountDeletion({ otp: String(values.otp), deletionToken })
-                  const { message } = response.data
-                  navigate("/")
-                  return { title: 'OTP Verified', message }
-            } catch (error) {
-                  throw error
-            }
+            console.log({ otp: String(values.otp), deletionToken })
+            const response = await confirmAccountDeletion({ otp: String(values.otp), deletionToken })
+            const { message } = response.data
+            navigate("/")
+            return { title: 'OTP Verified', message }
       }
 
       const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, submit)

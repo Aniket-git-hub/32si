@@ -145,6 +145,41 @@ describe('GameRooms', () => {
     expect(room.state.winner).toBe(rooms.colorOf(room, 'b'));
   });
 
+  it('lets only the challenged player join a challenge', () => {
+    const { rooms } = setup();
+    const result = rooms.challenge(alice, bob, 's-alice');
+    if (!result.ok) throw new Error(result.error);
+    const code = result.value.code;
+    expect(rooms.view(result.value).invited?.username).toBe('bob');
+    expect(rooms.join(code, carol, 's-carol').ok).toBe(false);
+    expect(rooms.join(code, bob, 's-bob').ok).toBe(true);
+    expect(rooms.get(code)!.status).toBe('playing');
+  });
+
+  it('reuses a pending challenge instead of creating duplicates', () => {
+    const { rooms } = setup();
+    const a = rooms.challenge(alice, bob, 's-alice');
+    const b = rooms.challenge(alice, bob, 's-alice');
+    expect(a.ok && b.ok && a.value.code === b.value.code).toBe(true);
+    expect(rooms.challenge(alice, alice, 's-alice').ok).toBe(false);
+  });
+
+  it('closes a challenge when it is declined or expires', () => {
+    const { rooms, events } = setup({ challengeTtlMs: 10 });
+    const declined = rooms.challenge(alice, bob, 's-alice');
+    if (!declined.ok) throw new Error(declined.error);
+    expect(rooms.decline(declined.value.code, 'c').ok).toBe(false);
+    rooms.decline(declined.value.code, 'b');
+    expect(rooms.get(declined.value.code)).toBeUndefined();
+    expect(events.closed).toContain('bob declined your challenge.');
+
+    const expired = rooms.challenge(alice, carol, 's-alice');
+    if (!expired.ok) throw new Error(expired.error);
+    rooms.sweep(Date.now() + 20);
+    expect(rooms.get(expired.value.code)).toBeUndefined();
+    expect(events.closed).toContain("carol didn't answer the challenge.");
+  });
+
   it('removes stale rooms', () => {
     const { rooms } = setup({ waitingTtlMs: 10 });
     const room = rooms.create(alice, 's-alice');

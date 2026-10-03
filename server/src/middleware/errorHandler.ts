@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { MongoError } from 'mongodb';
 import CustomError from '../utils/createError';
-import { getEnvironmentVariable } from '../utils/Helper';
 
 interface ErrorInfo {
   status: number;
@@ -33,8 +32,12 @@ const errorTypeMap: Record<string, ErrorInfo> = {
  * @param {Response} res Express.js Response Object
  * @param {NextFunction} next Express.js NextFunction
  */
+// Express recognises error handlers by their four parameters, so `next` must stay even though it is unused.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function errorHandler(error: Error, req: Request, res: Response, next: NextFunction): void {
-  if (getEnvironmentVariable('NODE_ENV') === 'development' || getEnvironmentVariable('TEST')) {
+  // process.env is read directly: getEnvironmentVariable throws for unset variables, which would turn
+  // every error response into a generic 500.
+  if (process.env.NODE_ENV === 'development' || process.env.TEST) {
     console.log(`[server]: Request: ${req.path} - [error]: ${error.message}`);
   }
 
@@ -48,8 +51,6 @@ function errorHandler(error: Error, req: Request, res: Response, next: NextFunct
   res?.status(errorInfo.status).json({
     message: typeof errorInfo.message === 'function' ? errorInfo.message(error) : errorInfo.message,
   });
-
-  next();
 }
 
 export default errorHandler;

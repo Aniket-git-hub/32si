@@ -11,14 +11,10 @@ export default function LoginPage() {
   const { save } = useAuth()
 
   const login = async (values) => {
-    try {
-      const response = await loginUser(values)
-      const {user, accessToken} = response.data 
-      save(user, accessToken)
-      return { message: `Welcome back ${ user.name && user.name }`, title:`Login Successful`}
-    } catch (error) {
-      throw error
-    }
+    const response = await loginUser(values)
+    const {user, accessToken} = response.data 
+    save(user, accessToken)
+    return { message: `Welcome back ${ user.name && user.name }`, title:`Login Successful`}
   }
 
   const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, login)
@@ -58,7 +54,7 @@ export default function LoginPage() {
                 <Button type="submit" colorScheme='purple' isLoading={isSubmitting} loadingText="logging..." disabled={isSubmitting}>
                   Login
                 </Button>
-                <p>Don't have an account? <Link href="/register">Create</Link> </p>
+                <p>Don&apos;t have an account? <Link href="/register">Create</Link> </p>
               </VStack>
             </Center>
           </form>

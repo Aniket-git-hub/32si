@@ -26,27 +26,11 @@ import {
 } from "../../components/game/GamePanels";
 import { DIFFICULTIES } from "../../game/ai";
 import { BLUE, DRAW, RED, applyAction, capturedBy, createInitialState, opponent } from "../../game/engine";
+import { loadRecentGames, recordOfflineGame } from "../../game/localRecord";
 import useGameSounds from "../../hooks/useGameSounds";
 
-const HISTORY_KEY = "32beads.recentGames";
 const AI_STEP_DELAY = 450;
 const AI_MIN_THINK = 500;
-
-const loadHistory = () => {
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY)) ?? [];
-  } catch {
-    return [];
-  }
-};
-
-const saveHistory = (history) => {
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-  } catch {
-    // Storage can be unavailable (private mode); the list just won't persist.
-  }
-};
 
 /** Runs the AI in a web worker; returns a function that resolves with the chosen turn. */
 const useAiWorker = () => {
@@ -90,7 +74,7 @@ export default function GamePage() {
   const [state, setState] = useState(createInitialState);
   const [gameId, setGameId] = useState(0);
   const [thinking, setThinking] = useState(false);
-  const [history, setHistory] = useState(loadHistory);
+  const [history, setHistory] = useState(loadRecentGames);
   const [undoStack, setUndoStack] = useState([]);
   const gameOver = useDisclosure();
   const rules = useDisclosure();
@@ -132,15 +116,12 @@ export default function GamePage() {
         level: mode === "ai" ? level : null,
         humanColor: mode === "ai" ? humanColor : null,
         winner: state.winner,
+        outcome: state.winner === DRAW ? "draw" : state.winner === humanColor ? "win" : "loss",
         red: capturedBy(state, RED),
         blue: capturedBy(state, BLUE),
         at: Date.now(),
       };
-      setHistory((h) => {
-        const next = [entry, ...h].slice(0, 5);
-        saveHistory(next);
-        return next;
-      });
+      setHistory(recordOfflineGame(entry));
     } else {
       play(state.lastMove?.captured.length ? "kill" : "move");
     }

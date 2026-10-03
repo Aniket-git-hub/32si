@@ -8,15 +8,10 @@ export default function VerifyOtp({ email }) {
     const navigate = useNavigate()
 
     const submit = async (values) => {
-        try {
-            console.log({ otp: String(values.otp), email })
-            const response = await verifyOtp({ otp: String(values.otp), email })
-            const { message } = response.data
-            navigate("/reset-password", { state: { email }, replace: true })
-            return { title: 'OTP Verified', message }
-        } catch (error) {
-            throw error
-        }
+        const response = await verifyOtp({ otp: String(values.otp), email })
+        const { message } = response.data
+        navigate("/reset-password", { state: { email }, replace: true })
+        return { title: 'OTP Verified', message }
     }
 
     const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, submit)

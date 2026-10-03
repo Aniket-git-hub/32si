@@ -16,7 +16,6 @@ export default function comboBox({ isDisabled, value, places, handleInputValueCh
                 isOpen,
                 inputValue,
                 highlightedIndex,
-                selectedItem,
                 getRootProps
             }) => (
                 <FormControl {...getRootProps()} isDisabled={isDisabled} isReadOnly={isDisabled} >
@@ -30,6 +29,7 @@ export default function comboBox({ isDisabled, value, places, handleInputValueCh
                                 <ListItem>loading...</ListItem>
                                 : places.filter(item => !inputValue || item?.name.includes(inputValue)).map((item, index) => (
                                     <ListItem
+                                        key={`${index}${item.name}`}
                                         {...getItemProps({
                                             key: `${index}${item.name}`,
                                             item,

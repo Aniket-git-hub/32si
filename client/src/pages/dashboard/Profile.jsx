@@ -8,6 +8,8 @@ import { useParams } from "react-router-dom";
 import { acceptConnection, connectUser, disconnectUser, getAUserByUsername, getProfilePicture, getSmallProfilePicture } from "../../api/user";
 import ImageWithPreview from "../../components/utils/ImageWithPreview";
 import { useAuth } from "../../hooks/useAuth";
+import { getGameStats } from "../../api/game";
+import useChallenge from "../../hooks/useChallenge";
 import useSocket from "../../hooks/useSocket";
 
 export default function Profile() {
@@ -23,6 +25,17 @@ export default function Profile() {
     const [myProfile, setMyProfile] = useState(false)
 
     const controllerRef = useRef(null)
+    const { challenge, pendingId } = useChallenge()
+    const [record, setRecord] = useState(null)
+
+    useEffect(() => {
+        if (!profileUser?._id) return
+        const controller = new AbortController()
+        getGameStats({ userId: profileUser._id, limit: 1 }, controller.signal)
+            .then((res) => setRecord(res.data.stats))
+            .catch(() => setRecord(null))
+        return () => controller.abort()
+    }, [profileUser?._id])
 
     const loadProfileUserData = async (signal) => {
         try {
@@ -112,12 +125,7 @@ export default function Profile() {
     }
 
 
-    const handleNewChallenge = () => {
-        socket.emit("newChallenge", {
-            userTo: profileUser,
-            message: `${user.username} has challenged you for a game.`
-        })
-    }
+    const handleNewChallenge = () => challenge(profileUser._id)
 
 
     if (!profileUser) {
@@ -189,9 +197,10 @@ export default function Profile() {
                             borderRadius={5}
                         >
                             <HiOutlineRectangleGroup />
-                            <Text>
-                                {profileUser && profileUser?.gamesPlayed.length}
-
+                            <Text title="Online games: wins · draws · losses">
+                                {record
+                                    ? `${record.played} games · ${record.wins}W ${record.draws}D ${record.losses}L`
+                                    : profileUser?.gamesPlayed.length}
                             </Text>
                         </HStack>
                         <HStack
@@ -225,6 +234,7 @@ export default function Profile() {
                                 bg: 'gray.300'
                             }}
                             isDisabled={myProfile}
+                            isLoading={pendingId === profileUser._id}
                         >
                             Challenge
                         </Button>

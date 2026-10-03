@@ -12,16 +12,12 @@ export default function ResetPasswordPage() {
     const location = useLocation()
     const navigate = useNavigate()
     const savePassword = async () => {
-        try {
-            const email = location.state.email
-            const response = await resetPassword({ password: values.password, email })
-            const { message } = response.data
-            setVerifyOTP(false)
-            navigate("/login", { replace: true })
-            return { title: `Password Reset`, message: message }
-        } catch (error) {
-            throw error
-        }
+        const email = location.state.email
+        const response = await resetPassword({ password: values.password, email })
+        const { message } = response.data
+        setVerifyOTP(false)
+        navigate("/login", { replace: true })
+        return { title: `Password Reset`, message: message }
     }
 
     const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, savePassword)

@@ -168,7 +168,11 @@ export default function OnlineGamePage() {
   const myTurn = room.status === "playing" && state.turn === myColor;
   const names = {
     [RED]: room.players[RED] ? `${room.players[RED].username}${myColor === RED ? " (you)" : ""}` : "Waiting…",
-    [BLUE]: room.players[BLUE] ? `${room.players[BLUE].username}${myColor === BLUE ? " (you)" : ""}` : "Waiting…",
+    [BLUE]: room.players[BLUE]
+      ? `${room.players[BLUE].username}${myColor === BLUE ? " (you)" : ""}`
+      : room.invited
+        ? `${room.invited.username}?`
+        : "Waiting…",
   };
   const presence = (color) => {
     const seat = room.players[color];
@@ -250,21 +254,34 @@ export default function OnlineGamePage() {
               maxW="90%"
             >
               <Spinner />
-              <Text fontWeight="bold">Waiting for an opponent</Text>
-              <Text fontSize="sm" textAlign="center">
-                Share this code with a friend:
-              </Text>
-              <Heading letterSpacing="0.3em" size="xl">
-                {code}
-              </Heading>
-              <HStack>
-                <Button size="sm" leftIcon={<FaCopy />} onClick={copyCode}>
-                  {codeCopied ? "Copied!" : "Copy code"}
-                </Button>
-                <Button size="sm" leftIcon={<FaLink />} onClick={copyLink}>
-                  {linkCopied ? "Copied!" : "Copy link"}
-                </Button>
-              </HStack>
+              {room.invited ? (
+                <>
+                  <Text fontWeight="bold" textAlign="center">
+                    Waiting for {room.invited.username} to accept your challenge
+                  </Text>
+                  <Text fontSize="sm" textAlign="center">
+                    The challenge expires after 2 minutes.
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text fontWeight="bold">Waiting for an opponent</Text>
+                  <Text fontSize="sm" textAlign="center">
+                    Share this code with a friend:
+                  </Text>
+                  <Heading letterSpacing="0.3em" size="xl">
+                    {code}
+                  </Heading>
+                  <HStack>
+                    <Button size="sm" leftIcon={<FaCopy />} onClick={copyCode}>
+                      {codeCopied ? "Copied!" : "Copy code"}
+                    </Button>
+                    <Button size="sm" leftIcon={<FaLink />} onClick={copyLink}>
+                      {linkCopied ? "Copied!" : "Copy link"}
+                    </Button>
+                  </HStack>
+                </>
+              )}
             </VStack>
           )}
         </Box>

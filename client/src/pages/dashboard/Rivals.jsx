@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-    Avatar,
     Box,
     Button,
     Card,
@@ -20,12 +19,17 @@ import { useNavigate } from "react-router-dom";
 import { getAllUsers, getProfilePicture, getSmallProfilePicture } from "../../api/user";
 import { useAllData } from "../../hooks/useAllData";
 import AvatarWithPreview from "../../components/utils/AvatarWithPreview";
+import { useAuth } from "../../hooks/useAuth";
+import useChallenge from "../../hooks/useChallenge";
+import { GiCrossedSwords } from "react-icons/gi";
 
 export default function Rivals() {
     const { rivals, setRivals, page, setPage, hasMore, setHasMore, pageLoaded, setPageLoaded } = useAllData();
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const observer = useRef();
+    const { user: me } = useAuth();
+    const { challenge, pendingId } = useChallenge();
 
     const lastItemRef = useCallback(
         (node) => {
@@ -104,12 +108,24 @@ export default function Rivals() {
                                     </Heading>
                                     <Text>{user.name}</Text>
                                     <Text>{user.bio}</Text>
-                                    <Button
-                                        variant={"ghost"}
-                                        onClick={() => navigate(`/profile/@${user.username}`)}
-                                    >
-                                        View Profile
-                                    </Button>
+                                    <HStack>
+                                        <Button
+                                            variant={"ghost"}
+                                            onClick={() => navigate(`/profile/@${user.username}`)}
+                                        >
+                                            View Profile
+                                        </Button>
+                                        {user._id !== me?._id && (
+                                            <Button
+                                                colorScheme="purple"
+                                                leftIcon={<GiCrossedSwords />}
+                                                isLoading={pendingId === user._id}
+                                                onClick={() => challenge(user._id)}
+                                            >
+                                                Challenge
+                                            </Button>
+                                        )}
+                                    </HStack>
                                 </VStack>
                             </CardBody>
                         </Card>

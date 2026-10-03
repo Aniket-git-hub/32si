@@ -1,12 +1,14 @@
 import TopNavBar from "../components/dashboard/TopNavBar";
-import { Grid, GridItem, Center } from "@chakra-ui/react";
+import { Grid, GridItem } from "@chakra-ui/react";
 import LeftSidePanel from "../components/dashboard/LeftSidePanel";
 import RightSidePanel from "../components/dashboard/RightSidePanel";
 import { Outlet } from "react-router-dom"
+import ChallengeListener from "../components/game/ChallengeListener";
 
 export default function RootLayout() {
     return (
         <>
+            <ChallengeListener />
             <Grid templateColumns="repeat(12, 1fr)">
                 <GridItem as="aside" colSpan={2} >
                     <LeftSidePanel />
