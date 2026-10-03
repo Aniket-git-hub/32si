@@ -12,6 +12,7 @@ import {
   SliderTrack,
   Switch,
   Text,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
@@ -33,6 +34,7 @@ const Toggle = ({ id, label, help, isChecked, onChange }) => (
 export default function GameSettings() {
   const { settings, updateSettings } = useGameSettings();
   const navigate = useNavigate();
+  const toast = useToast();
 
   return (
     <VStack align="stretch" spacing={6} maxW="640px" py={2}>
@@ -88,7 +90,7 @@ export default function GameSettings() {
       <Toggle
         id="capture-hints"
         label="Capture hints"
-        help="Highlight beads that can capture. Captures are optional, so they're easy to miss."
+        help="Highlight beads that can capture (captures are optional, so they're easy to miss) and your beads that are in danger."
         isChecked={settings.captureHints}
         onChange={(captureHints) => updateSettings({ captureHints })}
       />
@@ -104,6 +106,20 @@ export default function GameSettings() {
       <HStack flexWrap="wrap">
         <Button colorScheme="purple" variant="outline" onClick={() => navigate("/learn")}>
           Replay the tutorial
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => {
+            try {
+              localStorage.removeItem("32beads.coachSeen");
+              localStorage.removeItem("32beads.coachOff");
+            } catch {
+              // ignore
+            }
+            toast({ title: "Tips will show again in your next game.", status: "success", position: "top", duration: 2500 });
+          }}
+        >
+          Show game tips again
         </Button>
         <Button variant="ghost" onClick={() => updateSettings(DEFAULT_GAME_SETTINGS)}>
           Reset to defaults

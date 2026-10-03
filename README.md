@@ -38,14 +38,16 @@
 -   **vs Computer** – Easy, Medium or Hard, play as either colour. The AI runs in a web worker so the board never freezes.
 -   **Pass & Play** – two players on one device, with undo.
 -   **Online** – create a game and share the 6-letter code or link, join a friend's game, challenge an ally directly, or use **Random Match**. Each turn has a 60-second clock. Rematches swap colours. A player who loses connection has 60 seconds to come back before they forfeit.
--   **Learn** – `/learn` is a five-lesson interactive tutorial.
+-   **Learn** – `/learn` is a seven-lesson interactive tutorial (moving, capturing, chains, danger, protecting beads, blocking, winning). First games against the computer also get context-sensitive coach tips, and the board highlights beads that can capture (gold) or are in danger (red).
 
 ## Features ⭐
 
 -   User registration and login 🔑, password reset with OTP verification via email 📧
 -   Allies (friends), live presence, saved chat with unread badges 💬
--   Elo ratings and a leaderboard 🏆, stats, head-to-head records and replays of online games 📼
--   Game settings: sound, music volume, move/capture hints, confirm-move 🎛️
+-   Elo ratings and a leaderboard 🏆, stats, head-to-head records and replays of every game (online games on the server, offline ones on the device) 📼
+-   Game settings: sound, music volume, vibration, move/capture/danger hints, confirm-move 🎛️
+-   Animated board: glossy beads, jump arcs, capture bursts, turn glow; respects the system 'reduce motion' setting ✨
+-   Change your email (verified with a code sent to the new address) ✉️
 -   Works on phones (bottom tab bar), light and dark mode 🌗
 
 ## How it works 🛠️

@@ -10,10 +10,10 @@ import {
     POSITIONS,
     RED,
     destinationsFrom,
-    jumpsFrom,
     opponent,
 } from "../../game/engine";
 import { useGameSettings } from "../../context/GameSettingsContext";
+import { capturingBeads, endangeredBeads } from "../../game/hints";
 
 const WIDTH = 430;
 const HEIGHT = 600;
@@ -44,6 +44,7 @@ const THEMES = {
         glow: { [RED]: "#e63946", [BLUE]: "#3d82c0" },
         step: "#22a35a",
         capture: "#e2a400",
+        danger: "#d62839",
     },
     dark: {
         slab: ["#2b2858", "#1c1a3d"],
@@ -58,6 +59,7 @@ const THEMES = {
         glow: { [RED]: "#ff6b6b", [BLUE]: "#6db8f5" },
         step: "#4ade80",
         capture: "#facc15",
+        danger: "#ff6b6b",
     },
 };
 
@@ -193,7 +195,13 @@ const GameBoard = ({ state, onAction, canMove = true, flipped = false, hints }) 
     // Beads that can capture right now (captures are optional, so beginners easily miss them).
     const capturers = useMemo(() => {
         if (!active || state.chain !== null || !captureHints) return new Set();
-        return new Set(POINTS.filter((p) => state.board[p] === state.turn && jumpsFrom(state.board, p).length > 0));
+        return capturingBeads(state);
+    }, [state, active, captureHints]);
+
+    // Your beads the opponent could capture if it were their move (the classic beginner blunder).
+    const endangered = useMemo(() => {
+        if (!active || state.chain !== null || !captureHints) return new Set();
+        return endangeredBeads(state);
     }, [state, active, captureHints]);
 
     const toScreen = (p) => {
@@ -482,6 +490,21 @@ const GameBoard = ({ state, onAction, canMove = true, flipped = false, hints }) 
                             )}
                             {!capturers.has(p) && movable.has(p) && !isSelected && (
                                 <circle r={BEAD + 4} fill="none" stroke={theme.glow[color]} strokeOpacity="0.55" strokeWidth="2" />
+                            )}
+                            {endangered.has(p) && !isSelected && (
+                                <motion.circle
+                                    r={BEAD + 8}
+                                    fill="none"
+                                    stroke={theme.danger}
+                                    strokeWidth="2"
+                                    strokeDasharray="4 4"
+                                    aria-label="This bead can be captured"
+                                    animate={reduceMotion ? { opacity: 0.9 } : { opacity: [0.95, 0.4, 0.95], rotate: 360 }}
+                                    transition={{
+                                        opacity: { repeat: Infinity, duration: 1.6, ease: "easeInOut" },
+                                        rotate: { repeat: Infinity, duration: 12, ease: "linear" },
+                                    }}
+                                />
                             )}
                             {won && !reduceMotion && (
                                 <motion.circle

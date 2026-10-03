@@ -15,6 +15,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { FaBook, FaChessBoard, FaPlay, FaRedo, FaRobot, FaUndo, FaUsers } from "react-icons/fa";
 import { MdMusicNote, MdMusicOff } from "react-icons/md";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import Coach from "../../components/game/Coach";
 import GameBoard from "../../components/game/GameBoard";
 import {
   GameOverModal,
@@ -262,6 +263,9 @@ export default function GamePage() {
           onEndChain={() => handleAction({ type: "endChain" })}
           hint={hint}
         />
+        <Box maxW="420px" mx="auto">
+          <Coach state={state} myTurn={!aiToMove} />
+        </Box>
         <Box display="flex" justifyContent="center">
           <GameBoard
             key={`${mode}-${humanColor}`}

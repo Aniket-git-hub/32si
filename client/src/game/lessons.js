@@ -55,6 +55,27 @@ export const LESSONS = [
         success: 'Before every move, check whether your bead lands where it can be jumped.',
     },
     {
+        title: 'Protect your beads',
+        text: 'Blue wants to jump your bead in the middle. Instead of running, block the point behind it with another bead.',
+        position: { red: ['42', '31'], blue: ['52', '62'] },
+        check: (s) => {
+            if (!turnOver(s)) return null;
+            if (s.board[at('42')] !== RED) return 'This time, keep the middle bead where it is and cover the point behind it.';
+            return blueCaptures(s) ? 'Blue can still jump it. Which point does blue need to land on?' : true;
+        },
+        success: 'A bead can only be captured if the point behind it is empty. Beads that cover each other are hard to attack.',
+    },
+    {
+        title: 'Win by blocking',
+        text: "Blue's last bead is in its corner. Take away its last escape square and blue can't move at all.",
+        position: { red: ['82', '83', '62', '72'], blue: ['81'] },
+        check: (s) => {
+            if (!turnOver(s)) return null;
+            return s.winner === RED ? true : 'Blue can still move. Which empty point next to it is its way out?';
+        },
+        success: "A player with no legal move loses, even with beads left. Trapping is often faster than capturing everything.",
+    },
+    {
         title: 'Winning',
         text: 'Capture the last blue bead to win the game.',
         position: { red: ['22', '31'], blue: ['42'] },
