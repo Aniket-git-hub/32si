@@ -41,6 +41,9 @@ export interface Room {
   abandonDeadlines: Map<string, number>;
   // Set for a direct challenge: only this user may take the second seat.
   invited: Seat | null;
+  // The player to move must act before this time (ms since epoch) or the turn times out.
+  turnDeadline: number | null;
+  turnTimer: NodeJS.Timeout | null;
 }
 
 export interface SeatView extends Seat {
@@ -56,6 +59,9 @@ export interface RoomView {
   state: GameState;
   rematch: string[];
   invited: Seat | null;
+  // Time left for the current turn when this view was created (relative, so client clocks don't matter).
+  turnRemainingMs: number | null;
+  turnMs: number;
 }
 
 export type Result<T> = { ok: true; value: T } | { ok: false; error: string };
@@ -74,6 +80,7 @@ export interface RoomOptions {
   waitingTtlMs: number;
   finishedTtlMs: number;
   challengeTtlMs: number;
+  turnMs: number;
 }
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O or 1/I to avoid typos
@@ -84,6 +91,7 @@ const DEFAULT_OPTIONS: RoomOptions = {
   waitingTtlMs: 30 * 60_000,
   finishedTtlMs: 15 * 60_000,
   challengeTtlMs: 2 * 60_000,
+  turnMs: 60_000,
 };
 
 const ok = <T>(value: T): Result<T> => ({ ok: true, value });
@@ -131,6 +139,8 @@ export class GameRooms {
       state: room.state,
       rematch: [...room.rematch],
       invited: room.invited,
+      turnRemainingMs: room.turnDeadline === null ? null : Math.max(0, room.turnDeadline - Date.now()),
+      turnMs: this.options.turnMs,
     };
   }
 
@@ -157,6 +167,8 @@ export class GameRooms {
       abandonTimers: new Map(),
       abandonDeadlines: new Map(),
       invited: null,
+      turnDeadline: null,
+      turnTimer: null,
     };
     this.rooms.set(room.code, room);
     return room;
@@ -171,7 +183,38 @@ export class GameRooms {
     room.abandonDeadlines.delete(userId);
   }
 
+  /** Starts (or restarts) the clock for the player to move. */
+  private startTurnClock(room: Room) {
+    this.stopTurnClock(room);
+    if (room.status !== 'playing') return;
+    room.turnDeadline = Date.now() + this.options.turnMs;
+    room.turnTimer = setTimeout(() => this.turnTimedOut(room), this.options.turnMs);
+  }
+
+  private stopTurnClock(room: Room) {
+    if (room.turnTimer) clearTimeout(room.turnTimer);
+    room.turnTimer = null;
+    room.turnDeadline = null;
+  }
+
+  /** Out of time: a capture chain simply ends; otherwise the player to move loses. */
+  private turnTimedOut(room: Room) {
+    room.turnTimer = null;
+    room.turnDeadline = null;
+    if (room.status !== 'playing') return;
+    if (room.state.chain !== null) {
+      room.state = applyAction(room.state, { type: 'endChain' });
+      if (room.state.winner !== null) this.finish(room);
+      else this.startTurnClock(room);
+    } else {
+      room.state = forfeit(room.state, room.state.turn, 'timeout');
+      this.finish(room);
+    }
+    this.hooks.changed(room);
+  }
+
   private finish(room: Room) {
+    this.stopTurnClock(room);
     room.status = 'finished';
     room.finishedAt = Date.now();
     room.rematch.clear();
@@ -229,6 +272,9 @@ export class GameRooms {
     for (const other of [room.seats[RED], room.seats[BLUE]]) {
       if (other && !room.connections.has(other.userId)) this.startAbandonTimer(room, other.userId);
     }
+    // The clock starts once both players have opened the game.
+    const bothHere = [room.seats[RED], room.seats[BLUE]].every((p) => p && room.connections.has(p.userId));
+    if (room.status === 'playing' && room.turnTimer === null && bothHere) this.startTurnClock(room);
     this.hooks.changed(room);
     return ok(room);
   }
@@ -246,6 +292,7 @@ export class GameRooms {
 
     room.state = applyAction(room.state, action as Parameters<typeof applyAction>[1]);
     if (room.state.winner !== null) this.finish(room);
+    else this.startTurnClock(room);
     this.hooks.changed(room);
     return ok(room);
   }
@@ -276,6 +323,7 @@ export class GameRooms {
       room.startedAt = Date.now();
       room.finishedAt = null;
       room.rematch.clear();
+      this.startTurnClock(room);
     }
     this.hooks.changed(room);
     return ok(room);
@@ -360,6 +408,7 @@ export class GameRooms {
   }
 
   private close(room: Room, reason: string) {
+    this.stopTurnClock(room);
     for (const timer of room.abandonTimers.values()) clearTimeout(timer);
     this.rooms.delete(room.code);
     this.hooks.closed(room, reason);

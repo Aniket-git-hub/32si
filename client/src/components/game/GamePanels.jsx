@@ -97,8 +97,31 @@ export const ScoreCard = ({ state, names = {}, extras = {} }) => (
     </PanelCard>
 );
 
+const CLOCK_WARNING = 15;
+
+/** Seconds left for the current turn; turns red and pulses in the last 15 seconds. */
+export const TurnClock = ({ seconds, ...rest }) => {
+    if (seconds === null || seconds === undefined) return null;
+    const urgent = seconds <= CLOCK_WARNING;
+    return (
+        <Text
+            as={motion.span}
+            animate={urgent ? { scale: [1, 1.12, 1] } : { scale: 1 }}
+            transition={urgent ? { repeat: Infinity, duration: 1 } : undefined}
+            display="inline-block"
+            fontWeight="bold"
+            fontVariantNumeric="tabular-nums"
+            color={urgent ? "red.600" : undefined}
+            aria-label={`${seconds} seconds left for this turn`}
+            {...rest}
+        >
+            ⏱ {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}
+        </Text>
+    );
+};
+
 /** Whose turn it is, plus the "stop capturing" control during a capture chain. */
-export const TurnCard = ({ state, label, thinking = false, canEndChain = false, onEndChain, ...rest }) => (
+export const TurnCard = ({ state, label, thinking = false, canEndChain = false, onEndChain, clock = null, ...rest }) => (
     <PanelCard {...rest}>
         <PanelHeading icon={<FaUser />}>Turn</PanelHeading>
         {state.winner !== null ? (
@@ -119,6 +142,7 @@ export const TurnCard = ({ state, label, thinking = false, canEndChain = false, 
                 >
                     {label ?? PLAYER_LABELS[state.turn]}
                 </Text>
+                {clock !== null && <TurnClock seconds={clock} textAlign="center" fontSize="lg" />}
                 {thinking && (
                     <HStack justify="center">
                         <Spinner size="sm" />
@@ -146,7 +170,7 @@ export const TurnCard = ({ state, label, thinking = false, canEndChain = false, 
 );
 
 /** One-line status for phones: beads left on each side, whose turn it is, and the stop-capturing button. */
-export const CompactStatus = ({ state, names = {}, label, thinking = false, canEndChain = false, onEndChain, ...rest }) => {
+export const CompactStatus = ({ state, names = {}, label, thinking = false, canEndChain = false, onEndChain, clock = null, ...rest }) => {
     const bg = useColorModeValue("whiteAlpha.700", "blackAlpha.300");
     const side = (player) => (
         <VStack spacing={0} minW="72px">
@@ -173,9 +197,13 @@ export const CompactStatus = ({ state, names = {}, label, thinking = false, canE
                                     {thinking ? "Thinking…" : (label ?? PLAYER_LABELS[state.turn])}
                                 </Text>
                             </HStack>
-                            <Text fontSize="xs" color="gray.600" _dark={{ color: "gray.300" }}>
-                                to move
-                            </Text>
+                            {clock !== null ? (
+                                <TurnClock seconds={clock} fontSize="sm" />
+                            ) : (
+                                <Text fontSize="xs" color="gray.600" _dark={{ color: "gray.300" }}>
+                                    to move
+                                </Text>
+                            )}
                         </>
                     )}
                 </VStack>

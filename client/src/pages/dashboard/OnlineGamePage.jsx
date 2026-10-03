@@ -84,13 +84,13 @@ export default function OnlineGamePage() {
     const join = () =>
       socket.emit("game:join", { code }, (res) => {
         if (res?.ok) {
-          setRoom(res.room);
+          setRoom({ ...res.room, receivedAt: Date.now() });
           setError(null);
         } else {
           setError(res?.error ?? "Could not join the game.");
         }
       });
-    const onState = (view) => view.code === code && setRoom(view);
+    const onState = (view) => view.code === code && setRoom({ ...view, receivedAt: Date.now() });
     const onClosed = (data) => data.code === code && setClosedReason(data.reason);
 
     if (socket.connected) join();
@@ -141,7 +141,12 @@ export default function OnlineGamePage() {
       });
     });
 
-  const now = useNow(Boolean(opponentSeat?.abandonDeadline));
+  const now = useNow(Boolean(opponentSeat?.abandonDeadline) || room?.turnRemainingMs != null);
+  // Turn clock: the server sends the time left; count down from when the update arrived.
+  const clock =
+    room?.status === "playing" && room.turnRemainingMs != null
+      ? Math.max(0, Math.ceil((room.receivedAt + room.turnRemainingMs - now) / 1000))
+      : null;
   const bg = useColorModeValue("linear-gradient(to right, #f6d365, #fda085)", "linear-gradient(to right, #667eea, #764ba2)");
 
   if (closedReason || error) {
@@ -235,6 +240,7 @@ export default function OnlineGamePage() {
           label={waiting ? "Waiting…" : myTurn ? "Your turn" : names[state.turn]}
           canEndChain={myTurn}
           onEndChain={() => send("game:action", { action: { type: "endChain" } })}
+          clock={clock}
         />
         <Box display="flex" justifyContent="center" position="relative">
           <GameBoard
@@ -302,6 +308,7 @@ export default function OnlineGamePage() {
             label={waiting ? "Waiting…" : myTurn ? "Your turn" : `${names[state.turn]}'s turn`}
             canEndChain={myTurn}
             onEndChain={() => send("game:action", { action: { type: "endChain" } })}
+            clock={clock}
           />
           <PanelCard>
             <Text fontSize="sm" textAlign="center">

@@ -180,6 +180,37 @@ describe('GameRooms', () => {
     expect(events.closed).toContain("carol didn't answer the challenge.");
   });
 
+  it('runs a turn clock: a capture chain ends on time, otherwise the player to move loses', () => {
+    jest.useFakeTimers();
+    const ctx = setup({ turnMs: 1000 });
+    const room = ctx.rooms.create(alice, 's-alice');
+    expect(ctx.rooms.view(room).turnRemainingMs).toBeNull(); // no clock while waiting
+    ctx.rooms.join(room.code, bob, 's-bob');
+    expect(ctx.rooms.view(room).turnRemainingMs).toBe(1000);
+
+    jest.advanceTimersByTime(600);
+    ctx.rooms.act(room.code, 'a', { type: 'move', from: p('32'), to: p('42') });
+    expect(ctx.rooms.view(room).turnRemainingMs).toBe(1000); // a move gives the opponent a full turn
+
+    jest.advanceTimersByTime(1001);
+    expect(room.status).toBe('finished');
+    expect(room.state.winner).toBe(RED);
+    expect(room.state.reason).toBe('timeout');
+    expect(ctx.events.finished).toHaveLength(1);
+  });
+
+  it('ends an unfinished capture chain instead of forfeiting', () => {
+    jest.useFakeTimers();
+    const ctx = setup({ turnMs: 1000 });
+    const room = ctx.rooms.create(alice, 's-alice');
+    ctx.rooms.join(room.code, bob, 's-bob');
+    room.state = { ...room.state, chain: p('42'), board: room.state.board.slice() };
+    jest.advanceTimersByTime(1001);
+    expect(room.status).toBe('playing');
+    expect(room.state.chain).toBeNull();
+    expect(room.state.turn).toBe(BLUE);
+  });
+
   it('removes stale rooms', () => {
     const { rooms } = setup({ waitingTtlMs: 10 });
     const room = rooms.create(alice, 's-alice');

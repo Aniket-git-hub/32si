@@ -51,11 +51,12 @@ const REASON = {
   "no-captures": "50 turns without a capture",
   resigned: "Resigned",
   abandoned: "Left the game",
+  timeout: "Ran out of time",
 };
 
 const describeReason = (row) => {
   const text = REASON[row.reason] ?? "";
-  if (row.reason === "resigned" || row.reason === "abandoned") {
+  if (row.reason === "resigned" || row.reason === "abandoned" || row.reason === "timeout") {
     return row.outcome === "win" ? `Opponent ${text.toLowerCase()}` : `You ${text.toLowerCase()}`;
   }
   return text;

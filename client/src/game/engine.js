@@ -162,7 +162,7 @@ export const createInitialState = () => ({
     quietTurns: 0,
     moveNumber: 0,
     winner: null, // null | RED | BLUE | DRAW
-    reason: null, // 'captured-all' | 'blocked' | 'no-captures' | 'resigned' | 'abandoned'
+    reason: null, // 'captured-all' | 'blocked' | 'no-captures' | 'resigned' | 'abandoned' | 'timeout'
     lastMove: null, // { from, to, captured, player }
 });
 
@@ -295,7 +295,7 @@ export const applyAction = (state, action) => {
     return finishTurn(s, true);
 };
 
-/** Ends the game because a player resigned or abandoned it. */
+/** Ends the game because a player resigned, abandoned it or ran out of time. */
 export const forfeit = (state, loser, reason = 'resigned') => ({
     ...state,
     chain: null,
@@ -318,6 +318,8 @@ export const describeResult = (state) => {
             return `${l} resigned.`;
         case 'abandoned':
             return `${l} left the game.`;
+        case 'timeout':
+            return `${l} ran out of time.`;
         default:
             return `${w} wins.`;
     }

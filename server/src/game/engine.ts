@@ -36,7 +36,7 @@
 
 export type Player = 1 | 2;
 export type Winner = Player | 3;
-export type Reason = 'captured-all' | 'blocked' | 'no-captures' | 'resigned' | 'abandoned';
+export type Reason = 'captured-all' | 'blocked' | 'no-captures' | 'resigned' | 'abandoned' | 'timeout';
 
 export interface Move {
   from: number;
@@ -198,7 +198,7 @@ export const createInitialState = (): GameState => ({
   quietTurns: 0,
   moveNumber: 0,
   winner: null, // null | RED | BLUE | DRAW
-  reason: null, // 'captured-all' | 'blocked' | 'no-captures' | 'resigned' | 'abandoned'
+  reason: null, // 'captured-all' | 'blocked' | 'no-captures' | 'resigned' | 'abandoned' | 'timeout'
   lastMove: null, // { from, to, captured, player }
 });
 
@@ -333,7 +333,7 @@ export const applyAction = (state: GameState, action: Action): GameState => {
   return finishTurn(s, true);
 };
 
-/** Ends the game because a player resigned or abandoned it. */
+/** Ends the game because a player resigned, abandoned it or ran out of time. */
 export const forfeit = (state: GameState, loser: Player, reason: Reason = 'resigned'): GameState => ({
   ...state,
   chain: null,
@@ -356,6 +356,8 @@ export const describeResult = (state: GameState): string => {
       return `${l} resigned.`;
     case 'abandoned':
       return `${l} left the game.`;
+    case 'timeout':
+      return `${l} ran out of time.`;
     default:
       return `${w} wins.`;
   }
