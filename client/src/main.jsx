@@ -1,4 +1,5 @@
 import { ChakraProvider, ColorModeProvider, ColorModeScript, extendTheme } from '@chakra-ui/react'
+import { MotionConfig } from 'framer-motion'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
@@ -31,6 +32,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ColorModeScript initialColorMode={theme.config.initialColorMode} />
     <ChakraProvider theme={theme}>
       <ColorModeProvider options={{ useSystemColorMode: true }}>
+        <MotionConfig reducedMotion="user">
         <GameSettingsProvider>
         <AuthProvider>
           <AllDataContextProvider>
@@ -42,6 +44,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           </AllDataContextProvider>
         </AuthProvider>
         </GameSettingsProvider>
+        </MotionConfig>
       </ColorModeProvider>
     </ChakraProvider>
   </React.StrictMode>,

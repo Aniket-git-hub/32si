@@ -20,7 +20,8 @@ import {
     useColorModeValue,
     VStack,
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import Confetti from "react-confetti";
 import { FaTrophy, FaUser } from "react-icons/fa";
 import { Link as RouterLink } from "react-router-dom";
 import { BLUE, DRAW, DRAW_TURNS, PIECES_PER_PLAYER, RED, capturedBy, describeResult, movesForPlayer } from "../../game/engine";
@@ -239,10 +240,24 @@ export const CompactStatus = ({ state, names = {}, label, thinking = false, canE
     );
 };
 
-export const GameOverModal = ({ state, isOpen, onClose, title, children }) => {
+export const GameOverModal = ({ state, isOpen, onClose, title, children, celebrate = false }) => {
     const bg = useGameGradient();
+    const reduceMotion = useReducedMotion();
     const color = state.winner !== null ? PLAYER_COLORS[state.winner] : undefined;
     return (
+        <>
+        {isOpen && celebrate && !reduceMotion && (
+            <Box position="fixed" inset={0} pointerEvents="none" zIndex="tooltip">
+                <Confetti
+                    width={window.innerWidth}
+                    height={window.innerHeight}
+                    recycle={false}
+                    numberOfPieces={260}
+                    gravity={0.22}
+                    colors={["#E63946", "#3d82c0", "#facc15", "#a78bfa", "#ffffff"]}
+                />
+            </Box>
+        )}
         <Modal isOpen={isOpen} onClose={onClose} isCentered motionPreset="scale">
             <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(6px)" />
             <ModalContent bg={bg} borderRadius="2xl" boxShadow="2xl">
@@ -269,6 +284,7 @@ export const GameOverModal = ({ state, isOpen, onClose, title, children }) => {
                 </ModalBody>
             </ModalContent>
         </Modal>
+        </>
     );
 };
 

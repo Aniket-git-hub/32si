@@ -367,7 +367,13 @@ export default function OnlineGamePage() {
         </VStack>
       </GridItem>
 
-      <GameOverModal state={state} isOpen={gameOver.isOpen && room.status === "finished"} onClose={gameOver.onClose} title={winnerTitle}>
+      <GameOverModal
+        state={state}
+        isOpen={gameOver.isOpen && room.status === "finished"}
+        onClose={gameOver.onClose}
+        title={winnerTitle}
+        celebrate={state.winner === myColor}
+      >
         {rated?.changes?.[user?._id] && (
           <Text fontWeight="bold">
             Rating: {rated.changes[user._id].rating}{" "}

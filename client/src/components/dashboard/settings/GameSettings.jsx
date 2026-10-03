@@ -68,6 +68,14 @@ export default function GameSettings() {
         <FormHelperText>Start the music with the Play Music button on the game screen.</FormHelperText>
       </FormControl>
 
+      <Toggle
+        id="haptics"
+        label="Vibration"
+        help="A light buzz on moves and captures, on phones that support it."
+        isChecked={settings.haptics}
+        onChange={(haptics) => updateSettings({ haptics })}
+      />
+
       <Divider />
       <Heading size="md">Board</Heading>
       <Toggle

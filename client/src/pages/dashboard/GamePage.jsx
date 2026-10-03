@@ -35,7 +35,7 @@ import { playAction } from "../../game/replay";
 import { useGameSettings } from "../../context/GameSettingsContext";
 import useGameSounds from "../../hooks/useGameSounds";
 
-const AI_STEP_DELAY = 450;
+const AI_STEP_DELAY = 600; // a little longer than a jump animation
 const AI_MIN_THINK = 500;
 
 /** Runs the AI in a web worker; returns a function that resolves with the chosen turn. */
@@ -379,7 +379,13 @@ export default function GamePage() {
         </VStack>
       </GridItem>
 
-      <GameOverModal state={state} isOpen={gameOver.isOpen && state.winner !== null} onClose={gameOver.onClose} title={winnerTitle}>
+      <GameOverModal
+        state={state}
+        isOpen={gameOver.isOpen && state.winner !== null}
+        onClose={gameOver.onClose}
+        title={winnerTitle}
+        celebrate={state.winner !== DRAW && (mode === "local" || state.winner === humanColor)}
+      >
         <Button colorScheme="purple" size="lg" leftIcon={<FaRedo />} onClick={newGame}>
           Play Again
         </Button>

@@ -9,6 +9,7 @@ export const DEFAULT_GAME_SETTINGS = {
   moveHints: true, // ring the beads that can move and show where the selected bead can go
   captureHints: true, // highlight beads that can capture
   confirmMoves: false, // tap a destination twice to move (avoids mis-taps on small screens)
+  haptics: true, // vibrate on moves and captures (phones that support it)
 };
 
 const load = () => {
