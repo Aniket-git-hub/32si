@@ -22,7 +22,8 @@ import {
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { FaTrophy, FaUser } from "react-icons/fa";
-import { BLUE, DRAW, DRAW_TURNS, PIECES_PER_PLAYER, RED, capturedBy, describeResult } from "../../game/engine";
+import { Link as RouterLink } from "react-router-dom";
+import { BLUE, DRAW, DRAW_TURNS, PIECES_PER_PLAYER, RED, capturedBy, describeResult, movesForPlayer } from "../../game/engine";
 
 export const PLAYER_COLORS = { [RED]: "player.red", [BLUE]: "player.blue", [DRAW]: "player.draw" };
 export const PLAYER_LABELS = { [RED]: "RED", [BLUE]: "BLUE" };
@@ -102,6 +103,12 @@ export const ScoreCard = ({ state, names = {}, extras = {} }) => (
     </PanelCard>
 );
 
+/** "You can capture" hint for the player to move (pass the captureHints setting as `enabled`). */
+export const captureHint = (state, isMyTurn, enabled) => {
+    if (!enabled || !isMyTurn || state.winner !== null || state.chain !== null) return null;
+    return movesForPlayer(state.board, state.turn).some((m) => m.over !== null) ? "You can capture a bead!" : null;
+};
+
 const CLOCK_WARNING = 15;
 
 /** Seconds left for the current turn; turns red and pulses in the last 15 seconds. */
@@ -126,7 +133,13 @@ export const TurnClock = ({ seconds, ...rest }) => {
 };
 
 /** Whose turn it is, plus the "stop capturing" control during a capture chain. */
-export const TurnCard = ({ state, label, thinking = false, canEndChain = false, onEndChain, clock = null, ...rest }) => (
+const HintBadge = ({ children }) => (
+    <Badge colorScheme="yellow" variant="solid" textAlign="center" whiteSpace="normal" py={1} borderRadius="md">
+        {children}
+    </Badge>
+);
+
+export const TurnCard = ({ state, label, thinking = false, canEndChain = false, onEndChain, clock = null, hint = null, ...rest }) => (
     <PanelCard {...rest}>
         <PanelHeading icon={<FaUser />}>Turn</PanelHeading>
         {state.winner !== null ? (
@@ -149,6 +162,7 @@ export const TurnCard = ({ state, label, thinking = false, canEndChain = false, 
                     {label ?? PLAYER_LABELS[state.turn]}
                 </Text>
                 {clock !== null && <TurnClock seconds={clock} textAlign="center" fontSize="lg" />}
+                {hint && <HintBadge>{hint}</HintBadge>}
                 {thinking && (
                     <HStack justify="center">
                         <Spinner size="sm" />
@@ -176,7 +190,7 @@ export const TurnCard = ({ state, label, thinking = false, canEndChain = false, 
 );
 
 /** One-line status for phones: beads left on each side, whose turn it is, and the stop-capturing button. */
-export const CompactStatus = ({ state, names = {}, label, thinking = false, canEndChain = false, onEndChain, clock = null, ...rest }) => {
+export const CompactStatus = ({ state, names = {}, label, thinking = false, canEndChain = false, onEndChain, clock = null, hint = null, ...rest }) => {
     const bg = useColorModeValue("whiteAlpha.700", "blackAlpha.300");
     const side = (player) => (
         <VStack spacing={0} minW="72px">
@@ -215,6 +229,7 @@ export const CompactStatus = ({ state, names = {}, label, thinking = false, canE
                 </VStack>
                 {side(BLUE)}
             </HStack>
+            {hint && <HintBadge>{hint}</HintBadge>}
             {state.chain !== null && canEndChain && state.winner === null && (
                 <Button size="sm" colorScheme="purple" w="full" onClick={onEndChain}>
                     Stop capturing &amp; end turn
@@ -275,8 +290,8 @@ export const HowToPlayModal = ({ isOpen, onClose }) => (
                         onto the empty point behind it (yellow dots). The jumped bead is removed.
                     </ListItem>
                     <ListItem>
-                        After a capture, the same bead may keep jumping and capturing in the same turn. Click the bead
-                        again or press <b>End turn</b> to stop.
+                        After a capture, the same bead may keep jumping and capturing in the same turn. Press{" "}
+                        <b>End turn</b> to stop early.
                     </ListItem>
                     <ListItem>Capturing is optional.</ListItem>
                     <ListItem>
@@ -288,7 +303,10 @@ export const HowToPlayModal = ({ isOpen, onClose }) => (
                     </ListItem>
                 </UnorderedList>
             </ModalBody>
-            <ModalFooter>
+            <ModalFooter gap={2}>
+                <Button as={RouterLink} to="/learn" variant="outline" colorScheme="purple" onClick={onClose}>
+                    Interactive tutorial
+                </Button>
                 <Button colorScheme="purple" onClick={onClose}>
                     Got it
                 </Button>

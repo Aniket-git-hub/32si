@@ -32,9 +32,11 @@ import {
   CompactStatus,
   ScoreCard,
   TurnCard,
+  captureHint,
 } from "../../components/game/GamePanels";
 import { BLUE, DRAW, RED, opponent } from "../../game/engine";
 import { useAuth } from "../../hooks/useAuth";
+import { useGameSettings } from "../../context/GameSettingsContext";
 import useGameSounds from "../../hooks/useGameSounds";
 import useSocket from "../../hooks/useSocket";
 
@@ -148,6 +150,7 @@ export default function OnlineGamePage() {
       ? Math.max(0, Math.ceil((room.receivedAt + room.turnRemainingMs - now) / 1000))
       : null;
   const bg = useGameBackground();
+  const { settings } = useGameSettings();
 
   if (closedReason || error) {
     return (
@@ -172,6 +175,7 @@ export default function OnlineGamePage() {
 
   const waiting = room.status === "waiting";
   const myTurn = room.status === "playing" && state.turn === myColor;
+  const hint = captureHint(state, myTurn, settings.captureHints);
   const names = {
     [RED]: room.players[RED] ? `${room.players[RED].username}${myColor === RED ? " (you)" : ""}` : "Waiting…",
     [BLUE]: room.players[BLUE]
@@ -241,6 +245,7 @@ export default function OnlineGamePage() {
           canEndChain={myTurn}
           onEndChain={() => send("game:action", { action: { type: "endChain" } })}
           clock={clock}
+          hint={hint}
         />
         <Box display="flex" justifyContent="center" position="relative">
           <GameBoard
@@ -309,6 +314,7 @@ export default function OnlineGamePage() {
             canEndChain={myTurn}
             onEndChain={() => send("game:action", { action: { type: "endChain" } })}
             clock={clock}
+            hint={hint}
           />
           <PanelCard>
             <Text fontSize="sm" textAlign="center">

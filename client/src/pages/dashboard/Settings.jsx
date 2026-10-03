@@ -1,4 +1,5 @@
 import { Tabs, TabList, Tab, TabPanels, TabPanel } from "@chakra-ui/react"
+import GameSettings from "../../components/dashboard/settings/GameSettings"
 import ProfileSettings from "../../components/dashboard/settings/ProfileSettings"
 
 export default function Settings() {
@@ -13,7 +14,7 @@ export default function Settings() {
           <ProfileSettings />
         </TabPanel>
         <TabPanel>
-          <p>Game Settings</p>
+          <GameSettings />
         </TabPanel>
       </TabPanels>
     </Tabs>

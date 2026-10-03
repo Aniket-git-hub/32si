@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
 import { AllDataContextProvider } from './context/AllDataContext.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
+import { GameSettingsProvider } from './context/GameSettingsContext.jsx'
 import { SocketProvider } from './context/SocketContext.jsx'
 
 const theme = extendTheme({
@@ -30,6 +31,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ColorModeScript initialColorMode={theme.config.initialColorMode} />
     <ChakraProvider theme={theme}>
       <ColorModeProvider options={{ useSystemColorMode: true }}>
+        <GameSettingsProvider>
         <AuthProvider>
           <AllDataContextProvider>
             <SocketProvider>
@@ -39,6 +41,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             </SocketProvider>
           </AllDataContextProvider>
         </AuthProvider>
+        </GameSettingsProvider>
       </ColorModeProvider>
     </ChakraProvider>
   </React.StrictMode>,

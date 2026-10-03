@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { GiCrossedSwords } from 'react-icons/gi';
 import { useNavigate } from 'react-router-dom';
 import challengeSound from '../../assets/sounds/newGame.wav';
+import { useGameSettings } from '../../context/GameSettingsContext';
 import useSocket from '../../hooks/useSocket';
 
 /** Shows incoming challenges anywhere in the app, with Accept / Decline. */
@@ -10,12 +11,14 @@ export default function ChallengeListener() {
     const { socket } = useSocket();
     const toast = useToast();
     const navigate = useNavigate();
+    const { settings } = useGameSettings();
+    const soundOn = settings.soundEffects;
 
     useEffect(() => {
         if (!socket) return;
         const onChallenged = ({ code, from }) => {
             if (toast.isActive(code)) return;
-            new Audio(challengeSound).play().catch(() => {});
+            if (soundOn) new Audio(challengeSound).play().catch(() => {});
             toast({
                 id: code,
                 position: 'top-right',
@@ -65,7 +68,7 @@ export default function ChallengeListener() {
             socket.off('game:challenged', onChallenged);
             socket.off('game:challengeCancelled', onCancelled);
         };
-    }, [socket, toast, navigate]);
+    }, [socket, toast, navigate, soundOn]);
 
     return null;
 }

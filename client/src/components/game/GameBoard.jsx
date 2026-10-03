@@ -9,7 +9,9 @@ import {
     POSITIONS,
     RED,
     destinationsFrom,
+    jumpsFrom,
 } from "../../game/engine";
+import { useGameSettings } from "../../context/GameSettingsContext";
 
 const WIDTH = 430;
 const HEIGHT = 600;
@@ -70,14 +72,22 @@ const usePieceIds = (board) => {
  *
  * Controlled component: it renders `state` (see game/engine.js) and reports the player's intent
  * through `onAction({ type: 'move', from, to })` or `onAction({ type: 'endChain' })`.
+ * Hints and tap-to-confirm follow the player's game settings unless overridden with `hints`.
  */
-const GameBoard = ({ state, onAction, canMove = true, flipped = false }) => {
+const GameBoard = ({ state, onAction, canMove = true, flipped = false, hints }) => {
     const [selected, setSelected] = useState(null);
+    // With "confirm moves" on, the first tap on a destination only marks it.
+    const [pending, setPending] = useState(null);
+    const { settings } = useGameSettings();
+    const { moveHints, captureHints, confirmMoves } = { ...settings, ...hints };
     const palette = COLORS[useColorMode().colorMode] ?? COLORS.light;
     const pieceIds = usePieceIds(state.board);
 
     // Forget the selection whenever the position changes.
-    useEffect(() => setSelected(null), [state.moveNumber, canMove]);
+    useEffect(() => {
+        setSelected(null);
+        setPending(null);
+    }, [state.moveNumber, canMove]);
 
     const active = canMove && state.winner === null;
     // During a capture chain only the capturing bead may move.
@@ -87,9 +97,14 @@ const GameBoard = ({ state, onAction, canMove = true, flipped = false }) => {
         [state, current]
     );
     const movable = useMemo(() => {
-        if (!active || state.chain !== null) return new Set();
+        if (!active || state.chain !== null || !moveHints) return new Set();
         return new Set(POINTS.filter((p) => state.board[p] === state.turn && destinationsFrom(state, p).length > 0));
-    }, [state, active]);
+    }, [state, active, moveHints]);
+    // Beads that can capture right now (captures are optional, so beginners easily miss them).
+    const capturers = useMemo(() => {
+        if (!active || state.chain !== null || !captureHints) return new Set();
+        return new Set(POINTS.filter((p) => state.board[p] === state.turn && jumpsFrom(state.board, p).length > 0));
+    }, [state, active, captureHints]);
 
     const toScreen = (p) => {
         const { x, y } = POSITIONS[p];
@@ -101,19 +116,29 @@ const GameBoard = ({ state, onAction, canMove = true, flipped = false }) => {
     const handleClick = (p) => {
         if (!active) return;
         if (current !== null && destinations.some((d) => d.to === p)) {
+            if (confirmMoves && pending !== p) {
+                setPending(p);
+                return;
+            }
             onAction({ type: "move", from: current, to: p });
             setSelected(null);
-        } else if (state.chain !== null) {
-            if (p === state.chain) onAction({ type: "endChain" });
-        } else if (state.board[p] === state.turn && p !== selected) {
+            setPending(null);
+            return;
+        }
+        setPending(null);
+        // Mid-chain the capturing bead stays selected; ending the chain early is an explicit button press
+        // (tapping the bead again is too easy to do by accident).
+        if (state.chain !== null) return;
+        if (state.board[p] === state.turn && p !== selected) {
             setSelected(p);
         } else {
             setSelected(null);
         }
     };
 
-    const highlighted = new Set(destinations.map((d) => d.to));
-    const threatened = new Set(destinations.map((d) => d.capture).filter((c) => c !== null));
+    // Destinations stay clickable without hints; they're just not drawn.
+    const highlighted = new Set(moveHints ? destinations.map((d) => d.to) : []);
+    const threatened = new Set(moveHints ? destinations.map((d) => d.capture).filter((c) => c !== null) : []);
     const last = state.lastMove;
 
     const pieces = POINTS.filter((p) => state.board[p] !== EMPTY)
@@ -174,6 +199,19 @@ const GameBoard = ({ state, onAction, canMove = true, flipped = false }) => {
                     <g key={p} onClick={() => handleClick(p)} style={{ cursor: active ? "pointer" : "default" }}>
                         <circle cx={x} cy={y} r="22" fill="transparent" />
                         <circle cx={x} cy={y} r="20" fill="transparent" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
+                        {pending === p && (
+                            <motion.circle
+                                cx={x}
+                                cy={y}
+                                r="19"
+                                fill="none"
+                                stroke="white"
+                                strokeWidth="3"
+                                pointerEvents="none"
+                                animate={{ opacity: [1, 0.3, 1] }}
+                                transition={{ repeat: Infinity, duration: 1 }}
+                            />
+                        )}
                         <AnimatePresence>
                             {target && (
                                 <motion.circle
@@ -210,8 +248,18 @@ const GameBoard = ({ state, onAction, canMove = true, flipped = false }) => {
                             onClick={() => handleClick(p)}
                             style={{ cursor: active ? "pointer" : "default" }}
                         >
-                            {movable.has(p) && !isSelected && (
-                                <circle r="19" fill="none" stroke="white" strokeOpacity="0.55" strokeWidth="2" />
+                            {capturers.has(p) && !isSelected ? (
+                                <motion.circle
+                                    r="20"
+                                    fill="none"
+                                    stroke="#facc15"
+                                    strokeWidth="3"
+                                    animate={{ opacity: [1, 0.45, 1] }}
+                                    transition={{ repeat: Infinity, duration: 1.4 }}
+                                />
+                            ) : (
+                                movable.has(p) &&
+                                !isSelected && <circle r="19" fill="none" stroke="white" strokeOpacity="0.55" strokeWidth="2" />
                             )}
                             <motion.circle
                                 r="15"

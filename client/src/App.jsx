@@ -16,6 +16,7 @@ import AboutUs from './pages/dashboard/AboutUs';
 import ChatPage from './pages/dashboard/ChatPage';
 import Feedback from './pages/dashboard/Feedback';
 import GamePage from './pages/dashboard/GamePage';
+import LearnPage from './pages/dashboard/LearnPage';
 import HomePage from './pages/dashboard/HomePage';
 import OnlineGamePage from './pages/dashboard/OnlineGamePage';
 import Profile from './pages/dashboard/Profile';
@@ -60,6 +61,7 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="game" element={<GamePage />} />
         <Route path="game/online/:code" element={<OnlineGamePage />} />
+        <Route path="learn" element={<LearnPage />} />
         <Route path="settings" element={<Settings />} />
         <Route path="stats" element={<Stats />} />
         <Route path="feedback" element={<Feedback />} />

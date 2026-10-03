@@ -1,6 +1,7 @@
 // Offline games (Pass & Play, vs Computer) are not sent to the server; they are remembered in this browser.
 
 const HISTORY_KEY = '32beads.recentGames';
+const TUTORIAL_KEY = '32beads.tutorialDone';
 const AI_RECORD_KEY = '32beads.aiRecord';
 
 const read = (key, fallback) => {
@@ -39,3 +40,6 @@ export const recordOfflineGame = (entry) => {
     }
     return recent;
 };
+
+export const isTutorialDone = () => read(TUTORIAL_KEY, false) === true;
+export const markTutorialDone = () => write(TUTORIAL_KEY, true);

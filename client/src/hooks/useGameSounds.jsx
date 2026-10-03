@@ -5,6 +5,7 @@ import loseSound from '../assets/sounds/lose.wav';
 import moveSound from '../assets/sounds/move.wav';
 import newGameSound from '../assets/sounds/newGame.wav';
 import winSound from '../assets/sounds/win.wav';
+import { useGameSettings } from '../context/GameSettingsContext';
 
 const SOURCES = { move: moveSound, kill: killSound, win: winSound, lose: loseSound, newGame: newGameSound };
 
@@ -16,23 +17,25 @@ export default function useGameSounds() {
     );
     const music = useRef(null);
     const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+    const { settings } = useGameSettings();
+    const { soundEffects, musicVolume } = settings;
 
     const play = useCallback(
         (name) => {
             const audio = sounds[name];
-            if (!audio) return;
+            if (!audio || !soundEffects) return;
             audio.currentTime = 0;
             // play() is rejected when the browser blocks audio before the first user interaction.
             audio.play().catch(() => {});
         },
-        [sounds]
+        [sounds, soundEffects]
     );
 
     const toggleMusic = useCallback(() => {
         if (!music.current) {
             music.current = new Audio(backgroundMusic);
             music.current.loop = true;
-            music.current.volume = 0.05;
+            music.current.volume = musicVolume;
         }
         if (isMusicPlaying) {
             music.current.pause();
@@ -41,7 +44,11 @@ export default function useGameSounds() {
             music.current.play().catch(() => {});
             setIsMusicPlaying(true);
         }
-    }, [isMusicPlaying]);
+    }, [isMusicPlaying, musicVolume]);
+
+    useEffect(() => {
+        if (music.current) music.current.volume = musicVolume;
+    }, [musicVolume]);
 
     useEffect(() => () => music.current?.pause(), []);
 

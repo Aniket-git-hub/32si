@@ -46,6 +46,7 @@ import useChallenge from '../../hooks/useChallenge';
 import useSocket from '../../hooks/useSocket';
 import { getGameOverview, getGameStats } from '../../api/game';
 import { getSmallProfilePicture } from '../../api/user';
+import { isTutorialDone } from '../../game/localRecord';
 
 // Accepts a bare code or a pasted invite link (…/game/online/ABC123).
 const parseGameCode = (input) => input.trim().split('/').filter(Boolean).pop()?.toUpperCase() ?? '';
@@ -64,6 +65,7 @@ const HomePage = () => {
     const [gameCode, setGameCode] = useState('');
     const [isCreating, setIsCreating] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
+    const [showTutorialBanner, setShowTutorialBanner] = useState(() => !isTutorialDone());
 
     // Modal controls
     const createGameModal = useDisclosure();
@@ -259,6 +261,35 @@ const HomePage = () => {
                         </Stat>
                     </MotionBox>
                 </Grid>
+
+                {showTutorialBanner && (
+                    <Flex
+                        w="full"
+                        maxW="600px"
+                        mb={5}
+                        p={4}
+                        gap={3}
+                        align="center"
+                        borderRadius="xl"
+                        bg="purple.600"
+                        color="white"
+                        boxShadow="lg"
+                        direction={{ base: 'column', sm: 'row' }}
+                    >
+                        <Box flex={1}>
+                            <Text fontWeight="bold">New to 32 Beads?</Text>
+                            <Text fontSize="sm">Learn the rules in five quick, hands-on lessons.</Text>
+                        </Box>
+                        <HStack>
+                            <Button colorScheme="whiteAlpha" variant="ghost" color="white" onClick={() => setShowTutorialBanner(false)}>
+                                Not now
+                            </Button>
+                            <Button bg="white" color="purple.700" _hover={{ bg: 'purple.50' }} onClick={() => navigate('/learn')}>
+                                Start tutorial
+                            </Button>
+                        </HStack>
+                    </Flex>
+                )}
 
                 {/* Main Game Options */}
                 <MotionBox

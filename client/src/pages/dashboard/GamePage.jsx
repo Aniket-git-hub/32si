@@ -24,10 +24,12 @@ import {
   CompactStatus,
   ScoreCard,
   TurnCard,
+  captureHint,
 } from "../../components/game/GamePanels";
 import { DIFFICULTIES } from "../../game/ai";
 import { BLUE, DRAW, RED, applyAction, capturedBy, createInitialState, opponent } from "../../game/engine";
 import { loadRecentGames, recordOfflineGame } from "../../game/localRecord";
+import { useGameSettings } from "../../context/GameSettingsContext";
 import useGameSounds from "../../hooks/useGameSounds";
 
 const AI_STEP_DELAY = 450;
@@ -131,6 +133,8 @@ export default function GamePage() {
 
   // The computer's turn.
   const aiToMove = mode === "ai" && state.winner === null && state.turn === aiColor;
+  const { settings } = useGameSettings();
+  const hint = captureHint(state, !aiToMove, settings.captureHints);
   useEffect(() => {
     if (!aiToMove) return;
     let cancelled = false;
@@ -240,6 +244,7 @@ export default function GamePage() {
           thinking={thinking}
           canEndChain={!aiToMove}
           onEndChain={() => handleAction({ type: "endChain" })}
+          hint={hint}
         />
         <Box display="flex" justifyContent="center">
           <GameBoard
@@ -265,6 +270,7 @@ export default function GamePage() {
             thinking={thinking}
             canEndChain={!aiToMove}
             onEndChain={() => handleAction({ type: "endChain" })}
+            hint={hint}
           />
           {mode === "ai" && (
             <PanelCard>
