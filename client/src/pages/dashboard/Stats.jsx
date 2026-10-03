@@ -30,7 +30,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { FaGlobe, FaRobot } from "react-icons/fa";
+import { FaGlobe, FaPlay, FaRobot } from "react-icons/fa";
 import { GiCrossedSwords } from "react-icons/gi";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { getGameStats } from "../../api/game";
@@ -161,6 +161,7 @@ export default function Stats() {
   }, []);
 
   const stats = data?.stats;
+  const rating = data?.rating;
   const history = data?.history ?? [];
   const streak = stats?.currentStreak;
   const aiLevels = Object.keys(DIFFICULTIES).filter((level) => aiRecord[level]);
@@ -177,7 +178,7 @@ export default function Stats() {
           </Alert>
         )}
         {!error && !stats && (
-          <SimpleGrid columns={{ base: 2, md: 3, xl: 6 }} spacing={4}>
+          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
             {[...Array(6)].map((_, i) => (
               <Skeleton key={i} h="90px" borderRadius="xl" />
             ))}
@@ -196,7 +197,14 @@ export default function Stats() {
         )}
         {stats && stats.played > 0 && (
           <VStack spacing={5} align="stretch">
-            <SimpleGrid columns={{ base: 2, md: 3, xl: 6 }} spacing={4}>
+            <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
+              {rating && (
+                <StatTile
+                  label="Rating"
+                  value={rating.rating}
+                  help={rating.ratedGames ? `Peak ${rating.peakRating}` : "Unrated"}
+                />
+              )}
               <StatTile label="Games played" value={stats.played} help={`~${stats.averageMoves} moves per game`} />
               <StatTile label="Win rate" value={`${stats.winRate}%`} help={`${stats.wins} W · ${stats.draws} D · ${stats.losses} L`} />
               <StatTile
@@ -224,7 +232,9 @@ export default function Stats() {
                   <Th>You played</Th>
                   <Th>Result</Th>
                   <Th isNumeric>Captured</Th>
+                  <Th isNumeric>Rating</Th>
                   <Th>How it ended</Th>
+                  <Th />
                 </Tr>
               </Thead>
               <Tbody>
@@ -245,7 +255,17 @@ export default function Stats() {
                     <Td isNumeric>
                       {row.captured} – {row.lost}
                     </Td>
+                    <Td isNumeric color={row.ratingChange > 0 ? "green.500" : row.ratingChange < 0 ? "red.500" : "gray.500"}>
+                      {row.ratingChange === null ? "–" : `${row.ratingChange > 0 ? "+" : ""}${row.ratingChange}`}
+                    </Td>
                     <Td color="gray.500">{describeReason(row)}</Td>
+                    <Td>
+                      {row.hasReplay && (
+                        <Button size="xs" variant="ghost" colorScheme="purple" leftIcon={<FaPlay />} onClick={() => navigate(`/replay/${row.id}`)}>
+                          Watch
+                        </Button>
+                      )}
+                    </Td>
                   </Tr>
                 ))}
               </Tbody>

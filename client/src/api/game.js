@@ -41,3 +41,5 @@ export const getGameStats = async ({ userId, limit } = {}, signal) => {
       return handleRequest(`${getEndpoint('VITE_GAME_STATS_ROUTE', '/game/stats')}?${params}`, null, "GET", signal)
 }
 export const getGameOverview = async (signal) => handleRequest(getEndpoint('VITE_GAME_OVERVIEW_ROUTE', '/game/overview'), null, "GET", signal)
+export const getLeaderboard = async (signal) => handleRequest(getEndpoint('VITE_LEADERBOARD_ROUTE', '/game/leaderboard'), null, "GET", signal)
+export const getReplay = async (gameId, signal) => handleRequest(`${getEndpoint('VITE_REPLAY_ROUTE', '/game/replay')}/${gameId}`, null, "GET", signal)

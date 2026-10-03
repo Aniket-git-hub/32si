@@ -21,6 +21,8 @@ export interface SavedGame {
   moves?: number;
   startTime?: Date;
   endTime?: Date;
+  history?: number[];
+  ratingChanges?: { red?: number; blue?: number } | null;
 }
 
 export type Outcome = 'win' | 'loss' | 'draw';
@@ -36,6 +38,8 @@ export interface HistoryRow {
   moves: number;
   startTime: Date | null;
   endTime: Date | null;
+  ratingChange: number | null; // this player's rating change, null for unrated games
+  hasReplay: boolean;
 }
 
 export interface HeadToHead {
@@ -84,6 +88,8 @@ export const toHistory = (games: SavedGame[], userId: string): HistoryRow[] =>
         moves: game.moves ?? 0,
         startTime: game.startTime ?? null,
         endTime: game.endTime ?? null,
+        ratingChange: game.ratingChanges?.[color] ?? null,
+        hasReplay: (game.history?.length ?? 0) > 0,
       };
     })
     .filter((row): row is HistoryRow => row !== null)

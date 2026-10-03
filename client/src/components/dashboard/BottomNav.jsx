@@ -1,5 +1,6 @@
 import { Box, Flex, Text, useColorModeValue } from "@chakra-ui/react";
-import { FiSettings, FiUsers } from "react-icons/fi";
+import { FiUsers } from "react-icons/fi";
+import { MdOutlineLeaderboard } from "react-icons/md";
 import { HiOutlineRectangleGroup, HiOutlineUserGroup } from "react-icons/hi2";
 import { IoStatsChartOutline } from "react-icons/io5";
 import { NavLink } from "react-router-dom";
@@ -8,7 +9,7 @@ const ITEMS = [
     { label: "Play", icon: HiOutlineRectangleGroup, to: "/", end: true },
     { label: "Rivals", icon: HiOutlineUserGroup, to: "/rivals" },
     { label: "Stats", icon: IoStatsChartOutline, to: "/stats" },
-    { label: "Settings", icon: FiSettings, to: "/settings" },
+    { label: "Ranks", icon: MdOutlineLeaderboard, to: "/leaderboard" },
 ];
 
 /** Tab bar for phones and small tablets. */

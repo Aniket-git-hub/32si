@@ -28,6 +28,19 @@ const gameSchema = new mongoose.Schema<Game>({
   moves: {
     type: Number,
   },
+  // Encoded actions for replays (from * 45 + to, -1 = end a capture chain early).
+  history: {
+    type: [Number],
+    default: undefined,
+  },
+  rated: {
+    type: Boolean,
+    default: false,
+  },
+  ratingChanges: {
+    red: Number,
+    blue: Number,
+  },
   score: {
     type: String,
     // required: true,

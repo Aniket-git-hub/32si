@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import './App.css';
 import { useAllData } from './hooks/useAllData';
 import { useAuth } from './hooks/useAuth';
 import useSocket from './hooks/useSocket';
+import RequireAuth, { RedirectIfAuthenticated } from './components/auth/RequireAuth';
+import GuestLayout from './layouts/GuestLayout';
 import RootLayout from './layouts/RootLayout';
+import LandingPage from './pages/LandingPage';
 import CancelDeleteAccountRequestPage from './pages/auth/CancelDeleteAccountRequestPage';
 import DeleteAccountConfirmationPage from './pages/auth/DeleteAccountConfirmationPage';
 import Error404Page from './pages/auth/Error404Page';
@@ -17,6 +20,8 @@ import ChatPage from './pages/dashboard/ChatPage';
 import Feedback from './pages/dashboard/Feedback';
 import GamePage from './pages/dashboard/GamePage';
 import LearnPage from './pages/dashboard/LearnPage';
+import Leaderboard from './pages/dashboard/Leaderboard';
+import ReplayPage from './pages/dashboard/ReplayPage';
 import HomePage from './pages/dashboard/HomePage';
 import OnlineGamePage from './pages/dashboard/OnlineGamePage';
 import Profile from './pages/dashboard/Profile';
@@ -70,22 +75,26 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" exact element={isAuthenticated ? <RootLayout /> : <Navigate replace to="/login" />}>
-        <Route index element={<HomePage />} />
+      <Route path="/" element={isAuthenticated ? <RootLayout /> : <GuestLayout />}>
+        {/* Open to everyone: offline play, the tutorial and the about page. */}
+        <Route index element={isAuthenticated ? <HomePage /> : <LandingPage />} />
         <Route path="game" element={<GamePage />} />
-        <Route path="game/online/:code" element={<OnlineGamePage />} />
         <Route path="learn" element={<LearnPage />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="stats" element={<Stats />} />
-        <Route path="feedback" element={<Feedback />} />
         <Route path="about-us" element={<AboutUs />} />
-        <Route path="rivals" element={<Rivals />} />
-        <Route path="profile/:username" element={<Profile />} />
-        <Route path="chat/:username" element={<ChatPage />} />
+        {/* Members only. */}
+        <Route path="game/online/:code" element={<RequireAuth><OnlineGamePage /></RequireAuth>} />
+        <Route path="leaderboard" element={<RequireAuth><Leaderboard /></RequireAuth>} />
+        <Route path="replay/:gameId" element={<RequireAuth><ReplayPage /></RequireAuth>} />
+        <Route path="settings" element={<RequireAuth><Settings /></RequireAuth>} />
+        <Route path="stats" element={<RequireAuth><Stats /></RequireAuth>} />
+        <Route path="feedback" element={<RequireAuth><Feedback /></RequireAuth>} />
+        <Route path="rivals" element={<RequireAuth><Rivals /></RequireAuth>} />
+        <Route path="profile/:username" element={<RequireAuth><Profile /></RequireAuth>} />
+        <Route path="chat/:username" element={<RequireAuth><ChatPage /></RequireAuth>} />
         <Route path="*" element={<Error404Page />} />
       </Route>
-      <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate replace to="/" />} />
-      <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate replace to="/" />} />
+      <Route path="/login" element={<RedirectIfAuthenticated><LoginPage /></RedirectIfAuthenticated>} />
+      <Route path="/register" element={<RedirectIfAuthenticated><RegisterPage /></RedirectIfAuthenticated>} />
       <Route path="/forgot-password" element={<ForgotPasswordPage verifyOTP={verifyOTP} />} />
       <Route path="/reset-password" element={verifyOTP ? <ResetPasswordPage /> : <Error404Page />} />
       <Route path="/delete-account/:deletionToken" element={!user ? <DeleteAccountConfirmationPage /> : <Error404Page />} />

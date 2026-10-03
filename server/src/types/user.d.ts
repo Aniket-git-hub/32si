@@ -17,4 +17,7 @@ interface User extends Document {
   connectionRequests: string[];
   deletionToken: string;
   createdGames: string;
+  rating: number;
+  ratedGames: number;
+  peakRating: number;
 }

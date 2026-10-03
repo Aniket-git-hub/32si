@@ -1,4 +1,5 @@
 import { randomInt } from 'crypto';
+import { EncodedAction, encodeAction } from './elo';
 import {
   BLUE,
   GameState,
@@ -44,6 +45,8 @@ export interface Room {
   // The player to move must act before this time (ms since epoch) or the turn times out.
   turnDeadline: number | null;
   turnTimer: NodeJS.Timeout | null;
+  // Every action of the current game, for replays (see encodeAction).
+  history: EncodedAction[];
 }
 
 export interface SeatView extends Seat {
@@ -169,6 +172,7 @@ export class GameRooms {
       invited: null,
       turnDeadline: null,
       turnTimer: null,
+      history: [],
     };
     this.rooms.set(room.code, room);
     return room;
@@ -204,6 +208,7 @@ export class GameRooms {
     if (room.status !== 'playing') return;
     if (room.state.chain !== null) {
       room.state = applyAction(room.state, { type: 'endChain' });
+      room.history.push(encodeAction({ type: 'endChain' }));
       if (room.state.winner !== null) this.finish(room);
       else this.startTurnClock(room);
     } else {
@@ -291,6 +296,7 @@ export class GameRooms {
     if (error) return fail(error);
 
     room.state = applyAction(room.state, action as Parameters<typeof applyAction>[1]);
+    room.history.push(encodeAction(action as Parameters<typeof applyAction>[1]));
     if (room.state.winner !== null) this.finish(room);
     else this.startTurnClock(room);
     this.hooks.changed(room);
@@ -319,6 +325,7 @@ export class GameRooms {
     if (room.rematch.size === 2) {
       room.seats = { [RED]: room.seats[BLUE], [BLUE]: room.seats[RED] } as Record<Player, Seat | null>;
       room.state = createInitialState();
+      room.history = [];
       room.status = 'playing';
       room.startedAt = Date.now();
       room.finishedAt = null;

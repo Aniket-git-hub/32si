@@ -40,9 +40,14 @@ export const initializeSocketIO = (server: HttpServer) => {
       next(new CustomError('JsonWebTokenError', 'Invalid Token', err as Error));
     }
   }).on('connection', (socket: AuthenticatedSocket) => {
-    // Silently drop events from a socket that floods the server.
+    // Drop events from a socket that floods the server; events expecting a reply get an error so the
+    // client isn't left waiting.
     const allow = createSocketThrottle();
-    socket.use((_packet, next) => (allow() ? next() : undefined));
+    socket.use((packet, next) => {
+      if (allow()) return next();
+      const ack = packet[packet.length - 1];
+      if (typeof ack === 'function') ack({ ok: false, error: 'Too many requests. Slow down a little.' });
+    });
     userEventsHandler(socket, users);
     gameEventHandler(socket);
   });

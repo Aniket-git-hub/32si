@@ -7,6 +7,9 @@ interface Game extends Document {
   result?: 'red' | 'blue' | 'draw';
   reason?: string;
   moves?: number;
+  history?: number[];
+  rated?: boolean;
+  ratingChanges?: { red: number; blue: number };
   score: string;
   startTime: Date;
   endTime: Date;

@@ -64,6 +64,7 @@ describe('GameRooms', () => {
     expect(rooms.act(code, 'a', { type: 'hack' }).ok).toBe(false);
     expect(rooms.act(code, 'a', move('32', '42')).ok).toBe(true);
     expect(rooms.get(code)!.state.turn).toBe(BLUE);
+    expect(rooms.get(code)!.history).toEqual([p('32') * 45 + p('42')]); // rejected moves are not recorded
   });
 
   it('ends the game on resignation and saves it once', () => {

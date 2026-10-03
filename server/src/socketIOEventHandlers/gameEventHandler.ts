@@ -1,4 +1,5 @@
 import { isValidObjectId } from 'mongoose';
+import { isRated, rateGame, START_RATING } from '../game/elo';
 import { DRAW, RED, BLUE, capturedBy } from '../game/engine';
 import { GameRooms, Result, Room } from '../game/rooms';
 import { AuthenticatedSocket as Socket, getIO } from '../initializeSocket';
@@ -27,6 +28,7 @@ import USER from '../models/user';
  *    game:matched     { code }        quick match found an opponent
  *    game:challenged  { code, from }  someone challenged you
  *    game:challengeCancelled { code, reason }  a challenge to you was withdrawn, declined or expired
+ *    game:rated       { code, gameId, changes }  rating changes once a finished game is saved
  */
 
 const channel = (code: string) => `game:${code}`;
@@ -35,24 +37,89 @@ const userChannel = (userId: string) => `user:${userId}`;
 type Ack = (response: Record<string, unknown>) => void;
 const safeAck = (ack: unknown): Ack => (typeof ack === 'function' ? (ack as Ack) : () => undefined);
 
+/**
+ * Stores a finished game, updates both players' ratings and tells the room the rating changes
+ * ('game:rated' { code, changes: { [userId]: { change, rating } } }).
+ */
 const saveFinishedGame = async (room: Room) => {
   const red = room.seats[RED];
   const blue = room.seats[BLUE];
   if (!red || !blue) return;
-  const { winner, reason } = room.state;
+  // Copy everything now: a rematch can reset the room while we wait for the database.
+  const { winner, reason, moveNumber } = room.state;
+  const history = [...room.history];
+  const score = `${capturedBy(room.state, RED)}-${capturedBy(room.state, BLUE)}`;
+  const startTime = room.startedAt ? new Date(room.startedAt) : undefined;
+  const endTime = new Date(room.finishedAt ?? Date.now());
+  const rated = isRated(moveNumber);
   try {
+    let ratingChanges: { red: number; blue: number } | undefined;
+    let newRatings: { red: number; blue: number } | undefined;
+    if (rated) {
+      const players = await USER.find({ _id: { $in: [red.userId, blue.userId] } }).select('rating ratedGames');
+      const find = (id: string) => players.find((p) => String(p._id) === id);
+      const r = find(red.userId);
+      const b = find(blue.userId);
+      if (r && b) {
+        const redScore = winner === RED ? 1 : winner === BLUE ? 0 : 0.5;
+        const result = rateGame(
+          { rating: r.rating ?? START_RATING, ratedGames: r.ratedGames ?? 0 },
+          { rating: b.rating ?? START_RATING, ratedGames: b.ratedGames ?? 0 },
+          redScore,
+        );
+        ratingChanges = { red: result.a.change, blue: result.b.change };
+        newRatings = { red: result.a.rating, blue: result.b.rating };
+      }
+    }
+
     const game = await GAME.create({
       code: room.code,
       players: [red.userId, blue.userId],
       winner: winner === RED ? red.userId : winner === BLUE ? blue.userId : undefined,
       result: winner === DRAW ? 'draw' : winner === RED ? 'red' : 'blue',
       reason,
-      score: `${capturedBy(room.state, RED)}-${capturedBy(room.state, BLUE)}`,
-      moves: room.state.moveNumber,
-      startTime: room.startedAt ? new Date(room.startedAt) : undefined,
-      endTime: new Date(room.finishedAt ?? Date.now()),
+      score,
+      moves: moveNumber,
+      history,
+      rated: Boolean(ratingChanges),
+      ratingChanges,
+      startTime,
+      endTime,
     });
-    await USER.updateMany({ _id: { $in: [red.userId, blue.userId] } }, { $push: { gamesPlayed: game._id } });
+
+    const update = async (userId: string, change?: number, rating?: number) => {
+      if (change !== undefined) {
+        // Accounts created before ratings existed have no rating fields; $inc would start them at 0.
+        await USER.updateOne(
+          { _id: userId, rating: { $exists: false } },
+          { $set: { rating: START_RATING, ratedGames: 0, peakRating: START_RATING } },
+        );
+      }
+      return USER.updateOne(
+        { _id: userId },
+        change === undefined
+          ? { $push: { gamesPlayed: game._id } }
+          : // $inc (not $set) so two games finishing at once can't overwrite each other.
+            { $push: { gamesPlayed: game._id }, $inc: { rating: change, ratedGames: 1 }, $max: { peakRating: rating } },
+      );
+    };
+    await Promise.all([
+      update(red.userId, ratingChanges?.red, newRatings?.red),
+      update(blue.userId, ratingChanges?.blue, newRatings?.blue),
+    ]);
+
+    if (ratingChanges && newRatings) {
+      getIO()
+        .to(channel(room.code))
+        .emit('game:rated', {
+          code: room.code,
+          gameId: String(game._id),
+          changes: {
+            [red.userId]: { change: ratingChanges.red, rating: newRatings.red },
+            [blue.userId]: { change: ratingChanges.blue, rating: newRatings.blue },
+          },
+        });
+    }
   } catch (error) {
     console.error('[game] could not save finished game', room.code, error);
   }

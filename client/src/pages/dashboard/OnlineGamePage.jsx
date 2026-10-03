@@ -65,6 +65,8 @@ export default function OnlineGamePage() {
   const [error, setError] = useState(null);
   const [closedReason, setClosedReason] = useState(null);
   const [pending, setPending] = useState(false);
+  // Rating changes and saved game id, sent by the server once a finished game is stored.
+  const [rated, setRated] = useState(null);
   const lastMoveNumber = useRef(null);
   const leaveTimer = useRef(null);
 
@@ -94,15 +96,18 @@ export default function OnlineGamePage() {
       });
     const onState = (view) => view.code === code && setRoom({ ...view, receivedAt: Date.now() });
     const onClosed = (data) => data.code === code && setClosedReason(data.reason);
+    const onRated = (data) => data.code === code && setRated(data);
 
     if (socket.connected) join();
     socket.on("connect", join);
     socket.on("game:state", onState);
     socket.on("game:closed", onClosed);
+    socket.on("game:rated", onRated);
     return () => {
       socket.off("connect", join);
       socket.off("game:state", onState);
       socket.off("game:closed", onClosed);
+      socket.off("game:rated", onRated);
       leaveTimer.current = setTimeout(() => socket.emit("game:leave", { code }), 250);
     };
   }, [socket, code]);
@@ -128,6 +133,7 @@ export default function OnlineGamePage() {
   }, [state, myColor, play]);
 
   useEffect(() => {
+    if (room?.status === "playing") setRated(null); // a rematch started
     if (room?.status === "finished") gameOver.onOpen();
     else gameOver.onClose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -362,6 +368,15 @@ export default function OnlineGamePage() {
       </GridItem>
 
       <GameOverModal state={state} isOpen={gameOver.isOpen && room.status === "finished"} onClose={gameOver.onClose} title={winnerTitle}>
+        {rated?.changes?.[user?._id] && (
+          <Text fontWeight="bold">
+            Rating: {rated.changes[user._id].rating}{" "}
+            <Text as="span" color={rated.changes[user._id].change >= 0 ? "green.600" : "red.600"}>
+              ({rated.changes[user._id].change >= 0 ? "+" : ""}
+              {rated.changes[user._id].change})
+            </Text>
+          </Text>
+        )}
         {opponentRequestedRematch && !iRequestedRematch && (
           <Text fontWeight="bold">{opponentSeat.username} wants a rematch!</Text>
         )}
@@ -375,6 +390,11 @@ export default function OnlineGamePage() {
           {iRequestedRematch ? "Waiting for opponent…" : "Rematch"}
         </Button>
         {!opponentSeat?.connected && <Text fontSize="sm">Your opponent has left.</Text>}
+        {rated?.gameId && (
+          <Button variant="outline" colorScheme="purple" onClick={() => navigate(`/replay/${rated.gameId}`)}>
+            Watch replay
+          </Button>
+        )}
         <Button variant="ghost" leftIcon={<FaHome />} onClick={() => navigate("/")}>
           Back to home
         </Button>

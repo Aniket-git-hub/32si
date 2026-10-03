@@ -34,17 +34,19 @@
 
 ## Game Modes 🕹️
 
+-   **Guest play** – anyone can play the computer, pass & play or take the tutorial without an account.
 -   **vs Computer** – Easy, Medium or Hard, play as either colour. The AI runs in a web worker so the board never freezes.
 -   **Pass & Play** – two players on one device, with undo.
--   **Online** – create a game and share the 6-letter code or link, join a friend's game, or use **Random Match**. Rematches swap colours. A player who loses connection has 60 seconds to come back before they forfeit.
+-   **Online** – create a game and share the 6-letter code or link, join a friend's game, challenge an ally directly, or use **Random Match**. Each turn has a 60-second clock. Rematches swap colours. A player who loses connection has 60 seconds to come back before they forfeit.
+-   **Learn** – `/learn` is a five-lesson interactive tutorial.
 
 ## Features ⭐
 
--   User registration and login 🔑
--   Password reset functionality with OTP verification via email 📧
--   Email notifications on account creation 🎉
--   Real-time communication using WebSockets 💬
--   Finished online games are saved to each player's history 📜
+-   User registration and login 🔑, password reset with OTP verification via email 📧
+-   Allies (friends), live presence, saved chat with unread badges 💬
+-   Elo ratings and a leaderboard 🏆, stats, head-to-head records and replays of online games 📼
+-   Game settings: sound, music volume, move/capture hints, confirm-move 🎛️
+-   Works on phones (bottom tab bar), light and dark mode 🌗
 
 ## How it works 🛠️
 
@@ -52,18 +54,24 @@
 -   **AI** – `client/src/game/ai.js`: negamax search with alpha-beta pruning, iterative deepening, a transposition table and a capture-only quiescence search. It searches whole turns (including multi-capture chains). Hard looks about 7–8 turns ahead.
 -   **Online play** – the server is authoritative. `server/src/game/rooms.ts` stores the games and validates every move with the rules engine; `server/src/socketIOEventHandlers/gameEventHandler.ts` exposes it over socket.io (`game:create`, `game:join`, `game:action`, `game:resign`, `game:rematch`, `game:leave`, `game:quickMatch`).
 
+## Deploying 🚀
+
+-   **Client (Vercel)**: route env variables like `VITE_GAME_STATS_ROUTE` are optional; when they are missing the default path is used against `VITE_PROD_BASE_URL`.
+-   **Server (Render)**: online games, the turn clock and matchmaking live in memory, so run a single instance (a restart ends games in progress). The server trusts one proxy hop for rate limiting.
+-   **Database**: no migration needed; existing users get a 1200 rating on their first rated game.
+
 ## Tests ✅
 
 ```bash
-cd client && npm test                                                   # rules engine + AI
-cd server && npx jest tests/game                                        # online game rooms
+cd client && npm test                                                   # rules engine, AI, tutorial, replays
+cd server && npm test                                                   # game rooms, turn clock, ratings, stats, middleware
 node --experimental-strip-types --test scripts/engine-parity.test.mjs   # client/server engines agree (Node 22.6+)
 ```
 
 ## Future Enhancements 🚀
 
--   Challenge a friend directly from the Rivals page.
--   Stats and leaderboards from the saved games.
+-   Tournaments and seasonal leaderboards.
+-   Replays and analysis for games against the computer.
 
 ## Tech Stack 💻
 

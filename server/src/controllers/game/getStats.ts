@@ -32,7 +32,11 @@ async function getStats(req: Request, res: Response, next: NextFunction) {
     }));
 
     const history = toHistory(withPlayers as unknown as SavedGame[], userId);
-    res.json({ stats: summarize(history), history: history.slice(0, limit) });
+    const player = await USER.findById(userId).select('rating ratedGames peakRating').lean();
+    const rating = player
+      ? { rating: player.rating ?? 1200, ratedGames: player.ratedGames ?? 0, peakRating: player.peakRating ?? 1200 }
+      : null;
+    res.json({ stats: summarize(history), history: history.slice(0, limit), rating });
   } catch (error) {
     next(error);
   }

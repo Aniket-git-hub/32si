@@ -34,7 +34,7 @@ export default function Profile() {
         if (!profileUser?._id) return
         const controller = new AbortController()
         getGameStats({ userId: profileUser._id, limit: 1 }, controller.signal)
-            .then((res) => setRecord(res.data.stats))
+            .then((res) => setRecord({ ...res.data.stats, rating: res.data.rating }))
             .catch(() => setRecord(null))
         return () => controller.abort()
     }, [profileUser?._id])
@@ -239,6 +239,7 @@ export default function Profile() {
                                 {record
                                     ? `${record.played} games · ${record.wins}W ${record.draws}D ${record.losses}L`
                                     : profileUser?.gamesPlayed.length}
+                                {record?.rating?.ratedGames ? ` · ★ ${record.rating.rating}` : ""}
                             </Text>
                         </HStack>
                         <HStack

@@ -13,15 +13,17 @@ import {
 import { FiSettings } from "react-icons/fi";
 import { HiOutlineRectangleGroup, HiOutlineUserGroup } from "react-icons/hi2";
 import { IoStatsChartOutline } from "react-icons/io5";
-import { MdOutlineFeedback } from "react-icons/md";
+import { MdOutlineFeedback, MdOutlineLeaderboard, MdOutlineSchool } from "react-icons/md";
 import { SiAboutdotme } from "react-icons/si";
 import { NavLink } from "react-router-dom";
 
 function LeftSidePanel() {
   const sideBarListItems = [
-    { name: "New Game", icon: <HiOutlineRectangleGroup size="20" />, path: "/" },
+    { name: "Play", icon: <HiOutlineRectangleGroup size="20" />, path: "/" },
     { name: "Rivals", icon: <HiOutlineUserGroup size="20" />, path: "/rivals" },
+    { name: "Leaderboard", icon: <MdOutlineLeaderboard size="20" />, path: "/leaderboard" },
     { name: "Stats", icon: <IoStatsChartOutline size="20" />, path: "/stats" },
+    { name: "Learn to play", icon: <MdOutlineSchool size="20" />, path: "/learn" },
     { name: "Settings", icon: <FiSettings size="20" />, path: "/settings" },
   ];
 
