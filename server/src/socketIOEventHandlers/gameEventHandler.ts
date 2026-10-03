@@ -1,113 +1,140 @@
-import { Socket as IOSocket, Server } from 'socket.io';
-import { getIO } from '../initializeSocket';
+import { DRAW, RED, BLUE, capturedBy } from '../game/engine';
+import { GameRooms, Result, Room } from '../game/rooms';
+import { AuthenticatedSocket as Socket, getIO } from '../initializeSocket';
+import GAME from '../models/game';
+import USER from '../models/user';
 
-interface User {
-  socketId: string;
-  username: string,
-  friendsList: string[];
-}
-interface Socket extends IOSocket {
-  userId?: string;
-}
-interface Lobby {
-  users: string[];
-  count: number;
-  creator: string;
-}
+/**
+ * Online multiplayer events. The client sends intents, the server validates them with the rules
+ * engine and broadcasts the authoritative room state to everyone in the game.
+ *
+ *  client -> server (all take an ack callback that receives { ok, error?, ... })
+ *    game:create                      create a game, you play RED          -> { code, room }
+ *    game:join        { code }        join / rejoin a game                 -> { room }
+ *    game:action      { code, action } play a move ({type:'move',from,to}) or stop a capture chain ({type:'endChain'})
+ *    game:resign      { code }
+ *    game:rematch     { code }        both players must ask; colours are swapped
+ *    game:leave       { code }        leaving a running game forfeits it
+ *    game:quickMatch                  find a random opponent              -> { code } or { waiting: true }
+ *    game:cancelQuickMatch
+ *
+ *  server -> client
+ *    game:state       room view       sent after every change
+ *    game:closed      { code, reason }
+ *    game:matched     { code }        quick match found an opponent
+ */
 
-// Create a new Map to store the online lobbies
-const lobbies = new Map<string, { users: string[], count: number, creator: string }>();
+const channel = (code: string) => `game:${code}`;
+const userChannel = (userId: string) => `user:${userId}`;
 
-export const gameEventHandler = (socket: Socket, users: Map<string, User>) => {
-  const io: Server = getIO();
+type Ack = (response: Record<string, unknown>) => void;
+const safeAck = (ack: unknown): Ack => (typeof ack === 'function' ? (ack as Ack) : () => undefined);
 
-  socket.on('createGame', ({ userId, gameLobbyId }) => {
-    const user = users.get(userId);
-    if (user) {
-      const lobby = lobbies.get(gameLobbyId) || { users: [], count: 0, creator: userId };
-      if (lobby.count >= 2) {
-        console.log('Room is full');
-        return;
-      }
-      socket.join(gameLobbyId);
-      console.log(`${user.username} join the lobby ${gameLobbyId}`);
-      (lobby as Lobby).users.push(userId);
-      lobby.count++;
-      lobbies.set(gameLobbyId, lobby);
-      io.to(user.socketId).emit('gameCreated', { gameLobbyId });
-    }
+const saveFinishedGame = async (room: Room) => {
+  const red = room.seats[RED];
+  const blue = room.seats[BLUE];
+  if (!red || !blue) return;
+  const { winner, reason } = room.state;
+  try {
+    const game = await GAME.create({
+      code: room.code,
+      players: [red.userId, blue.userId],
+      winner: winner === RED ? red.userId : winner === BLUE ? blue.userId : undefined,
+      result: winner === DRAW ? 'draw' : winner === RED ? 'red' : 'blue',
+      reason,
+      score: `${capturedBy(room.state, RED)}-${capturedBy(room.state, BLUE)}`,
+      moves: room.state.moveNumber,
+      startTime: room.startedAt ? new Date(room.startedAt) : undefined,
+      endTime: new Date(room.finishedAt ?? Date.now()),
+    });
+    await USER.updateMany({ _id: { $in: [red.userId, blue.userId] } }, { $push: { gamesPlayed: game._id } });
+  } catch (error) {
+    console.error('[game] could not save finished game', room.code, error);
+  }
+};
+
+let rooms: GameRooms | null = null;
+
+const getRooms = (): GameRooms => {
+  if (rooms) return rooms;
+  const io = getIO();
+  const created = new GameRooms({
+    changed: (room) => {
+      io.to(channel(room.code)).emit('game:state', created.view(room));
+    },
+    finished: (room) => {
+      void saveFinishedGame(room);
+    },
+    closed: (room, reason) => {
+      io.to(channel(room.code)).emit('game:closed', { code: room.code, reason });
+      io.in(channel(room.code)).socketsLeave(channel(room.code));
+    },
+  });
+  setInterval(() => created.sweep(), 60_000).unref();
+  rooms = created;
+  return created;
+};
+
+export const gameEventHandler = (socket: Socket) => {
+  const store = getRooms();
+  const userId = socket.userId;
+  if (!userId) return;
+  const seat = { userId, username: socket.username ?? 'Player' };
+  socket.join(userChannel(userId));
+
+  const reply = (ack: Ack, result: Result<Room | null>) => {
+    if (!result.ok) ack({ ok: false, error: result.error });
+    else ack({ ok: true, room: result.value ? store.view(result.value) : null });
+  };
+
+  socket.on('game:create', (_payload: unknown, ackFn?: unknown) => {
+    const ack = safeAck(typeof _payload === 'function' ? _payload : ackFn);
+    const room = store.create(seat, socket.id);
+    socket.join(channel(room.code));
+    ack({ ok: true, code: room.code, room: store.view(room) });
   });
 
-  socket.on('joinGame', ({ userId, gameLobbyId }) => {
-    const user = users.get(userId);
-    if (user) {
-      const lobby = lobbies.get(gameLobbyId);
-      if (!lobby) {
-        console.log('Lobby does not exist');
-        io.to(user.socketId).emit('lobbyDoesNotExist', { gameLobbyId });
-        return;
-      }
-      if (lobby.count >= 2 || lobby.users.includes(userId)) {
-        console.log('Room is full or user is already in the room');
-        io.to(user.socketId).emit('roomFull', { gameLobbyId });
-        return;
-      }
-      const creator = users.get(lobby.creator)
-      if (creator) {
-        io.to(creator.socketId).emit('requestJoin', { userId, gameLobbyId });
-      }
-
-      io.to(user.socketId).emit('requestSubmitted', { gameLobbyId });
-    }
+  socket.on('game:join', (payload: { code?: unknown } = {}, ackFn?: unknown) => {
+    const ack = safeAck(ackFn);
+    const result = store.join(String(payload?.code ?? ''), seat, socket.id);
+    if (result.ok) socket.join(channel(result.value.code));
+    reply(ack, result);
   });
 
-  // When the creator gives permission, add the user to the lobby
-  socket.on('allowJoin', ({ userId, gameLobbyId }) => {
-    const user = users.get(userId);
-    const lobby = lobbies.get(gameLobbyId);
-    if (user && lobby && lobby.creator === socket.userId) {
-      socket.join(gameLobbyId);
-      console.log(`${user.username} join the lobby ${gameLobbyId}`);
-      lobby.users.push(userId);
-      lobby.count++;
-      lobbies.set(gameLobbyId, lobby);
-      socket.to(gameLobbyId).emit('userJoined', { userId, username: user.username });
-      const creator = users.get(lobby.creator)
-      if (creator) {
-        io.to(creator.socketId).emit('userJoined', { userId, username: user.username });
-        io.to(user.socketId).emit('gameJoined', { gameLobbyId, creator: creator.username });
-      }
-    }
+  socket.on('game:action', (payload: { code?: unknown; action?: unknown } = {}, ackFn?: unknown) => {
+    reply(safeAck(ackFn), store.act(String(payload?.code ?? ''), userId, payload?.action));
   });
 
-  socket.on('leaveGame', ({ userId, gameLobbyId }) => {
-    const user = users.get(userId);
-    if (user) {
-      const lobby = lobbies.get(gameLobbyId) || { users: [], count: 0, creator: '' };
-      const index = lobby.users.indexOf(userId);
-      if (index !== -1) {
-        socket.leave(gameLobbyId);
-        console.log(`${userId} left the lobby ${gameLobbyId}`);
-        lobby.users.splice(index, 1);
-        lobby.count--;
-        if (lobby.count === 0) {
-          lobbies.delete(gameLobbyId);
-        } else {
-          lobbies.set(gameLobbyId, lobby);
-        }
-        io.to(user.socketId).emit('gameLeft', { gameLobbyId });
-        socket.to(gameLobbyId).emit('userLeft', { userId, username: user.username });
-      }
-    }
+  socket.on('game:resign', (payload: { code?: unknown } = {}, ackFn?: unknown) => {
+    reply(safeAck(ackFn), store.resign(String(payload?.code ?? ''), userId));
   });
 
-  socket.on('gameChange', ({ userId, gameLobbyId, ...other }) => {
-    const user = users.get(userId);
-    if (user) {
-      console.log(`${userId} made a change in the ${gameLobbyId} in lobby ${gameLobbyId} ${other} `);
-      // io.to(gameLobbyId).emit('gameChanged', { userId, ...other });
-      socket.to(gameLobbyId).emit('gameChanged', { userId, ...other })
-    }
+  socket.on('game:rematch', (payload: { code?: unknown } = {}, ackFn?: unknown) => {
+    reply(safeAck(ackFn), store.rematch(String(payload?.code ?? ''), userId));
   });
 
+  socket.on('game:leave', (payload: { code?: unknown } = {}, ackFn?: unknown) => {
+    const code = String(payload?.code ?? '');
+    const room = store.get(code);
+    if (room) socket.leave(channel(room.code));
+    reply(safeAck(ackFn), store.leave(code, userId, socket.id));
+  });
+
+  socket.on('game:quickMatch', (_payload: unknown, ackFn?: unknown) => {
+    const ack = safeAck(typeof _payload === 'function' ? _payload : ackFn);
+    const room = store.quickMatch(seat, socket.id);
+    if (!room) return ack({ ok: true, waiting: true });
+    const io = getIO();
+    for (const player of [room.seats[RED], room.seats[BLUE]]) {
+      if (player) io.to(userChannel(player.userId)).emit('game:matched', { code: room.code });
+    }
+    ack({ ok: true, code: room.code });
+  });
+
+  socket.on('game:cancelQuickMatch', (_payload: unknown, ackFn?: unknown) => {
+    store.cancelQuickMatch(userId);
+    safeAck(typeof _payload === 'function' ? _payload : ackFn)({ ok: true });
+  });
+
+  socket.on('disconnect', () => store.disconnect(userId, socket.id));
 };

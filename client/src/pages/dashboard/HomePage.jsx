@@ -23,27 +23,36 @@ import {
     Text,
     useColorModeValue,
     useDisclosure,
+    useToast,
     VStack
 } from '@chakra-ui/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     FaGamepad,
     FaHistory,
     FaPlus,
     FaRandom,
+    FaRobot,
     FaTrophy,
-    FaUserFriends
+    FaUserFriends,
+    FaUsers
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import useSocket from '../../hooks/useSocket';
+
+// Accepts a bare code or a pasted invite link (…/game/online/ABC123).
+const parseGameCode = (input) => input.trim().split('/').filter(Boolean).pop()?.toUpperCase() ?? '';
 
 const MotionBox = motion(Box);
 const MotionFlex = motion(Flex);
 
 const HomePage = () => {
     const navigate = useNavigate();
+    const toast = useToast();
+    const { socket } = useSocket();
     const [gameCode, setGameCode] = useState('');
-    const [username, setUsername] = useState('');
+    const [isCreating, setIsCreating] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
 
     // Modal controls
@@ -73,29 +82,56 @@ const HomePage = () => {
         { id: 3, name: 'Player 3', avatar: '' }
     ];
 
-    // Game Creation Handler
+    const showError = (title) => toast({ title, status: 'error', duration: 3000, isClosable: true, position: 'top' });
+
+    // Online games are created on the server; the creator plays RED and shares the code.
     const handleCreateGame = () => {
-        // Implement game creation logic
-        createGameModal.onClose();
-        navigate('/game');
+        if (!socket?.connected) return showError('Not connected to the server yet. Try again in a moment.');
+        setIsCreating(true);
+        socket.emit('game:create', {}, (res) => {
+            setIsCreating(false);
+            if (!res?.ok) return showError(res?.error ?? 'Could not create the game.');
+            createGameModal.onClose();
+            navigate(`/game/online/${res.code}`);
+        });
     };
 
-    // Join Game Handler
     const handleJoinGame = () => {
-        // Implement game joining logic
+        const code = parseGameCode(gameCode);
+        if (!code) return;
         joinGameModal.onClose();
-        navigate('/game');
+        navigate(`/game/online/${code}`);
     };
 
-    // Random Match Handler
-    const handleRandomMatch = () => {
-        setIsSearching(true);
-        // Simulate searching for opponent
-        setTimeout(() => {
+    // Random match: the server pairs us with the next player who is also looking.
+    useEffect(() => {
+        if (!socket) return;
+        const onMatched = ({ code }) => {
             setIsSearching(false);
             randomMatchModal.onClose();
-            navigate('/game');
-        }, 2000);
+            navigate(`/game/online/${code}`);
+        };
+        socket.on('game:matched', onMatched);
+        return () => socket.off('game:matched', onMatched);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [socket, navigate]);
+
+    const handleRandomMatch = () => {
+        if (!socket?.connected) return showError('Not connected to the server yet. Try again in a moment.');
+        setIsSearching(true);
+        socket.emit('game:quickMatch', {}, (res) => {
+            if (!res?.ok) {
+                setIsSearching(false);
+                showError(res?.error ?? 'Matchmaking failed.');
+            }
+            // When matched, the 'game:matched' event navigates to the game.
+        });
+    };
+
+    const closeRandomMatch = () => {
+        if (isSearching) socket?.emit('game:cancelQuickMatch', {});
+        setIsSearching(false);
+        randomMatchModal.onClose();
     };
 
     // Button with enhanced animations
@@ -218,17 +254,31 @@ const HomePage = () => {
 
                         <VStack spacing={4} w="full">
                             <GameButton
+                                icon={<FaRobot />}
+                                onClick={() => navigate('/game?mode=ai')}
+                            >
+                                Play vs Computer
+                            </GameButton>
+
+                            <GameButton
+                                icon={<FaUsers />}
+                                onClick={() => navigate('/game?mode=local')}
+                            >
+                                Pass &amp; Play
+                            </GameButton>
+
+                            <GameButton
                                 icon={<FaPlus />}
                                 onClick={createGameModal.onOpen}
                             >
-                                Create Game
+                                Create Online Game
                             </GameButton>
 
                             <GameButton
                                 icon={<FaGamepad />}
                                 onClick={joinGameModal.onOpen}
                             >
-                                Join Game
+                                Join Online Game
                             </GameButton>
 
                             <GameButton
@@ -304,18 +354,13 @@ const HomePage = () => {
                         <ModalCloseButton />
                         <ModalBody>
                             <VStack spacing={4} pb={6}>
-                                <FormControl>
-                                    <FormLabel>Username</FormLabel>
-                                    <Input
-                                        placeholder="Enter your username"
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
-                                    />
-                                </FormControl>
+                                <Text>
+                                    You&apos;ll get a 6-letter code to share with a friend. You play RED and move first.
+                                </Text>
                                 <Button
                                     colorScheme="purple"
                                     onClick={handleCreateGame}
-                                    isDisabled={!username}
+                                    isLoading={isCreating}
                                     w="full"
                                 >
                                     Create Game
@@ -345,9 +390,11 @@ const HomePage = () => {
                                 <FormControl>
                                     <FormLabel>Game Code</FormLabel>
                                     <Input
-                                        placeholder="Enter game code"
+                                        placeholder="e.g. K7QM2X, or paste the invite link"
                                         value={gameCode}
                                         onChange={(e) => setGameCode(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleJoinGame()}
+                                        textTransform="uppercase"
                                     />
                                 </FormControl>
                                 <Button
@@ -393,7 +440,7 @@ const HomePage = () => {
                 {/* Random Match Modal */}
                 <Modal
                     isOpen={randomMatchModal.isOpen}
-                    onClose={randomMatchModal.onClose}
+                    onClose={closeRandomMatch}
                     isCentered
                 >
                     <ModalOverlay />
@@ -411,6 +458,9 @@ const HomePage = () => {
                                     <>
                                         <Spinner size="xl" color="purple.500" />
                                         <Text>Finding an opponent...</Text>
+                                        <Button variant="ghost" onClick={closeRandomMatch}>
+                                            Cancel
+                                        </Button>
                                     </>
                                 ) : (
                                     <>

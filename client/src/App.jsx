@@ -6,6 +6,7 @@ import { useAuth } from './hooks/useAuth';
 import useSocket from './hooks/useSocket';
 import RootLayout from './layouts/RootLayout';
 import CancelDeleteAccountRequestPage from './pages/auth/CancelDeleteAccountRequestPage';
+import DeleteAccountConfirmationPage from './pages/auth/DeleteAccountConfirmationPage';
 import Error404Page from './pages/auth/Error404Page';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import LoginPage from './pages/auth/LoginPage';
@@ -16,6 +17,7 @@ import ChatPage from './pages/dashboard/ChatPage';
 import Feedback from './pages/dashboard/Feedback';
 import GamePage from './pages/dashboard/GamePage';
 import HomePage from './pages/dashboard/HomePage';
+import OnlineGamePage from './pages/dashboard/OnlineGamePage';
 import Profile from './pages/dashboard/Profile';
 import Rivals from './pages/dashboard/Rivals';
 import Settings from './pages/dashboard/Settings';
@@ -57,6 +59,7 @@ function App() {
       <Route path="/" exact element={isAuthenticated ? <RootLayout /> : <Navigate replace to="/login" />}>
         <Route index element={<HomePage />} />
         <Route path="game" element={<GamePage />} />
+        <Route path="game/online/:code" element={<OnlineGamePage />} />
         <Route path="settings" element={<Settings />} />
         <Route path="stats" element={<Stats />} />
         <Route path="feedback" element={<Feedback />} />

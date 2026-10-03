@@ -11,9 +11,22 @@ const gameSchema = new mongoose.Schema<Game>({
     ],
     required: true,
   },
+  code: {
+    type: String,
+  },
   winner: {
     type: Schema.Types.ObjectId,
-    // required: true,
+    ref: 'user',
+  },
+  result: {
+    type: String,
+    enum: ['red', 'blue', 'draw'],
+  },
+  reason: {
+    type: String,
+  },
+  moves: {
+    type: Number,
   },
   score: {
     type: String,

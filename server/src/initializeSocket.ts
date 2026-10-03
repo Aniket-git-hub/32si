@@ -1,37 +1,45 @@
-import { Server as IOServer, Socket as IOSocket } from 'socket.io';
+import { Server as HttpServer } from 'http';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import CustomError from './utils/createError';
-import { userEventsHandler } from './socketIOEventHandlers/userEventsHandler';
+import { Server as IOServer, Socket as IOSocket } from 'socket.io';
+import { corsOrigin } from './config/cors.config';
 import { gameEventHandler } from './socketIOEventHandlers/gameEventHandler';
+import { userEventsHandler } from './socketIOEventHandlers/userEventsHandler';
+import CustomError from './utils/createError';
 
-interface Socket extends IOSocket {
+export interface AuthenticatedSocket extends IOSocket {
+  // Both come from the verified access token, never from data sent by the client.
   userId?: string;
+  username?: string;
+}
+
+export interface OnlineUser {
+  socketId: string;
+  username: string;
+  friendsList: string[];
 }
 
 let io: IOServer;
-const users = new Map<string, any>();
+const users = new Map<string, OnlineUser>();
 
-export const initializeSocketIO = (server: any) => {
-  io = new IOServer(server);
+export const initializeSocketIO = (server: HttpServer) => {
+  io = new IOServer(server, {
+    cors: { origin: corsOrigin, credentials: true },
+  });
 
-  io.use(async (socket: Socket, next: (err?: any) => void) => {
-    if (socket.handshake.query && socket.handshake.query.token) {
-      try {
-        const decoded = jwt.verify(
-          socket.handshake.query.token as string,
-          process.env.JWT_ACCESS_TOKEN_SECRET as string,
-        ) as JwtPayload;
-        socket.userId = decoded.id;
-        next();
-      } catch (err) {
-        next(new CustomError('JsonWebTokenError', 'Invalid Token', err as Error));
-      }
-    } else {
-      next(new CustomError('JsonWebTokenError', 'Token Not Provided'));
+  io.use((socket: AuthenticatedSocket, next: (err?: Error) => void) => {
+    const token = socket.handshake.query?.token;
+    if (!token) return next(new CustomError('JsonWebTokenError', 'Token Not Provided'));
+    try {
+      const decoded = jwt.verify(token as string, process.env.JWT_ACCESS_TOKEN_SECRET as string) as JwtPayload;
+      socket.userId = decoded.id;
+      socket.username = decoded.username;
+      next();
+    } catch (err) {
+      next(new CustomError('JsonWebTokenError', 'Invalid Token', err as Error));
     }
-  }).on('connection', (socket: Socket) => {
+  }).on('connection', (socket: AuthenticatedSocket) => {
     userEventsHandler(socket, users);
-    gameEventHandler(socket, users);
+    gameEventHandler(socket);
   });
 };
 

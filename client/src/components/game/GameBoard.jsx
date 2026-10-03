@@ -1,401 +1,229 @@
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import Piece from "./Piece";
-import Spot from "./Spot";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+    BLUE,
+    EMPTY,
+    NEIGHBORS,
+    POINTS,
+    POSITIONS,
+    RED,
+    destinationsFrom,
+} from "../../game/engine";
 
 const WIDTH = 430;
 const HEIGHT = 600;
-const BOARD_SIZE = 150;
+const UNIT = 37.5; // pixels per board unit (one square cell = 2 units = 75px)
 
-const colors = {
-    red: "#E63946",    // Vibrant red
-    blue: "#457B9D"    // Muted slate blue
-}
+const COLORS = {
+    [RED]: "#E63946",
+    [BLUE]: "#457B9D",
+};
 
-const GameBoard = ({ spotOnClick, onScoreChange }) => {
-    const createInitialBoard = () => {
-        const board = Array(9).fill().map(() => Array(5).fill(0));
+const EDGES = POINTS.flatMap((a) => NEIGHBORS[a].filter((b) => b > a).map((b) => [a, b]));
 
-        // Red pieces (top)
-        // First 2 rows: 3 pieces each (columns 1-3)
-        for (let i = 0; i <= 1; i++) {
-            for (let j = 1; j <= 3; j++) board[i][j] = 1;
+/**
+ * Keeps a stable id for every bead so a moving bead animates from its old point to its new one.
+ * Works by diffing the previous and the new board, so it also copes with states coming from the server.
+ */
+const usePieceIds = (board) => {
+    const ref = useRef({ board: null, ids: null, next: 0 });
+    return useMemo(() => {
+        const prev = ref.current;
+        if (prev.board === board) return prev.ids;
+        const ids = new Array(board.length).fill(null);
+        let next = prev.next;
+        if (!prev.board) {
+            for (const p of POINTS) if (board[p] !== EMPTY) ids[p] = next++;
+        } else {
+            const vacated = [];
+            const filled = [];
+            for (const p of POINTS) {
+                if (prev.board[p] === board[p]) {
+                    if (board[p] !== EMPTY) ids[p] = prev.ids[p];
+                    continue;
+                }
+                if (prev.board[p] !== EMPTY) vacated.push(p);
+                if (board[p] !== EMPTY) filled.push(p);
+            }
+            for (const p of filled) {
+                const k = vacated.findIndex((v) => prev.board[v] === board[p]);
+                if (k >= 0) {
+                    ids[p] = prev.ids[vacated[k]];
+                    vacated.splice(k, 1);
+                } else {
+                    ids[p] = next++;
+                }
+            }
         }
-        // Next 2 rows: 5 pieces each (all columns)
-        for (let i = 2; i <= 3; i++) {
-            for (let j = 0; j <= 4; j++) board[i][j] = 1;
-        }
+        ref.current = { board, ids, next };
+        return ids;
+    }, [board]);
+};
 
-        // Blue pieces (bottom)
-        // First 2 rows of blue: 5 pieces each (all columns)
-        for (let i = 5; i <= 6; i++) {
-            for (let j = 0; j <= 4; j++) board[i][j] = 2;
-        }
-        // Last 2 rows of blue: 3 pieces each (columns 1-3)
-        for (let i = 7; i <= 8; i++) {
-            for (let j = 1; j <= 3; j++) board[i][j] = 2;
-        }
+/**
+ * The 32 Beads board.
+ *
+ * Controlled component: it renders `state` (see game/engine.js) and reports the player's intent
+ * through `onAction({ type: 'move', from, to })` or `onAction({ type: 'endChain' })`.
+ */
+const GameBoard = ({ state, onAction, canMove = true, flipped = false }) => {
+    const [selected, setSelected] = useState(null);
+    const pieceIds = usePieceIds(state.board);
 
-        return board;
-    };
+    // Forget the selection whenever the position changes.
+    useEffect(() => setSelected(null), [state.moveNumber, canMove]);
 
-
-    const createEmptyMoves = () =>
-        Array(9).fill().map(() => Array(5).fill(false));
-
-
-    // Calculate positions similar to original createBoard
-    const calculateSizes = () => {
-        const x = WIDTH / 2;
-        const y = HEIGHT / 2;
-        const size = BOARD_SIZE;
-
-        return [
-            [
-                { x: 0, y: 0 },
-                { x: x - size / 2, y: y - size - size / 2 },
-                { x: x, y: y - size - size / 2 },
-                { x: x + size / 2, y: y - size - size / 2 },
-                { x: 0, y: 0 },
-            ],
-            [
-                { x: 0, y: 0 },
-                { x: x - size / 4, y: y - size - size / 4 },
-                { x: x, y: y - size - size / 4 },
-                { x: x + size / 4, y: y - size - size / 4 },
-                { x: 0, y: 0 },
-            ],
-            [
-                { x: x - size, y: y - size },
-                { x: x - size / 2, y: y - size },
-                { x: x, y: y - size },
-                { x: x + size / 2, y: y - size },
-                { x: x + size, y: y - size },
-            ],
-            [
-                { x: x - size, y: y - size / 2 },
-                { x: x - size / 2, y: y - size / 2 },
-                { x: x, y: y - size / 2 },
-                { x: x + size / 2, y: y - size / 2 },
-                { x: x + size, y: y - size / 2 },
-            ],
-            [
-                { x: x - size, y: y },
-                { x: x - size / 2, y: y },
-                { x: x, y: y },
-                { x: x + size / 2, y: y },
-                { x: x + size, y: y },
-            ],
-            [
-                { x: x - size, y: y + size / 2 },
-                { x: x - size / 2, y: y + size / 2 },
-                { x: x, y: y + size / 2 },
-                { x: x + size / 2, y: y + size / 2 },
-                { x: x + size, y: y + size / 2 },
-            ],
-            [
-                { x: x - size, y: y + size },
-                { x: x - size / 2, y: y + size },
-                { x: x, y: y + size },
-                { x: x + size / 2, y: y + size },
-                { x: x + size, y: y + size },
-            ],
-            [
-                { x: 0, y: 0 },
-                { x: x - size / 4, y: y + size + size / 4 },
-                { x: x, y: y + size + size / 4 },
-                { x: x + size / 4, y: y + size + size / 4 },
-                { x: 0, y: 0 },
-            ],
-            [
-                { x: 0, y: 0 },
-                { x: x - size / 2, y: y + size + size / 2 },
-                { x: x, y: y + size + size / 2 },
-                { x: x + size / 2, y: y + size + size / 2 },
-                { x: 0, y: 0 },
-            ],
-        ];
-    };
-
-    const sizes = calculateSizes();
-
-    const relations = {
-        "01": ["02", "11"],
-        "02": ["01", "03", "12"],
-        "03": ["02", "13"],
-        11: ["01", "12", "22"],
-        12: ["02", "11", "13", "22"],
-        13: ["03", "12", "22"],
-        20: ["21", "30", "31"],
-        21: ["20", "22", "31"],
-        22: ["21", "31", "32", "33", "23", "12", "11", "13"],
-        23: ["22", "24", "33"],
-        24: ["23", "33", "34"],
-        30: ["20", "31", "40"],
-        31: ["20", "21", "22", "32", "42", "41", "40", "30"],
-        32: ["22", "31", "42", "33"],
-        33: ["22", "23", "24", "34", "44", "43", "42", "32"],
-        34: ["24", "33", "44"],
-        40: ["30", "31", "41", "51", "50"],
-        41: ["31", "40", "51", "42"],
-        42: ["41", "31", "32", "33", "43", "53", "52", "51"],
-        43: ["42", "33", "44", "53"],
-        44: ["33", "34", "43", "53", "54"],
-        50: ["40", "51", "60"],
-        51: ["40", "41", "42", "50", "52", "60", "61", "62"],
-        52: ["51", "42", "53", "62"],
-        53: ["42", "43", "44", "52", "54", "62", "63", "64"],
-        54: ["44", "53", "64"],
-        60: ["50", "51", "61"],
-        61: ["51", "60", "62"],
-        62: ["51", "52", "53", "61", "63", "71", "72", "73"],
-        63: ["62", "53", "64"],
-        64: ["53", "54", "63"],
-        71: ["62", "72", "81"],
-        72: ["62", "71", "73", "82"],
-        73: ["62", "72", "83"],
-        81: ["71", "82"],
-        82: ["72", "81", "83"],
-        83: ["73", "82"],
-    }
-
-    const [boardState, setBoardState] = useState(() => createInitialBoard());
-    const [selectedPiece, setSelectedPiece] = useState(null);
-    const [possibleMoves, setPossibleMoves] = useState(
-        Array(9).fill().map(() => Array(5).fill(false))
+    const active = canMove && state.winner === null;
+    // During a capture chain only the capturing bead may move.
+    const current = active ? (state.chain ?? selected) : null;
+    const destinations = useMemo(
+        () => (current === null ? [] : destinationsFrom(state, current)),
+        [state, current]
     );
-    const [turn, setTurn] = useState("RED");
+    const movable = useMemo(() => {
+        if (!active || state.chain !== null) return new Set();
+        return new Set(POINTS.filter((p) => state.board[p] === state.turn && destinationsFrom(state, p).length > 0));
+    }, [state, active]);
 
-    useEffect(() => {
-        setBoardState(createInitialBoard());
-        setSelectedPiece(null);
-        setPossibleMoves(createEmptyMoves());
-        setTurn("RED");
-    }, []);
-
-    const isNullSpot = (i, j) => {
-        const positions = [
-            "84", "80", "74", "70",
-            "14", "10", "00", "04"
-        ];
-        return positions.includes(`${i}${j}`);
+    const toScreen = (p) => {
+        const { x, y } = POSITIONS[p];
+        const sx = WIDTH / 2 + x * UNIT;
+        const sy = HEIGHT / 2 + y * UNIT;
+        return flipped ? { x: WIDTH - sx, y: HEIGHT - sy } : { x: sx, y: sy };
     };
 
-    const isValidSpot = (i, j) => !isNullSpot(i, j);
-
-    const findValidJumps = (startI, startJ, player, board, visited = new Set()) => {
-        const jumps = [];
-        const currentKey = `${startI},${startJ}`;
-        if (visited.has(currentKey) || !isValidSpot(startI, startJ)) return jumps;
-        visited.add(currentKey);
-
-        const neighbors = relations[`${startI}${startJ}`] || [];
-        neighbors.forEach(neighbor => {
-            const [midI, midJ] = neighbor.split('').map(Number);
-            if (!isValidSpot(midI, midJ)) return;
-            const midPiece = board[midI][midJ];
-
-            // Check if neighbor is opponent's piece
-            if (midPiece !== 0 && midPiece !== player) {
-                const dx = midI - startI;
-                const dy = midJ - startJ;
-                const landI = midI + dx;
-                const landJ = midJ + dy;
-
-                // Check landing spot exists and is empty
-                if (isValidSpot(landI, landJ) && board[landI]?.[landJ] === 0) {
-                    jumps.push({
-                        to: { i: landI, j: landJ },
-                        jumped: [{ i: midI, j: midJ }],
-                        additionalJumps: findValidJumps(landI, landJ, player, board, new Set(visited))
-                    });
-                }
-            }
-        });
-
-        return jumps;
-    };
-
-
-
-    // Modified movement handler
-    const handleSpotClick = (i, j) => {
-        if (isNullSpot(i, j)) return;
-
-        if (selectedPiece) {
-            const move = possibleMoves[i][j];
-            if (move) {
-                // Update board state
-                const newBoard = boardState.map(row => [...row]);
-                newBoard[selectedPiece.i][selectedPiece.j] = 0;
-                newBoard[i][j] = selectedPiece.value;
-
-                // Calculate jumped pieces
-                const jumpedPieces = move.jumped.filter(({ i, j }) =>
-                    boardState[i][j] !== 0 && boardState[i][j] !== selectedPiece.value
-                );
-
-                // Update scores
-                if (jumpedPieces.length > 0) {
-                    const opponent = selectedPiece.value === 1 ? 'blue' : 'red';
-                    const scoreChange = {
-                        [opponent]: -jumpedPieces.length
-                    };
-                    onScoreChange(scoreChange);
-                }
-
-                // Remove jumped pieces
-                jumpedPieces.forEach(({ i, j }) => {
-                    newBoard[i][j] = 0;
-                });
-
-                setBoardState(newBoard);
-
-                // Check for multi-jump
-                if (jumpedPieces.length > 0) { // Only check for multi-jumps if we made a jump
-                    const followUpJumps = findValidJumps(i, j, selectedPiece.value, newBoard);
-                    if (followUpJumps.length > 0) {
-                        const newMoves = createEmptyMoves();
-                        followUpJumps.forEach(jump => {
-                            newMoves[jump.to.i][jump.to.j] = {
-                                ...jump,
-                                jumped: [...move.jumped, ...jump.jumped]
-                            };
-                        });
-                        setPossibleMoves(newMoves);
-                        setSelectedPiece({ i, j, value: selectedPiece.value });
-                    } else {
-                        // End turn after final jump
-                        setSelectedPiece(null);
-                        setPossibleMoves(createEmptyMoves());
-                        const newTurn = turn === 'RED' ? 'BLUE' : 'RED';
-                        setTurn(newTurn);
-                        spotOnClick(newTurn);
-                    }
-                } else {
-                    // End turn immediately if it was a simple move
-                    setSelectedPiece(null);
-                    setPossibleMoves(createEmptyMoves());
-                    const newTurn = turn === 'RED' ? 'BLUE' : 'RED';
-                    setTurn(newTurn);
-                    spotOnClick(newTurn);
-                }
-            } else {
-                const isCurrentPlayerPiece =
-                    (turn === 'RED' && boardState[i][j] === 1) ||
-                    (turn === 'BLUE' && boardState[i][j] === 2);
-
-                if (isCurrentPlayerPiece) {
-                    // Switch selection to new piece
-                    const moves = calculatePossibleMoves(i, j);
-                    setPossibleMoves(moves);
-                    setSelectedPiece({ i, j, value: boardState[i][j] });
-                } else {
-                    // Deselect if clicking empty or opponent's piece
-                    setSelectedPiece(null);
-                    setPossibleMoves(createEmptyMoves());
-                }
-            }
-            return;
-        }
-
-        // Select piece if belongs to current player
-        if (boardState[i][j] !== 0 && (
-            (turn === 'RED' && boardState[i][j] === 1) ||
-            (turn === 'BLUE' && boardState[i][j] === 2)
-        )) {
-            const moves = calculatePossibleMoves(i, j);
-            setPossibleMoves(moves);
-            setSelectedPiece({ i, j, value: boardState[i][j] });
+    const handleClick = (p) => {
+        if (!active) return;
+        if (current !== null && destinations.some((d) => d.to === p)) {
+            onAction({ type: "move", from: current, to: p });
+            setSelected(null);
+        } else if (state.chain !== null) {
+            if (p === state.chain) onAction({ type: "endChain" });
+        } else if (state.board[p] === state.turn && p !== selected) {
+            setSelected(p);
+        } else {
+            setSelected(null);
         }
     };
 
-    const calculatePossibleMoves = (i, j) => {
-        const moves = createEmptyMoves();
-        if (!isValidSpot(i, j)) return moves;
-        const player = boardState[i][j];
+    const highlighted = new Set(destinations.map((d) => d.to));
+    const threatened = new Set(destinations.map((d) => d.capture).filter((c) => c !== null));
+    const last = state.lastMove;
 
-        // Check simple adjacent moves
-        const neighbors = relations[`${i}${j}`] || [];
-        neighbors.forEach(neighbor => {
-            const [x, y] = neighbor.split('').map(Number);
-            if (isValidSpot(x, y) && boardState[x][y] === 0) {
-                moves[x][y] = { jumped: [] };
-            }
-        });
-
-
-        // Check jump moves
-        const jumps = findValidJumps(i, j, player, boardState);
-        jumps.forEach(jump => {
-            moves[jump.to.i][jump.to.j] = {
-                to: jump.to,
-                jumped: jump.jumped,
-                chain: jump.additionalJumps
-            };
-        });
-
-        return moves;
-    };
+    const pieces = POINTS.filter((p) => state.board[p] !== EMPTY)
+        .map((p) => ({ p, id: pieceIds[p], color: state.board[p] }))
+        .sort((a, b) => a.id - b.id);
 
     return (
-        <svg className="board" width={WIDTH} height={HEIGHT}>
-            {/* Render connection lines */}
-            {Object.entries(relations).map(([key, connections]) => {
-                const [iKey, jKey] = key.split("").map(Number);
-                const from = sizes[iKey][jKey];
-
-                return connections.map((conn, idx) => {
-                    const [x, y] = conn.split("").map(Number);
-                    const toSpot = sizes[x][y];
-                    const isPossiblePath = possibleMoves[x]?.[y] || possibleMoves[iKey]?.[jKey];
-
-                    return (
-                        <motion.line
-                            key={`${key}-${idx}`}
-                            x1={from.x}
-                            y1={from.y}
-                            x2={toSpot.x}
-                            y2={toSpot.y}
-                            stroke={isPossiblePath ? "#4ade80" : "white"}
-                            strokeWidth="2"
-                            strokeOpacity={isPossiblePath ? 1 : 0.5}
-                        />
-                    );
-                });
+        <svg
+            viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+            width="100%"
+            style={{ maxWidth: WIDTH, touchAction: "manipulation", userSelect: "none" }}
+            role="img"
+            aria-label="32 Beads board"
+        >
+            {/* Lines */}
+            {EDGES.map(([a, b]) => {
+                const from = toScreen(a);
+                const to = toScreen(b);
+                const isPath =
+                    current !== null &&
+                    ((a === current && highlighted.has(b)) ||
+                        (b === current && highlighted.has(a)) ||
+                        (threatened.has(a) && highlighted.has(b)) ||
+                        (threatened.has(b) && highlighted.has(a)));
+                return (
+                    <line
+                        key={`${a}-${b}`}
+                        x1={from.x}
+                        y1={from.y}
+                        x2={to.x}
+                        y2={to.y}
+                        stroke={isPath ? "#4ade80" : "white"}
+                        strokeWidth={isPath ? 3 : 2}
+                        strokeOpacity={isPath ? 1 : 0.5}
+                    />
+                );
             })}
 
-            {/* Render spots */}
-            {boardState.map((row, i) => row.map((cell, j) => {
-                if (isNullSpot(i, j)) return null;
-                const { x, y } = sizes[i][j];
+            {/* Last move */}
+            {last && last.from !== undefined && (
+                <g pointerEvents="none">
+                    <circle {...centre(toScreen(last.from))} r="20" fill="none" stroke="#facc15" strokeWidth="2" strokeDasharray="4 4" />
+                    {last.captured.map((c) => (
+                        <g key={c} stroke="#facc15" strokeWidth="2" opacity="0.8">
+                            <line x1={toScreen(c).x - 7} y1={toScreen(c).y - 7} x2={toScreen(c).x + 7} y2={toScreen(c).y + 7} />
+                            <line x1={toScreen(c).x - 7} y1={toScreen(c).y + 7} x2={toScreen(c).x + 7} y2={toScreen(c).y - 7} />
+                        </g>
+                    ))}
+                </g>
+            )}
 
+            {/* Points */}
+            {POINTS.map((p) => {
+                const { x, y } = toScreen(p);
+                const target = highlighted.has(p);
+                const capture = target && destinations.find((d) => d.to === p)?.capture !== null;
                 return (
-                    <Spot
-                        key={`${i}-${j}`}
-                        x={x}
-                        y={y}
-                        isPossibleMove={possibleMoves[i][j]}
-                        onClick={() => handleSpotClick(i, j)}
-                    >
-                        {cell !== 0 && (
-                            <motion.g
-                                layoutId={`piece-${i}-${j}`}
-                                transition={{ type: "spring", stiffness: 300 }}
-                            >
-                                <Piece
-                                    x={x}
-                                    y={y}
-                                    color={cell === 1 ? colors.red : colors.blue}
-                                    isSelected={selectedPiece?.i === i && selectedPiece?.j === j}
+                    <g key={p} onClick={() => handleClick(p)} style={{ cursor: active ? "pointer" : "default" }}>
+                        <circle cx={x} cy={y} r="22" fill="transparent" />
+                        <circle cx={x} cy={y} r="20" fill="transparent" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
+                        <AnimatePresence>
+                            {target && (
+                                <motion.circle
+                                    key="target"
+                                    cx={x}
+                                    cy={y}
+                                    r="11"
+                                    fill={capture ? "rgba(250, 204, 21, 0.85)" : "rgba(74, 222, 128, 0.75)"}
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0, opacity: 0 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    style={{ transformOrigin: `${x}px ${y}px` }}
                                 />
-                            </motion.g>
-                        )}
-                    </Spot>
+                            )}
+                        </AnimatePresence>
+                    </g>
                 );
-            }))}
-        </svg>
-    )
-}
+            })}
 
-export default GameBoard
+            {/* Beads */}
+            <AnimatePresence>
+                {pieces.map(({ p, id, color }) => {
+                    const { x, y } = toScreen(p);
+                    const isSelected = current === p;
+                    const isThreatened = threatened.has(p);
+                    return (
+                        <motion.g
+                            key={id}
+                            initial={{ opacity: 0, scale: 0.5, x, y }}
+                            animate={{ opacity: 1, scale: 1, x, y }}
+                            exit={{ opacity: 0, scale: 0.2, transition: { duration: 0.35 } }}
+                            transition={{ type: "spring", stiffness: 260, damping: 24 }}
+                            onClick={() => handleClick(p)}
+                            style={{ cursor: active ? "pointer" : "default" }}
+                        >
+                            {movable.has(p) && !isSelected && (
+                                <circle r="19" fill="none" stroke="white" strokeOpacity="0.55" strokeWidth="2" />
+                            )}
+                            <motion.circle
+                                r="15"
+                                fill={COLORS[color]}
+                                stroke={isSelected ? "white" : isThreatened ? "#facc15" : "rgba(0,0,0,0.25)"}
+                                strokeWidth={isSelected || isThreatened ? 3 : 1}
+                                animate={{ scale: isSelected ? 1.2 : 1 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 12 }}
+                            />
+                            <circle r="5" cx="-4" cy="-5" fill="white" opacity="0.25" pointerEvents="none" />
+                        </motion.g>
+                    );
+                })}
+            </AnimatePresence>
+        </svg>
+    );
+};
+
+const centre = ({ x, y }) => ({ cx: x, cy: y });
+
+export default GameBoard;
