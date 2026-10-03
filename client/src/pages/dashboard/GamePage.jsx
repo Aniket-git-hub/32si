@@ -4,15 +4,17 @@ import {
   ButtonGroup,
   Grid,
   GridItem,
+  HStack,
+  IconButton,
   Text,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FaBook, FaChessBoard, FaRedo, FaRobot, FaUndo, FaUsers } from "react-icons/fa";
+import { FaBook, FaChessBoard, FaPlay, FaRedo, FaRobot, FaUndo, FaUsers } from "react-icons/fa";
 import { MdMusicNote, MdMusicOff } from "react-icons/md";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import GameBoard from "../../components/game/GameBoard";
 import {
   GameOverModal,
@@ -27,8 +29,9 @@ import {
   captureHint,
 } from "../../components/game/GamePanels";
 import { DIFFICULTIES } from "../../game/ai";
-import { BLUE, DRAW, RED, applyAction, capturedBy, createInitialState, opponent } from "../../game/engine";
-import { loadRecentGames, recordOfflineGame } from "../../game/localRecord";
+import { BLUE, DRAW, RED, capturedBy, createInitialState, opponent } from "../../game/engine";
+import { loadRecentGames, recordOfflineGame, saveLocalReplay } from "../../game/localRecord";
+import { playAction } from "../../game/replay";
 import { useGameSettings } from "../../context/GameSettingsContext";
 import useGameSounds from "../../hooks/useGameSounds";
 
@@ -69,6 +72,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function GamePage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const mode = searchParams.get("mode") === "ai" ? "ai" : "local";
   const humanColor = searchParams.get("color") === "blue" ? BLUE : RED;
   const level = DIFFICULTIES[searchParams.get("level")] ? searchParams.get("level") : "medium";
@@ -124,7 +128,19 @@ export default function GamePage() {
         blue: capturedBy(state, BLUE),
         at: Date.now(),
       };
-      setHistory(recordOfflineGame(entry));
+      const id = entry.at;
+      saveLocalReplay({
+        id,
+        mode,
+        level: entry.level,
+        red: { username: names[RED] },
+        blue: { username: names[BLUE] },
+        result: state.winner === DRAW ? "draw" : state.winner === RED ? "red" : "blue",
+        reason: state.reason,
+        history: state.log ?? [],
+        at: entry.at,
+      });
+      setHistory(recordOfflineGame({ ...entry, replayId: id }));
     } else {
       play(state.lastMove?.captured.length ? "kill" : "move");
     }
@@ -146,7 +162,7 @@ export default function GamePage() {
         setThinking(false);
         if (!result) return;
         result.actions.forEach((action, k) => {
-          timers.push(setTimeout(() => !cancelled && setState((s) => applyAction(s, action)), k * AI_STEP_DELAY));
+          timers.push(setTimeout(() => !cancelled && setState((s) => playAction(s, action)), k * AI_STEP_DELAY));
         });
       })
       .catch((error) => {
@@ -163,7 +179,7 @@ export default function GamePage() {
     if (aiToMove) return;
     // Remember the position at the start of each human turn so it can be undone.
     if (state.chain === null) setUndoStack((stack) => [...stack, state]);
-    setState((s) => applyAction(s, action));
+    setState((s) => playAction(s, action));
   };
 
   const undo = () => {
@@ -335,7 +351,8 @@ export default function GamePage() {
               </Text>
             )}
             {history.map((game) => (
-              <Text key={game.at} fontSize="sm" color={PLAYER_COLORS[game.winner]} textAlign="center">
+              <HStack key={game.at} justify="center" spacing={1}>
+              <Text fontSize="sm" color={PLAYER_COLORS[game.winner]} textAlign="center">
                 {game.mode === "ai" ? `vs ${DIFFICULTIES[game.level]?.label ?? ""} AI` : "Pass & Play"} ·{" "}
                 {game.winner === DRAW
                   ? "Draw"
@@ -346,6 +363,17 @@ export default function GamePage() {
                     : `${PLAYER_LABELS[game.winner]} won`}{" "}
                 ({game.red}-{game.blue})
               </Text>
+              {game.replayId && (
+                <IconButton
+                  size="xs"
+                  variant="ghost"
+                  aria-label="Watch replay"
+                  title="Watch replay"
+                  icon={<FaPlay />}
+                  onClick={() => navigate(`/replay/local/${game.replayId}`)}
+                />
+              )}
+              </HStack>
             ))}
           </PanelCard>
         </VStack>
@@ -355,6 +383,11 @@ export default function GamePage() {
         <Button colorScheme="purple" size="lg" leftIcon={<FaRedo />} onClick={newGame}>
           Play Again
         </Button>
+        {history[0]?.replayId && (
+          <Button variant="outline" colorScheme="purple" leftIcon={<FaPlay />} onClick={() => navigate(`/replay/local/${history[0].replayId}`)}>
+            Watch replay
+          </Button>
+        )}
       </GameOverModal>
       <HowToPlayModal isOpen={rules.isOpen} onClose={rules.onClose} />
     </Grid>

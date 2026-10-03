@@ -81,6 +81,7 @@ function App() {
         <Route path="game" element={<GamePage />} />
         <Route path="learn" element={<LearnPage />} />
         <Route path="about-us" element={<AboutUs />} />
+        <Route path="replay/local/:localId" element={<ReplayPage />} />
         {/* Members only. */}
         <Route path="game/online/:code" element={<RequireAuth><OnlineGamePage /></RequireAuth>} />
         <Route path="leaderboard" element={<RequireAuth><Leaderboard /></RequireAuth>} />

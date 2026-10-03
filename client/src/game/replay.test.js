@@ -25,3 +25,19 @@ it('rebuilds every position of a recorded game', () => {
 it('stops at corrupt data instead of crashing', () => {
     assert.equal(replayStates([17 * 45 + 22, 999]).length, 2);
 });
+
+it('playAction keeps a move log that replays to the same position, and undo restores the log', async () => {
+    const { playAction } = await import('./replay.js');
+    let seed = 3;
+    const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+    let state = createInitialState();
+    let saved = null;
+    for (let i = 0; i < 80 && state.winner === null; i++) {
+        if (i === 40) saved = state; // a position to "undo" back to
+        const actions = legalActions(state);
+        state = playAction(state, actions[Math.floor(rnd() * actions.length)]);
+    }
+    assert.deepEqual(replayStates(state.log).at(-1).board, state.board);
+    assert.equal(saved.log.length, 40);
+    assert.deepEqual(replayStates(saved.log).at(-1).board, saved.board);
+});

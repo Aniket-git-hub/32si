@@ -36,7 +36,7 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { getGameStats } from "../../api/game";
 import { getSmallProfilePicture } from "../../api/user";
 import { DIFFICULTIES } from "../../game/ai";
-import { loadAiRecord } from "../../game/localRecord";
+import { loadAiRecord, loadLocalReplays } from "../../game/localRecord";
 import useChallenge from "../../hooks/useChallenge";
 
 const OUTCOME = {
@@ -149,6 +149,7 @@ export default function Stats() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [aiRecord] = useState(loadAiRecord);
+  const [localReplays] = useState(loadLocalReplays);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -345,6 +346,26 @@ export default function Stats() {
               );
             })}
           </SimpleGrid>
+        )}
+        {localReplays.length > 0 && (
+          <Box mt={5}>
+            <Text fontWeight="bold" mb={2}>
+              Replays on this device
+            </Text>
+            <VStack align="stretch" spacing={1}>
+              {localReplays.slice(0, 8).map((r) => (
+                <HStack key={r.id} justify="space-between">
+                  <Text fontSize="sm">
+                    {formatDate(r.at)} · {r.mode === "ai" ? `vs ${DIFFICULTIES[r.level]?.label ?? ""} computer` : "Pass & play"} ·{" "}
+                    {r.result === "draw" ? "Draw" : `${(r.result === "red" ? r.red : r.blue).username} won`}
+                  </Text>
+                  <Button size="xs" variant="ghost" colorScheme="purple" leftIcon={<FaPlay />} onClick={() => navigate(`/replay/local/${r.id}`)}>
+                    Watch
+                  </Button>
+                </HStack>
+              ))}
+            </VStack>
+          </Box>
         )}
       </Section>
     </VStack>

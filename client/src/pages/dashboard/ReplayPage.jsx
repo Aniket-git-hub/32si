@@ -24,6 +24,7 @@ import { getReplay } from "../../api/game";
 import GameBoard from "../../components/game/GameBoard";
 import { PanelCard, PLAYER_COLORS, ScoreCard, useGameBackground } from "../../components/game/GamePanels";
 import { BLUE, RED, describeResult } from "../../game/engine";
+import { getLocalReplay } from "../../game/localRecord";
 import { replayStates } from "../../game/replay";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -35,7 +36,8 @@ const SPEEDS = [
 
 /** Step through a finished online game. */
 export default function ReplayPage() {
-  const { gameId } = useParams();
+  // /replay/:gameId is an online game from the server; /replay/local/:localId one saved on this device.
+  const { gameId, localId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const bg = useGameBackground();
@@ -46,6 +48,12 @@ export default function ReplayPage() {
   const [speed, setSpeed] = useState(SPEEDS[0]);
 
   useEffect(() => {
+    if (localId) {
+      const local = getLocalReplay(localId);
+      if (local) setGame({ ...local, ratingChanges: null });
+      else setError("This replay isn't on this device any more.");
+      return;
+    }
     const controller = new AbortController();
     getReplay(gameId, controller.signal)
       .then((res) => setGame(res.data))
@@ -53,7 +61,7 @@ export default function ReplayPage() {
         if (err.code !== "ERR_CANCELED") setError(err.response?.status === 404 ? "This replay isn't available." : "Couldn't load the replay.");
       });
     return () => controller.abort();
-  }, [gameId]);
+  }, [gameId, localId]);
 
   const states = useMemo(() => (game ? replayStates(game.history) : []), [game]);
   const last = Math.max(0, states.length - 1);
@@ -95,8 +103,8 @@ export default function ReplayPage() {
     return (
       <Center py={16} flexDirection="column" gap={4}>
         <Heading size="md">{error}</Heading>
-        <Button colorScheme="purple" variant="outline" onClick={() => navigate("/stats")}>
-          Back to stats
+        <Button colorScheme="purple" variant="outline" onClick={() => navigate(localId ? "/game" : "/stats")}>
+          Go back
         </Button>
       </Center>
     );
@@ -110,7 +118,10 @@ export default function ReplayPage() {
   }
 
   const names = { [RED]: game.red.username, [BLUE]: game.blue.username };
-  const iPlayedBlue = game.blue._id === user?._id;
+  // Show the player's own colour at the bottom: online by account, offline from the saved game.
+  // (Pass & play is shown like the live game: blue at the bottom.)
+  const iPlayedBlue = localId ? (game.mode === "ai" ? game.blue.username === "You" : true) : game.blue._id === user?._id;
+  const backTo = localId ? (game.mode === "ai" ? "/game?mode=ai" : "/game?mode=local") : "/stats";
   const shown = step === last ? finalState : state;
 
   return (
@@ -133,8 +144,8 @@ export default function ReplayPage() {
               {names[BLUE]}
             </Text>
           </Heading>
-          <Button size="sm" variant="outline" colorScheme="purple" onClick={() => navigate("/stats")}>
-            Back to stats
+          <Button size="sm" variant="outline" colorScheme="purple" onClick={() => navigate(backTo)}>
+            {localId ? "Back to the game" : "Back to stats"}
           </Button>
         </HStack>
       </GridItem>

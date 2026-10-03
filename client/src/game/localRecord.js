@@ -2,6 +2,8 @@
 
 const HISTORY_KEY = '32beads.recentGames';
 const TUTORIAL_KEY = '32beads.tutorialDone';
+const REPLAYS_KEY = '32beads.replays';
+const MAX_REPLAYS = 20;
 const AI_RECORD_KEY = '32beads.aiRecord';
 
 const read = (key, fallback) => {
@@ -43,3 +45,13 @@ export const recordOfflineGame = (entry) => {
 
 export const isTutorialDone = () => read(TUTORIAL_KEY, false) === true;
 export const markTutorialDone = () => write(TUTORIAL_KEY, true);
+
+/** Saved offline games for the replay viewer (newest first). */
+export const loadLocalReplays = () => read(REPLAYS_KEY, []);
+export const getLocalReplay = (id) => loadLocalReplays().find((r) => String(r.id) === String(id)) ?? null;
+
+/** replay: { id, mode, level, red, blue, result: 'red'|'blue'|'draw', reason, history, at } */
+export const saveLocalReplay = (replay) => {
+    if (!replay.history?.length) return;
+    write(REPLAYS_KEY, [replay, ...loadLocalReplays().filter((r) => r.id !== replay.id)].slice(0, MAX_REPLAYS));
+};
