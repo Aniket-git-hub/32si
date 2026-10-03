@@ -26,7 +26,7 @@ import {
     useToast,
     VStack
 } from '@chakra-ui/react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import {
     FaGamepad,
@@ -378,8 +378,8 @@ const HomePage = () => {
                 </MotionBox>
             </MotionFlex>
 
-            {/* Enhanced Modals */}
-            <AnimatePresence>
+            {/* Modals (Chakra animates them itself) */}
+            <>
                 {/* Create Game Modal */}
                 <Modal
                     isOpen={createGameModal.isOpen}
@@ -555,7 +555,7 @@ const HomePage = () => {
                         </ModalBody>
                     </ModalContent>
                 </Modal>
-            </AnimatePresence>
+            </>
         </Container>
     );
 };

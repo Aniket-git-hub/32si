@@ -371,7 +371,7 @@ export default function ProfileSettings() {
                             <FormErrorMessage> </FormErrorMessage>
                         </FormControl>
                         <Spacer flex={1} />
-                        <Button isDisabled isReadOnly flex={2} colorScheme="red" variant={"outline"} onClick={() => alert({ description: "comming soon" })}>Update</Button>
+                        <Button isDisabled title="Changing your email is not available yet" flex={2} colorScheme="red" variant={"outline"} onClick={() => alert({ description: "Coming soon" })}>Update</Button>
                     </Flex>
                 </form>
 

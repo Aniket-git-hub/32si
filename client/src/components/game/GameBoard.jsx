@@ -1,3 +1,4 @@
+import { useColorMode } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -18,8 +19,9 @@ const UNIT = 37.5; // pixels per board unit (one square cell = 2 units = 75px)
 const VIEW = { x: 40, y: 50, width: 350, height: 500 };
 
 const COLORS = {
-    [RED]: "#E63946",
-    [BLUE]: "#457B9D",
+    light: { [RED]: "#E63946", [BLUE]: "#457B9D", line: "white" },
+    // Brighter blue so beads stand out on the dark board.
+    dark: { [RED]: "#EF4444", [BLUE]: "#5DA9E9", line: "#c7c2f0" },
 };
 
 const EDGES = POINTS.flatMap((a) => NEIGHBORS[a].filter((b) => b > a).map((b) => [a, b]));
@@ -71,6 +73,7 @@ const usePieceIds = (board) => {
  */
 const GameBoard = ({ state, onAction, canMove = true, flipped = false }) => {
     const [selected, setSelected] = useState(null);
+    const palette = COLORS[useColorMode().colorMode] ?? COLORS.light;
     const pieceIds = usePieceIds(state.board);
 
     // Forget the selection whenever the position changes.
@@ -142,7 +145,7 @@ const GameBoard = ({ state, onAction, canMove = true, flipped = false }) => {
                         y1={from.y}
                         x2={to.x}
                         y2={to.y}
-                        stroke={isPath ? "#4ade80" : "white"}
+                        stroke={isPath ? "#4ade80" : palette.line}
                         strokeWidth={isPath ? 3 : 2}
                         strokeOpacity={isPath ? 1 : 0.5}
                     />
@@ -212,7 +215,7 @@ const GameBoard = ({ state, onAction, canMove = true, flipped = false }) => {
                             )}
                             <motion.circle
                                 r="15"
-                                fill={COLORS[color]}
+                                fill={palette[color]}
                                 stroke={isSelected ? "white" : isThreatened ? "#facc15" : "rgba(0,0,0,0.25)"}
                                 strokeWidth={isSelected || isThreatened ? 3 : 1}
                                 animate={{ scale: isSelected ? 1.2 : 1 }}

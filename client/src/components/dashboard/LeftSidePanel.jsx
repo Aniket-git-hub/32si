@@ -1,5 +1,4 @@
 import {
-  Badge,
   Box,
   Divider,
   HStack,
@@ -31,9 +30,9 @@ function LeftSidePanel() {
   return (
     <Box p={3}>
       <VStack>
-        <Heading p={5}>32 Beads
-          <Badge colorScheme='purple'>Alpha</Badge>
-        </Heading>
+        <Link as={NavLink} to="/" _hover={{}}>
+          <Heading p={5}>32 Beads</Heading>
+        </Link>
         <List w="100%">
           {sideBarListItems.map((item, index) => {
             return (

@@ -19,7 +19,7 @@ export default function comboBox({ isDisabled, value, places, handleInputValueCh
                 getRootProps
             }) => (
                 <FormControl {...getRootProps()} isDisabled={isDisabled} isReadOnly={isDisabled} >
-                    <FormLabel {...getLabelProps()}>Enter You City</FormLabel>
+                    <FormLabel {...getLabelProps()}>Your city</FormLabel>
                     <InputGroup {...getRootProps({}, { superRefError: true })}>
                         <Input {...getInputProps()} />
                     </InputGroup>

@@ -1,10 +1,10 @@
 import { AtSignIcon } from "@chakra-ui/icons";
-import { Box, Button, Center, Flex, HStack, Heading, Skeleton, SkeletonText, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, Center, Flex, HStack, Heading, Skeleton, SkeletonText, Stack, Text, VStack } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { BsPeople } from "react-icons/bs";
 import { HiOutlineRectangleGroup } from "react-icons/hi2";
 import { MdPlace } from "react-icons/md";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { acceptConnection, connectUser, disconnectUser, getAUserByUsername, getProfilePicture, getSmallProfilePicture } from "../../api/user";
 import ImageWithPreview from "../../components/utils/ImageWithPreview";
 import { useAuth } from "../../hooks/useAuth";
@@ -16,6 +16,7 @@ export default function Profile() {
     const { socket } = useSocket()
     const { user, setUser } = useAuth()
     let { username } = useParams()
+    const navigate = useNavigate()
     const [profileUser, setProfileUser] = useState(null)
     const [isFriend, setIsFriend] = useState(false)
     const [isConnecting, setIsConnecting] = useState(false)
@@ -27,6 +28,7 @@ export default function Profile() {
     const controllerRef = useRef(null)
     const { challenge, pendingId } = useChallenge()
     const [record, setRecord] = useState(null)
+    const [loadError, setLoadError] = useState(null) // null | 'not-found' | 'failed'
 
     useEffect(() => {
         if (!profileUser?._id) return
@@ -39,13 +41,16 @@ export default function Profile() {
 
     const loadProfileUserData = async (signal) => {
         try {
+            setLoadError(null)
             const response = await getAUserByUsername(username.replace(/@/g, ""), signal)
             setProfileUser(response.data.user)
             setIsFriend(response.data.user.friends?.map(friend => friend._id).includes(user._id))
             setRequestSent(response.data.user.connectionRequests.includes(user.username))
             setMyProfile(user._id === response.data.user._id)
         } catch (error) {
-            console.log(error)
+            if (error.code === "ERR_CANCELED") return
+            setProfileUser(null)
+            setLoadError(error.response?.status === 404 ? "not-found" : "failed")
         }
     }
 
@@ -127,6 +132,33 @@ export default function Profile() {
 
     const handleNewChallenge = () => challenge(profileUser._id)
 
+
+    if (loadError) {
+        return (
+            <Center py={16}>
+                <VStack spacing={4} textAlign="center" px={4}>
+                    <Heading size="md">
+                        {loadError === "not-found" ? `There's no player called @${username.replace(/@/g, "")}` : "Couldn't load this profile"}
+                    </Heading>
+                    <Text color="gray.500">
+                        {loadError === "not-found"
+                            ? "Check the spelling, or find people to play on the Rivals page."
+                            : "Check your connection and try again."}
+                    </Text>
+                    <HStack>
+                        {loadError === "failed" && (
+                            <Button colorScheme="purple" onClick={() => loadProfileUserData(controllerRef.current?.signal)}>
+                                Try again
+                            </Button>
+                        )}
+                        <Button variant="outline" colorScheme="purple" onClick={() => navigate("/rivals")}>
+                            Browse rivals
+                        </Button>
+                    </HStack>
+                </VStack>
+            </Center>
+        )
+    }
 
     if (!profileUser) {
         return (

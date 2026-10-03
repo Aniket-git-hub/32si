@@ -5,5 +5,7 @@ module.exports = {
   rules: {
     'prettier/prettier': ['error'],
     '@typescript-eslint/explicit-function-return-type': 'off',
+    // `const { password, ...rest } = user` is how fields are dropped before sending a user.
+    '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
   },
 };

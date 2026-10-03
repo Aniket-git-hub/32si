@@ -5,7 +5,6 @@ import {
   Grid,
   GridItem,
   Text,
-  useColorModeValue,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
@@ -19,6 +18,7 @@ import {
   GameOverModal,
   HowToPlayModal,
   PanelCard,
+  useGameBackground,
   PLAYER_COLORS,
   PLAYER_LABELS,
   CompactStatus,
@@ -183,7 +183,7 @@ export default function GamePage() {
           : "The computer wins"
         : `${PLAYER_LABELS[state.winner] ?? ""} WINS!`;
 
-  const bg = useColorModeValue("linear-gradient(to right, #f6d365, #fda085)", "linear-gradient(to right, #667eea, #764ba2)");
+  const bg = useGameBackground();
 
   return (
     <Grid

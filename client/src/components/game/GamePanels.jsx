@@ -24,14 +24,18 @@ import { motion } from "framer-motion";
 import { FaTrophy, FaUser } from "react-icons/fa";
 import { BLUE, DRAW, DRAW_TURNS, PIECES_PER_PLAYER, RED, capturedBy, describeResult } from "../../game/engine";
 
-export const PLAYER_COLORS = { [RED]: "red.500", [BLUE]: "blue.500", [DRAW]: "gray.500" };
+export const PLAYER_COLORS = { [RED]: "player.red", [BLUE]: "player.blue", [DRAW]: "player.draw" };
 export const PLAYER_LABELS = { [RED]: "RED", [BLUE]: "BLUE" };
 
 export const useGameGradient = () =>
     useColorModeValue(
         "linear-gradient(135deg, #f6d365 0%, #fda085 100%)",
-        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+        "linear-gradient(135deg, #2b2870 0%, #3a2f74 100%)"
     );
+
+/** Background of the whole game screen. */
+export const useGameBackground = () =>
+    useColorModeValue("linear-gradient(to right, #f6d365, #fda085)", "linear-gradient(135deg, #14122f 0%, #221a45 100%)");
 
 export const PanelCard = ({ children, ...rest }) => {
     const bg = useGameGradient();
@@ -60,6 +64,7 @@ const PlayerRow = ({ player, state, name, isTurn, extra }) => {
             borderWidth={3}
             borderColor={PLAYER_COLORS[player]}
             bg={isTurn ? "whiteAlpha.600" : "whiteAlpha.300"}
+            _dark={{ bg: isTurn ? "whiteAlpha.200" : "whiteAlpha.50" }}
             borderRadius="md"
             px={3}
             py={2}
@@ -72,7 +77,7 @@ const PlayerRow = ({ player, state, name, isTurn, extra }) => {
                     {left}
                 </Text>
             </HStack>
-            <HStack justify="space-between" fontSize="xs" color="blackAlpha.700">
+            <HStack justify="space-between" fontSize="xs" color="blackAlpha.700" _dark={{ color: "whiteAlpha.700" }}>
                 <Text>{PLAYER_LABELS[player]} · captured {capturedBy(state, player)}</Text>
                 {extra}
             </HStack>
@@ -136,6 +141,7 @@ export const TurnCard = ({ state, label, thinking = false, canEndChain = false, 
                     borderWidth={3}
                     borderColor={PLAYER_COLORS[state.turn]}
                     bg="whiteAlpha.500"
+                    _dark={{ bg: "whiteAlpha.100" }}
                     p={2}
                     borderRadius="md"
                     fontWeight="bold"

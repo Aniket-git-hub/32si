@@ -12,7 +12,6 @@ import {
   Spinner,
   Text,
   useClipboard,
-  useColorModeValue,
   useDisclosure,
   useToast,
   VStack,
@@ -28,6 +27,7 @@ import {
   GameOverModal,
   HowToPlayModal,
   PanelCard,
+  useGameBackground,
   PLAYER_LABELS,
   CompactStatus,
   ScoreCard,
@@ -147,7 +147,7 @@ export default function OnlineGamePage() {
     room?.status === "playing" && room.turnRemainingMs != null
       ? Math.max(0, Math.ceil((room.receivedAt + room.turnRemainingMs - now) / 1000))
       : null;
-  const bg = useColorModeValue("linear-gradient(to right, #f6d365, #fda085)", "linear-gradient(to right, #667eea, #764ba2)");
+  const bg = useGameBackground();
 
   if (closedReason || error) {
     return (
@@ -313,7 +313,7 @@ export default function OnlineGamePage() {
           <PanelCard>
             <Text fontSize="sm" textAlign="center">
               You play{" "}
-              <Text as="span" fontWeight="bold" color={myColor === RED ? "red.600" : "blue.600"}>
+              <Text as="span" fontWeight="bold" color={myColor === RED ? "player.red" : "player.blue"}>
                 {myColor ? PLAYER_LABELS[myColor] : "—"}
               </Text>
             </Text>
