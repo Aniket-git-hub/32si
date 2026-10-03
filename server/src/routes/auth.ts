@@ -1,6 +1,7 @@
 import express, { Router, RequestHandler } from 'express';
 const router: Router = express.Router();
 import { getRoute } from '../utils/Helper';
+import { authLimiter, otpLimiter } from '../config/security.config';
 
 import {
   inputValidation,
@@ -20,24 +21,33 @@ import forgotPasswordVerifyOtp from './../controllers/auth/forgotPasswordVerifyO
 import resetPassword from './../controllers/auth/resetPassword';
 import logout from './../controllers/auth/userLogout';
 
-router.post(getRoute('REGISTER_USER_ROUTE', '/register'), uRIV as RequestHandler[], inputValidation, register);
-router.post(getRoute('LOGIN_USER_ROUTE', '/login'), uLIV as RequestHandler[], inputValidation, login);
+router.post(
+  getRoute('REGISTER_USER_ROUTE', '/register'),
+  authLimiter,
+  uRIV as RequestHandler[],
+  inputValidation,
+  register,
+);
+router.post(getRoute('LOGIN_USER_ROUTE', '/login'), authLimiter, uLIV as RequestHandler[], inputValidation, login);
 router.post(getRoute('LOGOUT_USER_ROUTE', '/logout'), verifyJWT, logout);
 router.post(getRoute('REFRESH_TOKEN_ROUTE', '/token/refresh'), verifyJWT, refreshToken);
 router.post(
   getRoute('FORGOT_PASSWORD_ROUTE', '/forgot-password'),
+  otpLimiter,
   fPEV as RequestHandler[],
   inputValidation,
   forgotPassword,
 );
 router.post(
   getRoute('VERIFY_OTP_ROUTE', '/forgot-password/verify-otp'),
+  otpLimiter,
   fPOV as RequestHandler[],
   inputValidation,
   forgotPasswordVerifyOtp,
 );
 router.post(
   getRoute('RESET_PASSWORD_ROUTE', '/reset-password'),
+  otpLimiter,
   rPV as RequestHandler[],
   inputValidation,
   resetPassword,

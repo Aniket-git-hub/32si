@@ -11,6 +11,9 @@ export const AllDataContextProvider = ({ children }) => {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const [pageLoaded, setPageLoaded] = useState([]);
+  // Unread chat messages per sender id, and the friend whose chat is open (their messages count as read).
+  const [unreadMessages, setUnreadMessages] = useState({});
+  const [openChatWith, setOpenChatWith] = useState(null);
 
   const resetData = () => {
     setRivals([]);
@@ -21,6 +24,8 @@ export const AllDataContextProvider = ({ children }) => {
     setHasMore(true);
     setPage(1);
     setPageLoaded([]);
+    setUnreadMessages({});
+    setOpenChatWith(null);
   };
 
   return (
@@ -43,6 +48,10 @@ export const AllDataContextProvider = ({ children }) => {
         setPage,
         pageLoaded,
         setPageLoaded,
+        unreadMessages,
+        setUnreadMessages,
+        openChatWith,
+        setOpenChatWith,
       }}
     >
       {children}

@@ -1,4 +1,4 @@
-import { AvatarBadge, Box, Center, Flex, Heading, IconButton, Input, InputGroup, InputLeftElement, List, ListItem, Stack, Text, useColorModeValue } from "@chakra-ui/react";
+import { AvatarBadge, Badge, Box, Center, Flex, Heading, IconButton, Input, InputGroup, InputLeftElement, List, ListItem, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 import { FiMessageCircle, FiSearch } from "react-icons/fi";
 import { GiCrossedSwords } from "react-icons/gi";
 import useChallenge from "../../hooks/useChallenge";
@@ -13,7 +13,7 @@ import FullTextSearchUsers from '../utils/FullTextSearchUsers';
 function RightSidePanel() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const { onlineFriends } = useAllData()
+  const { onlineFriends, unreadMessages } = useAllData()
   const hoverColor = useColorModeValue("gray.100", "gray.700")
   const { challenge, pendingId } = useChallenge()
 
@@ -73,7 +73,24 @@ function RightSidePanel() {
                       onClick={() => challenge(friend._id)}
                     />
                   )}
-                  <IconButton _hover={{}} variant={"ghost"} aria-label={`Chat with ${friend.username}`} icon={<FiMessageCircle />} onClick={() => navigate(`/chat/${friend.username}`)} />
+                  <Box position="relative">
+                    <IconButton _hover={{}} variant={"ghost"} aria-label={`Chat with ${friend.username}`} icon={<FiMessageCircle />} onClick={() => navigate(`/chat/${friend.username}`)} />
+                    {unreadMessages?.[friend._id] > 0 && (
+                      <Badge
+                        position="absolute"
+                        top="2px"
+                        right="2px"
+                        colorScheme="red"
+                        variant="solid"
+                        borderRadius="full"
+                        fontSize="10px"
+                        pointerEvents="none"
+                        aria-label={`${unreadMessages[friend._id]} unread`}
+                      >
+                        {unreadMessages[friend._id]}
+                      </Badge>
+                    )}
+                  </Box>
                 </Flex>
               </Flex>
             </ListItem>

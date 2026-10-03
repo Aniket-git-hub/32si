@@ -2,6 +2,7 @@ import { Server as HttpServer } from 'http';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { Server as IOServer, Socket as IOSocket } from 'socket.io';
 import { corsOrigin } from './config/cors.config';
+import { createSocketThrottle } from './config/security.config';
 import { gameEventHandler } from './socketIOEventHandlers/gameEventHandler';
 import { userEventsHandler } from './socketIOEventHandlers/userEventsHandler';
 import CustomError from './utils/createError';
@@ -24,6 +25,7 @@ const users = new Map<string, OnlineUser>();
 export const initializeSocketIO = (server: HttpServer) => {
   io = new IOServer(server, {
     cors: { origin: corsOrigin, credentials: true },
+    maxHttpBufferSize: 100_000, // no event needs more than a few KB
   });
 
   io.use((socket: AuthenticatedSocket, next: (err?: Error) => void) => {
@@ -38,6 +40,9 @@ export const initializeSocketIO = (server: HttpServer) => {
       next(new CustomError('JsonWebTokenError', 'Invalid Token', err as Error));
     }
   }).on('connection', (socket: AuthenticatedSocket) => {
+    // Silently drop events from a socket that floods the server.
+    const allow = createSocketThrottle();
+    socket.use((_packet, next) => (allow() ? next() : undefined));
     userEventsHandler(socket, users);
     gameEventHandler(socket);
   });

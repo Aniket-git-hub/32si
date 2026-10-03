@@ -64,10 +64,7 @@ const userSchema = new mongoose.Schema<User>({
   deletionToken: {
     type: String,
   },
-  createdGames: [
-    { type: String }
-  ]
-
+  createdGames: [{ type: String }],
 });
 
 userSchema.index({ location: '2dsphere' });

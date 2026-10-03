@@ -71,12 +71,18 @@ export default function Profile() {
         }
     }, [username])
 
+    // Reload when a friend request to or from this player changes (listeners removed on leave).
     useEffect(() => {
-        if (socket) {
-            socket.on("connectionRequest", () => loadProfileUserData(controllerRef.current.signal));
-            socket.on("connectionRequestAccepted", () => loadProfileUserData(controllerRef.current.signal));
+        if (!socket) return
+        const reload = () => loadProfileUserData(controllerRef.current?.signal)
+        socket.on("connectionRequest", reload)
+        socket.on("connectionRequestAccepted", reload)
+        return () => {
+            socket.off("connectionRequest", reload)
+            socket.off("connectionRequestAccepted", reload)
         }
-    }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [socket, username])
 
     const handleConnectUser = async ({ username }) => {
         try {

@@ -4,6 +4,9 @@ import express, { Application, Response } from 'express';
 const app: Application = express();
 const PORT: string | number = process.env.PORT || 3000;
 
+import { applySecurity } from './config/security.config';
+applySecurity(app);
+
 /**
  *  cross-origin configuration
  *  prevents cross origin error and preflight error
@@ -24,10 +27,11 @@ app.use(
  * body-parser configuration for post and put requests
  * Allows server to receive data from the client
  */
-app.use(express.json());
+app.use(express.json({ limit: '100kb' }));
 app.use(
   express.urlencoded({
     extended: true,
+    limit: '100kb',
   }),
 );
 app.use(cookieParser());

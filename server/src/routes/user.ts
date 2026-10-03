@@ -19,6 +19,7 @@ import postApplicationFeedback from '../controllers/user/applicationFeedback';
 import searchUsers from '../controllers/user/searchUsers';
 import deleteUserRequest from '../controllers/user/deleteUserRequest';
 import cancelAccountDeletion from '../controllers/user/cancelDeletionRequest';
+import { getChatHistory, getUnreadCounts } from '../controllers/user/chat';
 
 const router: Router = express.Router();
 
@@ -26,8 +27,8 @@ router.get(getRoute('GET_USER_BY_USERNAME_ROUTE', '/by-username/:username'), ver
 router.get(getRoute('GET_USER_BY_USER_ID_ROUTE', '/by-id/:userId'), verifyJWT, getAUserById);
 router.put(getRoute('UPDATE_USER_ROUTE', '/'), verifyJWT, updateUser);
 router.delete(getRoute('DELETE_USER_REQUEST_ROUTE', '/'), verifyJWT, deleteUserRequest);
-router.post(`${getRoute('DELETE_USER_ROUTE', '/delete-user/')}:token`, deleteUser)
-router.post(`${getRoute('CANCEL_DELETE_USER_ROUTE', '/cancel-delete-user/')}:token`, cancelAccountDeletion)
+router.post(`${getRoute('DELETE_USER_ROUTE', '/delete-user/')}:token`, deleteUser);
+router.post(`${getRoute('CANCEL_DELETE_USER_ROUTE', '/cancel-delete-user/')}:token`, cancelAccountDeletion);
 router.get(getRoute('GET_ALL_USER_ROUTE', '/users'), verifyJWT, getAllUser);
 router.post(getRoute('CONNECT_USER_ROUTE', '/:username/connect'), verifyJWT, connectUser);
 router.post(getRoute('ACCEPT_USER_ROUTE', '/:userId/accept'), verifyJWT, acceptConnection);
@@ -58,5 +59,7 @@ router.post(
 );
 
 router.get('/users/search', verifyJWT, searchUsers);
+router.get('/chat-unread', verifyJWT, getUnreadCounts);
+router.get('/chat/:userId', verifyJWT, getChatHistory);
 
 export default router;

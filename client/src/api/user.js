@@ -63,3 +63,9 @@ export const searchUsers = async (data, signal) => {
 export const deleteAccountRequest = async (signal) => handleRequest(`${getEndpoint("VITE_DELETE_ACCOUNT_ROUTE", '/user/')}`, null, "DELETE", signal)
 export const confirmAccountDeletion = async (data, signal) => handleRequest(`${getEndpoint("VITE_CONFIRM_ACCOUNT_DELETION", '/user/delete-user')}/${data.deletionToken}`, data, "POST", signal)
 export const cancelAccountDeleteRequest = async (data, signal) => handleRequest(`${getEndpoint("VITE_CANCEL_ACCOUNT_DELETION", '/user/cancel-delete-user')}/${data.deletionToken}`, data, "POST", signal)
+export const getChatHistory = async ({ userId, before, limit = 50 }, signal) => {
+    const params = new URLSearchParams({ limit });
+    if (before) params.set('before', before);
+    return handleRequest(`${getEndpoint("VITE_CHAT_HISTORY_ROUTE", '/user/chat')}/${userId}?${params}`, null, "GET", signal)
+}
+export const getUnreadCounts = async (signal) => handleRequest(getEndpoint("VITE_CHAT_UNREAD_ROUTE", '/user/chat-unread'), null, "GET", signal)

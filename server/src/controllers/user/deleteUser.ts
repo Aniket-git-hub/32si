@@ -5,19 +5,18 @@ import { sendAccountDeletionSuccesfullEmail } from '../../utils/sendEmail';
 import OTP from '../../models/otp';
 import bcrypt from 'bcryptjs';
 
-
 async function deleteUser(req: Request, res: Response, next: NextFunction) {
   try {
     const token = req.params.token;
     const user = await USER.findOne({ deletionToken: token });
     if (!user) throw new CustomError('DeleteError', 'user not found');
-    const userId = user._id
+    const userId = user._id;
 
-    const { otp } = req.body
+    const { otp } = req.body;
 
-    const savedOtp = await OTP.findOne({ email: user.email })
+    const savedOtp = await OTP.findOne({ email: user.email });
     if (!savedOtp || !bcrypt.compareSync(String(otp), savedOtp.otp)) {
-      throw new CustomError("InvalidOTP", "Invalid OTP")
+      throw new CustomError('InvalidOTP', 'Invalid OTP');
     }
 
     const { success, error } = await sendAccountDeletionSuccesfullEmail(user.email, user.name);

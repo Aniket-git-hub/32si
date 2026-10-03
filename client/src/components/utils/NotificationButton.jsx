@@ -54,26 +54,18 @@ function NotificationButton() {
       const { user, } = useAuth()
       const { notifications, setNotifications } = useAllData()
 
+      // Pending friend requests show up as notifications (without wiping other notifications).
+      const requests = user.connectionRequests ?? []
       useEffect(() => {
-            if (user.connectionRequests?.length !== 0) {
-                  user.connectionRequests.forEach(username => {
-                        let notificationsExist = notifications.some(n => n.key === username)
-                        if (!notificationsExist) {
-                              setNotifications(prev => [
-                                    ...prev,
-                                    {
-                                          key: username,
-                                          message: `${username} wants to connect with you`,
-                                          action: { redirect: username }
-                                    }
-                              ])
-                        }
-                  })
-            }
-            return () => {
-                  setNotifications([])
-            }
-      }, [user.connectionRequests])
+            if (!requests.length) return
+            setNotifications(prev => {
+                  const missing = requests.filter(username => !prev.some(n => n.key === username))
+                  return missing.length
+                        ? [...prev, ...missing.map(username => ({ key: username, message: `${username} wants to connect with you`, action: { redirect: username } }))]
+                        : prev
+            })
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [requests.join(","), setNotifications])
 
       return (
             <>

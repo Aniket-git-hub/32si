@@ -16,6 +16,7 @@ import LeftSidePanel from "../components/dashboard/LeftSidePanel";
 import RightSidePanel from "../components/dashboard/RightSidePanel";
 import TopNavBar from "../components/dashboard/TopNavBar";
 import ChallengeListener from "../components/game/ChallengeListener";
+import ChatListener from "../components/dashboard/ChatListener";
 
 /**
  * App shell.
@@ -40,6 +41,7 @@ export default function RootLayout() {
     return (
         <>
             <ChallengeListener />
+            <ChatListener />
             <Flex minH="100vh">
                 <Box
                     as="aside"

@@ -1,4 +1,7 @@
+import { isValidObjectId } from 'mongoose';
 import { Server } from 'socket.io';
+import MESSAGE, { MAX_MESSAGE_LENGTH } from '../models/message';
+import USER from '../models/user';
 import { AuthenticatedSocket as Socket, OnlineUser as User, getIO } from '../initializeSocket';
 
 export const userEventsHandler = (socket: Socket, users: Map<string, User>) => {
@@ -54,10 +57,40 @@ export const userEventsHandler = (socket: Socket, users: Map<string, User>) => {
     }
   });
 
-  socket.on('message', ({ userToId, ...rest }) => {
-    const user = users.get(userToId);
-    if (user) {
-      io.to(user.socketId).emit('message', rest);
+  /**
+   * chat:send { to, text } -> ack { ok, message } | { ok: false, error }
+   * Messages are saved, so friends who are offline get them later. Every tab of both people
+   * receives 'chat:message'.
+   */
+  socket.on('chat:send', async (payload: { to?: unknown; text?: unknown } = {}, ack?: unknown) => {
+    const reply = typeof ack === 'function' ? ack : () => undefined;
+    const from = socket.userId;
+    const to = String(payload?.to ?? '');
+    const text = typeof payload?.text === 'string' ? payload.text.trim() : '';
+    if (!from || !isValidObjectId(to)) return reply({ ok: false, error: 'Unknown player.' });
+    if (!text) return reply({ ok: false, error: 'Message is empty.' });
+    if (text.length > MAX_MESSAGE_LENGTH)
+      return reply({ ok: false, error: `Messages can be at most ${MAX_MESSAGE_LENGTH} characters.` });
+    try {
+      const allies = await USER.exists({ _id: from, friends: to });
+      if (!allies) return reply({ ok: false, error: 'You can only message your allies.' });
+      const message = (await MESSAGE.create({ from, to, text })).toObject();
+      io.to(`user:${to}`).to(`user:${from}`).emit('chat:message', message);
+      reply({ ok: true, message });
+    } catch (error) {
+      console.error('[chat] could not send message', error);
+      reply({ ok: false, error: 'Could not send the message.' });
+    }
+  });
+
+  /** chat:read { from } - the user has seen the conversation with `from`. */
+  socket.on('chat:read', async (payload: { from?: unknown } = {}) => {
+    const from = String(payload?.from ?? '');
+    if (!socket.userId || !isValidObjectId(from)) return;
+    try {
+      await MESSAGE.updateMany({ from, to: socket.userId, readAt: null }, { $set: { readAt: new Date() } });
+    } catch (error) {
+      console.error('[chat] could not mark messages read', error);
     }
   });
 };
