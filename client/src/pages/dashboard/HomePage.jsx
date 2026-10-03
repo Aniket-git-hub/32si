@@ -77,6 +77,7 @@ const HomePage = () => {
         'linear(to-r, #667eea, #764ba2)'
     );
     const statsBg = useColorModeValue('whiteAlpha.900', 'whiteAlpha.200');
+    const cardBg = useColorModeValue('white', 'gray.700');
 
     // Live site numbers, refreshed every 30 seconds.
     const [stats, setStats] = useState(null);
@@ -202,12 +203,11 @@ const HomePage = () => {
     );
 
     return (
-        <Container maxW="container.xl" h="100vh" py={10}>
+        <Container maxW="container.xl" py={{ base: 4, md: 10 }} px={{ base: 1, md: 4 }}>
             <MotionFlex
                 direction="column"
                 align="center"
                 justify="center"
-                h="full"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -215,12 +215,12 @@ const HomePage = () => {
                 {/* Stats Section */}
                 <Grid
                     templateColumns="repeat(3, 1fr)"
-                    gap={6}
+                    gap={{ base: 2, md: 6 }}
                     w="full"
-                    mb={10}
+                    mb={{ base: 5, md: 10 }}
                 >
                     <MotionBox
-                        p={6}
+                        p={{ base: 3, md: 6 }}
                         bg={statsBg}
                         borderRadius="xl"
                         boxShadow="xl"
@@ -228,12 +228,12 @@ const HomePage = () => {
                         transition={{ duration: 0.2 }}
                     >
                         <Stat>
-                            <StatLabel>Total Games</StatLabel>
+                            <StatLabel fontSize={{ base: "xs", md: "sm" }}>Total Games</StatLabel>
                             <StatNumber>{stats ? stats.totalGames : '–'}</StatNumber>
                         </Stat>
                     </MotionBox>
                     <MotionBox
-                        p={6}
+                        p={{ base: 3, md: 6 }}
                         bg={statsBg}
                         borderRadius="xl"
                         boxShadow="xl"
@@ -241,12 +241,12 @@ const HomePage = () => {
                         transition={{ duration: 0.2 }}
                     >
                         <Stat>
-                            <StatLabel>Online Players</StatLabel>
+                            <StatLabel fontSize={{ base: "xs", md: "sm" }}>Online Players</StatLabel>
                             <StatNumber>{stats ? stats.onlinePlayers : '–'}</StatNumber>
                         </Stat>
                     </MotionBox>
                     <MotionBox
-                        p={6}
+                        p={{ base: 3, md: 6 }}
                         bg={statsBg}
                         borderRadius="xl"
                         boxShadow="xl"
@@ -254,7 +254,7 @@ const HomePage = () => {
                         transition={{ duration: 0.2 }}
                     >
                         <Stat>
-                            <StatLabel>Active Games</StatLabel>
+                            <StatLabel fontSize={{ base: "xs", md: "sm" }}>Active Games</StatLabel>
                             <StatNumber>{stats ? stats.activeGames : '–'}</StatNumber>
                         </Stat>
                     </MotionBox>
@@ -262,8 +262,8 @@ const HomePage = () => {
 
                 {/* Main Game Options */}
                 <MotionBox
-                    p={10}
-                    bg="whiteAlpha.900"
+                    p={{ base: 5, md: 10 }}
+                    bg={cardBg}
                     borderRadius="2xl"
                     boxShadow="2xl"
                     w="full"
@@ -274,7 +274,7 @@ const HomePage = () => {
                 >
                     <VStack spacing={8}>
                         <Heading
-                            size="2xl"
+                            size={{ base: "xl", md: "2xl" }}
                             textAlign="center"
                             bgGradient={bgGradient}
                             bgClip="text"
@@ -335,7 +335,7 @@ const HomePage = () => {
                 <MotionBox
                     mt={10}
                     p={6}
-                    bg="whiteAlpha.900"
+                    bg={cardBg}
                     borderRadius="xl"
                     boxShadow="xl"
                     w="full"

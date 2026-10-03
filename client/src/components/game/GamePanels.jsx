@@ -98,8 +98,8 @@ export const ScoreCard = ({ state, names = {}, extras = {} }) => (
 );
 
 /** Whose turn it is, plus the "stop capturing" control during a capture chain. */
-export const TurnCard = ({ state, label, thinking = false, canEndChain = false, onEndChain }) => (
-    <PanelCard>
+export const TurnCard = ({ state, label, thinking = false, canEndChain = false, onEndChain, ...rest }) => (
+    <PanelCard {...rest}>
         <PanelHeading icon={<FaUser />}>Turn</PanelHeading>
         {state.winner !== null ? (
             <Text textAlign="center" fontWeight="bold">
@@ -144,6 +144,51 @@ export const TurnCard = ({ state, label, thinking = false, canEndChain = false, 
         )}
     </PanelCard>
 );
+
+/** One-line status for phones: beads left on each side, whose turn it is, and the stop-capturing button. */
+export const CompactStatus = ({ state, names = {}, label, thinking = false, canEndChain = false, onEndChain, ...rest }) => {
+    const bg = useColorModeValue("whiteAlpha.700", "blackAlpha.300");
+    const side = (player) => (
+        <VStack spacing={0} minW="72px">
+            <Text fontSize="xs" fontWeight="bold" color={PLAYER_COLORS[player]} noOfLines={1} maxW="96px">
+                {names[player] ?? PLAYER_LABELS[player]}
+            </Text>
+            <Text fontSize="xl" fontWeight="extrabold" color={PLAYER_COLORS[player]} lineHeight={1}>
+                {PIECES_PER_PLAYER - capturedBy(state, player === RED ? BLUE : RED)}
+            </Text>
+        </VStack>
+    );
+    return (
+        <VStack spacing={2} w="full" {...rest}>
+            <HStack w="full" justify="space-between" bg={bg} borderRadius="lg" px={3} py={2}>
+                {side(RED)}
+                <VStack spacing={0} flex={1}>
+                    {state.winner !== null ? (
+                        <Text fontWeight="bold">Game over</Text>
+                    ) : (
+                        <>
+                            <HStack spacing={1}>
+                                {thinking && <Spinner size="xs" />}
+                                <Text fontWeight="bold" color={PLAYER_COLORS[state.turn]} textAlign="center" noOfLines={1}>
+                                    {thinking ? "Thinking…" : (label ?? PLAYER_LABELS[state.turn])}
+                                </Text>
+                            </HStack>
+                            <Text fontSize="xs" color="gray.600" _dark={{ color: "gray.300" }}>
+                                to move
+                            </Text>
+                        </>
+                    )}
+                </VStack>
+                {side(BLUE)}
+            </HStack>
+            {state.chain !== null && canEndChain && state.winner === null && (
+                <Button size="sm" colorScheme="purple" w="full" onClick={onEndChain}>
+                    Stop capturing &amp; end turn
+                </Button>
+            )}
+        </VStack>
+    );
+};
 
 export const GameOverModal = ({ state, isOpen, onClose, title, children }) => {
     const bg = useGameGradient();

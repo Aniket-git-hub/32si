@@ -1,5 +1,5 @@
-import { Box, Flex, HStack, Link, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Text, VStack, useColorModeValue, useToast } from "@chakra-ui/react";
-import { FiChevronDown } from 'react-icons/fi';
+import { Box, Flex, Heading, HStack, IconButton, Link, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Text, VStack, useColorModeValue, useToast } from "@chakra-ui/react";
+import { FiChevronDown, FiMenu, FiUsers } from 'react-icons/fi';
 import { NavLink } from 'react-router-dom';
 import { logoutUser } from "../../api/auth";
 import { getProfilePicture, getSmallProfilePicture } from "../../api/user";
@@ -8,7 +8,7 @@ import { useAuth } from "../../hooks/useAuth";
 import AvatarWithPreview from "../utils/AvatarWithPreview";
 import NotificationButton from "../utils/NotificationButton";
 import ThemeToggleButton from "../utils/ThemeToggleButton";
-function TopNavBar() {
+function TopNavBar({ onOpenMenu, onOpenAllies }) {
     const { user, remove } = useAuth()
     const { resetData } = useAllData()
     const { username, name } = user
@@ -36,8 +36,22 @@ function TopNavBar() {
 
     return (
         <>
-            <Flex as="nav" p=".5rem" pr="1rem" justifyContent="end" alignItems="center">
-                <HStack spacing={{ base: 0, md: 6 }}>
+            <Flex as="nav" p=".5rem" pr="1rem" justifyContent="space-between" alignItems="center">
+                <HStack display={{ base: "flex", lg: "none" }} spacing={1}>
+                    <IconButton variant="ghost" aria-label="Open menu" icon={<FiMenu size={22} />} onClick={onOpenMenu} />
+                    <Link as={NavLink} to="/" _hover={{}}>
+                        <Heading size="md">32 Beads</Heading>
+                    </Link>
+                </HStack>
+                <Box display={{ base: "none", lg: "block" }} />
+                <HStack spacing={{ base: 0, md: 4 }}>
+                    <IconButton
+                        display={{ base: "none", lg: "flex", xl: "none" }}
+                        variant="ghost"
+                        aria-label="Show allies"
+                        icon={<FiUsers size={20} />}
+                        onClick={onOpenAllies}
+                    />
                     <ThemeToggleButton />
                     <NotificationButton />
 

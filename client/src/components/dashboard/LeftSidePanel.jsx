@@ -29,7 +29,7 @@ function LeftSidePanel() {
   const hoverColor = useColorModeValue("gray.100", "gray.700")
 
   return (
-    <Box minH="100vh" p={3}>
+    <Box p={3}>
       <VStack>
         <Heading p={5}>32 Beads
           <Badge colorScheme='purple'>Alpha</Badge>

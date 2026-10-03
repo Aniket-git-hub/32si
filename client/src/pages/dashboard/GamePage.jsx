@@ -21,6 +21,7 @@ import {
   PanelCard,
   PLAYER_COLORS,
   PLAYER_LABELS,
+  CompactStatus,
   ScoreCard,
   TurnCard,
 } from "../../components/game/GamePanels";
@@ -192,10 +193,10 @@ export default function GamePage() {
       bg={bg}
       borderRadius={10}
       p={{ base: 3, md: 6 }}
-      templateColumns={{ base: "1fr", lg: "repeat(10, 1fr)" }}
+      templateColumns={{ base: "minmax(0, 1fr)", md: "minmax(0, 1fr) 250px" }}
       gap={4}
     >
-      <GridItem colSpan={{ base: 1, lg: 10 }} display="flex" justifyContent="space-between" flexWrap="wrap" gap={2}>
+      <GridItem gridColumn="1 / -1" display="flex" justifyContent="space-between" flexWrap="wrap" gap={2}>
         <ButtonGroup isAttached size="sm">
           <Button
             leftIcon={<FaUsers />}
@@ -228,38 +229,18 @@ export default function GamePage() {
         </ButtonGroup>
       </GridItem>
 
-      {/* Left column */}
-      <GridItem colSpan={{ base: 1, lg: 2 }}>
-        <VStack spacing={4}>
-          <ScoreCard state={state} names={names} />
-          <PanelCard>
-            <Text fontWeight="bold" display="flex" alignItems="center" justifyContent="center" gap={2}>
-              <FaChessBoard /> RECENT GAMES
-            </Text>
-            {history.length === 0 && (
-              <Text fontSize="sm" textAlign="center">
-                No games yet
-              </Text>
-            )}
-            {history.map((game) => (
-              <Text key={game.at} fontSize="sm" color={PLAYER_COLORS[game.winner]} textAlign="center">
-                {game.mode === "ai" ? `vs ${DIFFICULTIES[game.level]?.label ?? ""} AI` : "Pass & Play"} ·{" "}
-                {game.winner === DRAW
-                  ? "Draw"
-                  : game.mode === "ai"
-                    ? game.winner === game.humanColor
-                      ? "Won"
-                      : "Lost"
-                    : `${PLAYER_LABELS[game.winner]} won`}{" "}
-                ({game.red}-{game.blue})
-              </Text>
-            ))}
-          </PanelCard>
-        </VStack>
-      </GridItem>
-
       {/* Board */}
-      <GridItem colSpan={{ base: 1, lg: 6 }}>
+      <GridItem>
+        <CompactStatus
+          display={{ base: "flex", md: "none" }}
+          mb={3}
+          state={state}
+          names={names}
+          label={names[state.turn]}
+          thinking={thinking}
+          canEndChain={!aiToMove}
+          onEndChain={() => handleAction({ type: "endChain" })}
+        />
         <Box display="flex" justifyContent="center">
           <GameBoard
             key={`${mode}-${humanColor}`}
@@ -271,10 +252,14 @@ export default function GamePage() {
         </Box>
       </GridItem>
 
-      {/* Right column */}
-      <GridItem colSpan={{ base: 1, lg: 2 }}>
+      {/* Side column (below the board on phones) */}
+      <GridItem>
         <VStack spacing={4}>
+          <Box display={{ base: "none", md: "block" }} w="full">
+            <ScoreCard state={state} names={names} />
+          </Box>
           <TurnCard
+            display={{ base: "none", md: "flex" }}
             state={state}
             label={names[state.turn]}
             thinking={thinking}
@@ -309,7 +294,7 @@ export default function GamePage() {
                 {Object.entries(DIFFICULTIES).map(([key, { label }]) => (
                   <Button
                     key={key}
-                    flex={1}
+                    minH="32px"
                     colorScheme="purple"
                     variant={level === key ? "solid" : "outline"}
                     onClick={() => changeSettings({ level: key })}
@@ -333,6 +318,29 @@ export default function GamePage() {
             >
               Undo
             </Button>
+          </PanelCard>
+          <PanelCard>
+            <Text fontWeight="bold" display="flex" alignItems="center" justifyContent="center" gap={2}>
+              <FaChessBoard /> RECENT GAMES
+            </Text>
+            {history.length === 0 && (
+              <Text fontSize="sm" textAlign="center">
+                No games yet
+              </Text>
+            )}
+            {history.map((game) => (
+              <Text key={game.at} fontSize="sm" color={PLAYER_COLORS[game.winner]} textAlign="center">
+                {game.mode === "ai" ? `vs ${DIFFICULTIES[game.level]?.label ?? ""} AI` : "Pass & Play"} ·{" "}
+                {game.winner === DRAW
+                  ? "Draw"
+                  : game.mode === "ai"
+                    ? game.winner === game.humanColor
+                      ? "Won"
+                      : "Lost"
+                    : `${PLAYER_LABELS[game.winner]} won`}{" "}
+                ({game.red}-{game.blue})
+              </Text>
+            ))}
           </PanelCard>
         </VStack>
       </GridItem>

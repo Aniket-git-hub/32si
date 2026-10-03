@@ -29,6 +29,7 @@ import {
   HowToPlayModal,
   PanelCard,
   PLAYER_LABELS,
+  CompactStatus,
   ScoreCard,
   TurnCard,
 } from "../../components/game/GamePanels";
@@ -193,10 +194,10 @@ export default function OnlineGamePage() {
       bg={bg}
       borderRadius={10}
       p={{ base: 3, md: 6 }}
-      templateColumns={{ base: "1fr", lg: "repeat(10, 1fr)" }}
+      templateColumns={{ base: "minmax(0, 1fr)", md: "minmax(0, 1fr) 250px" }}
       gap={4}
     >
-      <GridItem colSpan={{ base: 1, lg: 10 }} display="flex" justifyContent="space-between" flexWrap="wrap" gap={2}>
+      <GridItem gridColumn="1 / -1" display="flex" justifyContent="space-between" flexWrap="wrap" gap={2}>
         <HStack>
           <Text fontWeight="bold">Online game</Text>
           <Button size="sm" variant="outline" colorScheme="purple" leftIcon={<FaCopy />} onClick={copyCode}>
@@ -214,7 +215,7 @@ export default function OnlineGamePage() {
       </GridItem>
 
       {opponentSeat?.abandonDeadline && room.status === "playing" && (
-        <GridItem colSpan={{ base: 1, lg: 10 }}>
+        <GridItem gridColumn="1 / -1">
           <Alert status="warning" borderRadius="md">
             <AlertIcon />
             <AlertDescription>
@@ -225,13 +226,16 @@ export default function OnlineGamePage() {
         </GridItem>
       )}
 
-      <GridItem colSpan={{ base: 1, lg: 2 }}>
-        <VStack spacing={4}>
-          <ScoreCard state={state} names={names} extras={{ [RED]: presence(RED), [BLUE]: presence(BLUE) }} />
-        </VStack>
-      </GridItem>
-
-      <GridItem colSpan={{ base: 1, lg: 6 }}>
+      <GridItem>
+        <CompactStatus
+          display={{ base: "flex", md: "none" }}
+          mb={3}
+          state={state}
+          names={names}
+          label={waiting ? "Waiting…" : myTurn ? "Your turn" : names[state.turn]}
+          canEndChain={myTurn}
+          onEndChain={() => send("game:action", { action: { type: "endChain" } })}
+        />
         <Box display="flex" justifyContent="center" position="relative">
           <GameBoard
             state={state}
@@ -287,9 +291,13 @@ export default function OnlineGamePage() {
         </Box>
       </GridItem>
 
-      <GridItem colSpan={{ base: 1, lg: 2 }}>
+      <GridItem>
         <VStack spacing={4}>
+          <Box display={{ base: "none", md: "block" }} w="full">
+            <ScoreCard state={state} names={names} extras={{ [RED]: presence(RED), [BLUE]: presence(BLUE) }} />
+          </Box>
           <TurnCard
+            display={{ base: "none", md: "flex" }}
             state={state}
             label={waiting ? "Waiting…" : myTurn ? "Your turn" : `${names[state.turn]}'s turn`}
             canEndChain={myTurn}

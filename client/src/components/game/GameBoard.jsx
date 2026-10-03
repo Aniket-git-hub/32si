@@ -13,6 +13,9 @@ import {
 const WIDTH = 430;
 const HEIGHT = 600;
 const UNIT = 37.5; // pixels per board unit (one square cell = 2 units = 75px)
+// The points span x 65..365 and y 75..525; crop the drawing to them plus room for a bead (symmetric, so
+// flipping the board keeps it centred).
+const VIEW = { x: 40, y: 50, width: 350, height: 500 };
 
 const COLORS = {
     [RED]: "#E63946",
@@ -116,9 +119,9 @@ const GameBoard = ({ state, onAction, canMove = true, flipped = false }) => {
 
     return (
         <svg
-            viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+            viewBox={`${VIEW.x} ${VIEW.y} ${VIEW.width} ${VIEW.height}`}
             width="100%"
-            style={{ maxWidth: WIDTH, touchAction: "manipulation", userSelect: "none" }}
+            style={{ maxWidth: 420, touchAction: "manipulation", userSelect: "none" }}
             role="img"
             aria-label="32 Beads board"
         >
