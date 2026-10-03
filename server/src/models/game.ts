@@ -11,9 +11,35 @@ const gameSchema = new mongoose.Schema<Game>({
     ],
     required: true,
   },
+  code: {
+    type: String,
+  },
   winner: {
     type: Schema.Types.ObjectId,
-    // required: true,
+    ref: 'user',
+  },
+  result: {
+    type: String,
+    enum: ['red', 'blue', 'draw'],
+  },
+  reason: {
+    type: String,
+  },
+  moves: {
+    type: Number,
+  },
+  // Encoded actions for replays (from * 45 + to, -1 = end a capture chain early).
+  history: {
+    type: [Number],
+    default: undefined,
+  },
+  rated: {
+    type: Boolean,
+    default: false,
+  },
+  ratingChanges: {
+    red: Number,
+    blue: Number,
   },
   score: {
     type: String,

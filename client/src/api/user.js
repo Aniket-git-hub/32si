@@ -2,36 +2,32 @@ import { interceptorsInstance } from "../config/axios.config";
 import { getEndpoint } from "../utils/Helper";
 
 const handleRequest = async (endpoint, data, method, signal) => {
-    try {
-        let response;
-        const token = `Bearer ${localStorage.getItem('accessToken')}`
-        const config = {
-            headers: {
-                Authorization: token,
-            },
-            signal,
-        };
-        switch (method) {
-            case "GET":
-                response = await interceptorsInstance.get(endpoint, config);
-                break;
-            case "POST":
-                response = await interceptorsInstance.post(endpoint, data, config);
-                break;
-            case "PUT":
-                response = await interceptorsInstance.put(endpoint, data, config);
-                break;
-            case "DELETE":
-                response = await interceptorsInstance.delete(endpoint, config);
-                break;
-            default:
-                throw new Error("Invalid method");
-        }
-        if (response.status === 200) {
-            return response;
-        }
-    } catch (error) {
-        throw error
+    let response;
+    const token = `Bearer ${localStorage.getItem('accessToken')}`
+    const config = {
+        headers: {
+            Authorization: token,
+        },
+        signal,
+    };
+    switch (method) {
+        case "GET":
+            response = await interceptorsInstance.get(endpoint, config);
+            break;
+        case "POST":
+            response = await interceptorsInstance.post(endpoint, data, config);
+            break;
+        case "PUT":
+            response = await interceptorsInstance.put(endpoint, data, config);
+            break;
+        case "DELETE":
+            response = await interceptorsInstance.delete(endpoint, config);
+            break;
+        default:
+            throw new Error("Invalid method");
+    }
+    if (response.status === 200) {
+        return response;
     }
 }
 
@@ -67,3 +63,11 @@ export const searchUsers = async (data, signal) => {
 export const deleteAccountRequest = async (signal) => handleRequest(`${getEndpoint("VITE_DELETE_ACCOUNT_ROUTE", '/user/')}`, null, "DELETE", signal)
 export const confirmAccountDeletion = async (data, signal) => handleRequest(`${getEndpoint("VITE_CONFIRM_ACCOUNT_DELETION", '/user/delete-user')}/${data.deletionToken}`, data, "POST", signal)
 export const cancelAccountDeleteRequest = async (data, signal) => handleRequest(`${getEndpoint("VITE_CANCEL_ACCOUNT_DELETION", '/user/cancel-delete-user')}/${data.deletionToken}`, data, "POST", signal)
+export const getChatHistory = async ({ userId, before, limit = 50 }, signal) => {
+    const params = new URLSearchParams({ limit });
+    if (before) params.set('before', before);
+    return handleRequest(`${getEndpoint("VITE_CHAT_HISTORY_ROUTE", '/user/chat')}/${userId}?${params}`, null, "GET", signal)
+}
+export const getUnreadCounts = async (signal) => handleRequest(getEndpoint("VITE_CHAT_UNREAD_ROUTE", '/user/chat-unread'), null, "GET", signal)
+export const requestEmailChange = async (data) => handleRequest(getEndpoint("VITE_EMAIL_CHANGE_REQUEST_ROUTE", '/user/email/change-request'), data, "POST")
+export const confirmEmailChange = async (data) => handleRequest(getEndpoint("VITE_EMAIL_CHANGE_CONFIRM_ROUTE", '/user/email/change-confirm'), data, "POST")

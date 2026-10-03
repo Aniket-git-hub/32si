@@ -1,25 +1,23 @@
-import { Button, FormControl, FormLabel, Input, Link, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, Flex, VStack, Center } from '@chakra-ui/react'
+import { Button, FormControl, FormLabel, Input, Link, FormErrorMessage, Heading, Container, Card, CardBody, InputGroup, InputRightElement, Icon, VStack, Center } from '@chakra-ui/react'
 import { registerUser } from '../../api/auth';
 import { useAuth } from '../../hooks/useAuth';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 
 
 export default function RegisterPage() {
+  const location = useLocation()
   const initialState = { name: '', username: '', email: '', password: '' }
 
   const { save } = useAuth()
   
   const register = async (values) => {
-    try {
-      const response = await registerUser(values)
-      const { user, accessToken } = response.data 
-      save(user, accessToken)
-      return { title:`Registration Successful`, message:`Welcome ${user.name && user.name} to 32 Beads Community.`}
-    } catch (error) {
-      throw error
-    }
+    const response = await registerUser(values)
+    const { user, accessToken } = response.data 
+    save(user, accessToken)
+    return { title:`Registration Successful`, message:`Welcome ${user.name && user.name} to 32 Beads Community.`}
   }
 
   const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, register)
@@ -70,7 +68,7 @@ export default function RegisterPage() {
                 <Button type="submit" colorScheme='purple' isLoading={isSubmitting} loadingText="registering.." disabled={isSubmitting}>
                   Register
                 </Button>
-                <p>Have an account? <Link href="/login">Login</Link> </p>
+                <p>Have an account? <Link as={RouterLink} to="/login" state={location.state} color="purple.500">Log in</Link> </p>
               </VStack>
             </Center>
           </form>

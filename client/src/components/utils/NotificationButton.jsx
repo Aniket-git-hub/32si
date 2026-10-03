@@ -5,44 +5,67 @@ import { useNavigate } from 'react-router-dom';
 import { useAllData } from "../../hooks/useAllData";
 import { useAuth } from "../../hooks/useAuth";
 import CustomModal from "./CustomModal";
-function NotificationButton() {
-      const { user, } = useAuth()
+// CustomModal passes its onClose to this child, so items can close the modal before navigating.
+function NotificationList({ notifications, onClose }) {
       const navigate = useNavigate()
-      const { notifications, setNotifications } = useAllData()
 
-      const handleVisitProfile = async (username) => {
-            onClose()
+      const visitProfile = (username) => {
+            onClose?.()
             navigate(`/profile/@${username}`)
       }
 
-      const handleClickOnNotificationItem = (action) => {
-            if (action.redirect) {
-                  console.log(action.redirect)
-                  onClose()
-                  navigate(`/profile/@${action.redirect}`)
-            }
+      if (!notifications.length) {
+            return (
+                  <Center>
+                        <Text> No Notifications </Text>
+                  </Center>
+            )
       }
 
+      return (
+            <List spacing={3}>
+                  {notifications.map((item, index) => (
+                        <ListItem
+                              onClick={() => item?.action?.redirect && visitProfile(item.action.redirect)}
+                              key={`${item.message}${index}`}
+                              _hover={{ bg: "purple.50" }}
+                              borderRadius={5} p={3}
+                              cursor="pointer"
+                        >
+                              <HStack>
+                                    <Text>
+                                          {item.message}
+                                    </Text>
+                                    <Button
+                                          onClick={(e) => {
+                                                e.stopPropagation()
+                                                visitProfile(item.key)
+                                          }}
+                                          variant={"outline"}
+                                          colorScheme="purple">Visit Profile</Button>
+                              </HStack>
+                        </ListItem>
+                  ))}
+            </List>
+      )
+}
+
+function NotificationButton() {
+      const { user, } = useAuth()
+      const { notifications, setNotifications } = useAllData()
+
+      // Pending friend requests show up as notifications (without wiping other notifications).
+      const requests = user.connectionRequests ?? []
       useEffect(() => {
-            if (user.connectionRequests?.length !== 0) {
-                  user.connectionRequests.forEach(username => {
-                        let notificationsExist = notifications.some(n => n.key === username)
-                        if (!notificationsExist) {
-                              setNotifications(prev => [
-                                    ...prev,
-                                    {
-                                          key: username,
-                                          message: `${username} wants to connect with you`,
-                                          action: { redirect: username }
-                                    }
-                              ])
-                        }
-                  })
-            }
-            return () => {
-                  setNotifications([])
-            }
-      }, [user.connectionRequests])
+            if (!requests.length) return
+            setNotifications(prev => {
+                  const missing = requests.filter(username => !prev.some(n => n.key === username))
+                  return missing.length
+                        ? [...prev, ...missing.map(username => ({ key: username, message: `${username} wants to connect with you`, action: { redirect: username } }))]
+                        : prev
+            })
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [requests.join(","), setNotifications])
 
       return (
             <>
@@ -76,33 +99,7 @@ function NotificationButton() {
                               </>
                         }}
                   >
-                        <List spacing={3}>
-                              {notifications.length > 0 ? notifications.map((item, index) => (
-                                    <ListItem
-                                          onClick={(e) => handleClickOnNotificationItem(item?.action)}
-                                          key={`${item.message}${index}`}
-                                          _hover={{ bg: "purple.50" }}
-                                          borderRadius={5} p={3}
-                                    >
-                                          <HStack>
-                                                <Text>
-                                                      {item.message}
-                                                </Text>
-                                                <Button
-                                                      onClick={(e) => handleVisitProfile(item.key)}
-                                                      variant={"outline"}
-                                                      colorScheme="purple">Visit Profile</Button>
-                                          </HStack>
-                                    </ListItem>
-                              ))
-                                    :
-                                    <>
-                                          <Center>
-                                                <Text> No Notifications </Text>
-                                          </Center>
-                                    </>
-                              }
-                        </List>
+                        <NotificationList notifications={notifications} />
 
                   </CustomModal>
 

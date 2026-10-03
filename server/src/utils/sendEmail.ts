@@ -9,6 +9,7 @@ import otpEmailTemplate from './emailTemplates/otpEmailTemplate';
 import passwordResetInitiatedTemplate from './emailTemplates/passwordResetInitiatedTemplate';
 import passwordResetSuccessfulTemplate from './emailTemplates/passwordResetSuccessfulTemplate';
 import registrationSuccessfulTemplate from './emailTemplates/registrationSuccessfulTemplate';
+import emailChangedTemplate from './emailTemplates/emailChangedTemplate';
 
 interface EmailResponse {
   success: boolean;
@@ -42,8 +43,18 @@ export const sendPasswordResetSuccessfulEmail = (receiverEmail: string, name: st
 export const sendRegistrationSuccessfulEmail = (receiverEmail: string, name: string) =>
   sendEmail(receiverEmail, 'Welcome to B2 Beads Board Game!', registrationSuccessfulTemplate(name));
 
-export const sendAccountDeletionEmail = (receiverEmail: string, name: string, confirmationLink: string, otp: number, cancellationLink: string) =>
-  sendEmail(receiverEmail, 'Your Account Deletion Request', accountDeletionEmailTemplate(name, confirmationLink, otp, cancellationLink));
+export const sendAccountDeletionEmail = (
+  receiverEmail: string,
+  name: string,
+  confirmationLink: string,
+  otp: number,
+  cancellationLink: string,
+) =>
+  sendEmail(
+    receiverEmail,
+    'Your Account Deletion Request',
+    accountDeletionEmailTemplate(name, confirmationLink, otp, cancellationLink),
+  );
 
 export const sendAccountDeletionSuccesfullEmail = (receiverEmail: string, name: string) =>
   sendEmail(receiverEmail, 'Your Account Deleted Succesfully', accountDeletionSuccessTemplate(name));
@@ -65,3 +76,6 @@ export const sendNewFeedbackReceivedEmail = (
     'New User Feedback Received',
     newFeedbackReceivedTemplate('Aniket Singh', userName, userEmail, userMessage),
   );
+
+export const sendEmailChangedEmail = (receiverEmail: string, name: string, newEmail: string) =>
+  sendEmail(receiverEmail, 'Your 32 Beads email address was changed', emailChangedTemplate(name, newEmail));

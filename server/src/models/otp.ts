@@ -10,6 +10,15 @@ const optSchema = new Schema<Otp>({
     type: String,
     required: true,
   },
+  // 'password-reset' (default) or 'email-change'; codes only work for the purpose they were sent for.
+  purpose: {
+    type: String,
+    default: 'password-reset',
+  },
+  // For email changes: the account whose email is being changed.
+  userId: {
+    type: Schema.Types.ObjectId,
+  },
   createdAt: {
     type: Date,
     expires: 120,

@@ -6,6 +6,7 @@ interface City {
   // other properties...
 }
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const cities: City[] = require('cities.json');
 
 router.get('/city/:name', (req, res) => {

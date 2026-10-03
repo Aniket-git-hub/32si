@@ -3,6 +3,7 @@ import USER from '../../models/user';
 import bcrypt from 'bcryptjs';
 import { sendPasswordResetSuccessfulEmail } from '../../utils/sendEmail';
 import CustomError from '../../utils/createError';
+import { isValidResetToken } from '../../utils/resetToken';
 
 /**
  * @description  controller to reset the user password.
@@ -12,10 +13,11 @@ import CustomError from '../../utils/createError';
  */
 async function resetPassword(req: Request, res: Response, next: NextFunction) {
   try {
-    const { email, password } = req.body;
+    const { email, password, resetToken } = req.body;
     const user = await USER.findOne({ email });
-    if (!user) {
-      throw new CustomError('AuthError', 'Invalid Email');
+    if (!user || !isValidResetToken(resetToken, email, user.password)) {
+      // Same answer for unknown emails and bad tokens.
+      return res.status(400).json({ message: 'This reset link has expired. Please request a new code.' });
     }
 
     const hashPassword = await bcrypt.hash(password, 12);

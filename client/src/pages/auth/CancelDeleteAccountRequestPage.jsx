@@ -7,7 +7,7 @@ import Error404Page from "./Error404Page"
 export default function CancelDeleteAccountRequestPage() {
       const alert = useToast()
       const navigate = useNavigate()
-      const [value, setValue] = useState("Cancelling Delete Request Please Wait")
+      const [value] = useState("Cancelling Delete Request Please Wait")
       const { deletionToken } = useParams()
 
       useEffect(() => {

@@ -12,16 +12,12 @@ export default function ForgotPasswordPage() {
     const [email, setEmail] = useState('')
 
     const submit = async (values) => {
-        try {
-            setEmail(values.email)
-            console.log(email)
-            await forgotPassword(values)
-            setVerifyOTP(true)
-            setCountdown(120)
-            return { title: `Email sent`, message: `OTP sent : ${email}` }
-        } catch (error) {
-            throw error
-        }
+        setEmail(values.email)
+        console.log(email)
+        await forgotPassword(values)
+        setVerifyOTP(true)
+        setCountdown(120)
+        return { title: `Email sent`, message: `OTP sent : ${email}` }
     }
 
     const { values, errors, handleChange, handleSubmit, isSubmitting } = useFormValidation(initialState, submit)

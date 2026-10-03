@@ -1,5 +1,4 @@
 import {
-  Badge,
   Box,
   Divider,
   HStack,
@@ -14,26 +13,28 @@ import {
 import { FiSettings } from "react-icons/fi";
 import { HiOutlineRectangleGroup, HiOutlineUserGroup } from "react-icons/hi2";
 import { IoStatsChartOutline } from "react-icons/io5";
-import { MdOutlineFeedback } from "react-icons/md";
+import { MdOutlineFeedback, MdOutlineLeaderboard, MdOutlineSchool } from "react-icons/md";
 import { SiAboutdotme } from "react-icons/si";
 import { NavLink } from "react-router-dom";
 
 function LeftSidePanel() {
   const sideBarListItems = [
-    { name: "New Game", icon: <HiOutlineRectangleGroup size="20" />, path: "/" },
+    { name: "Play", icon: <HiOutlineRectangleGroup size="20" />, path: "/" },
     { name: "Rivals", icon: <HiOutlineUserGroup size="20" />, path: "/rivals" },
+    { name: "Leaderboard", icon: <MdOutlineLeaderboard size="20" />, path: "/leaderboard" },
     { name: "Stats", icon: <IoStatsChartOutline size="20" />, path: "/stats" },
+    { name: "Learn to play", icon: <MdOutlineSchool size="20" />, path: "/learn" },
     { name: "Settings", icon: <FiSettings size="20" />, path: "/settings" },
   ];
 
   const hoverColor = useColorModeValue("gray.100", "gray.700")
 
   return (
-    <Box minH="100vh" p={3}>
+    <Box p={3}>
       <VStack>
-        <Heading p={5}>32 Beads
-          <Badge colorScheme='purple'>Alpha</Badge>
-        </Heading>
+        <Link as={NavLink} to="/" _hover={{}}>
+          <Heading p={5}>32 Beads</Heading>
+        </Link>
         <List w="100%">
           {sideBarListItems.map((item, index) => {
             return (

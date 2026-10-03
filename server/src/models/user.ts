@@ -64,14 +64,16 @@ const userSchema = new mongoose.Schema<User>({
   deletionToken: {
     type: String,
   },
-  createdGames: [
-    { type: String }
-  ]
-
+  createdGames: [{ type: String }],
+  // Elo rating from online games (see game/elo.ts).
+  rating: { type: Number, default: 1200 },
+  ratedGames: { type: Number, default: 0 },
+  peakRating: { type: Number, default: 1200 },
 });
 
 userSchema.index({ location: '2dsphere' });
 userSchema.index({ username: 'text', name: 'text' });
+userSchema.index({ rating: -1 });
 
 const USER = mongoose.model<User>('user', userSchema);
 export default USER;

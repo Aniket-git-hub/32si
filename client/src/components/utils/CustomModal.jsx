@@ -38,4 +38,6 @@ const CustomModal = forwardRef(({ title, trigger, children, size, footer, varian
       );
 });
 
+CustomModal.displayName = 'CustomModal';
+
 export default CustomModal;

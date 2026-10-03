@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import USER from '../../models/user';
-import mongoose from 'mongoose';
 import CustomError from '../../utils/createError';
 
 async function acceptConnection(req: Request, res: Response, next: NextFunction) {

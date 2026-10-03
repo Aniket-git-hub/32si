@@ -24,23 +24,56 @@
 
 ## How to Play 🎮
 
--   Two players can play live together online.
--   Each player takes turns placing a bead on any hole on the board.
--   A player can eliminate an opponent's bead if their bead is next to the opponent's bead and the spot beyond the opponent's bead (in a straight line or diagonally) is empty. The opponent's bead is then removed from the board.
--   The first player to eliminate all of their opponent's beads wins.
+-   Each player has 16 beads. RED starts at the top of the board and moves first.
+-   On your turn, move one bead along a line to a neighbouring empty point.
+-   **Capture** by jumping over an enemy bead that is right next to yours, in a straight line, onto the empty point directly behind it. The jumped bead is removed.
+-   After a capture, the same bead may keep jumping and capturing in the same turn (multi-capture). You can stop the chain whenever you like.
+-   Capturing is optional.
+-   **You win** by capturing all of your opponent's beads, or by leaving them with no legal move.
+-   After 50 turns in a row without any capture, the game is a draw.
 
-(Note: An AI opponent feature is currently under development.)
+## Game Modes 🕹️
+
+-   **Guest play** – anyone can play the computer, pass & play or take the tutorial without an account.
+-   **vs Computer** – Easy, Medium or Hard, play as either colour. The AI runs in a web worker so the board never freezes.
+-   **Pass & Play** – two players on one device, with undo.
+-   **Online** – create a game and share the 6-letter code or link, join a friend's game, challenge an ally directly, or use **Random Match**. Each turn has a 60-second clock. Rematches swap colours. A player who loses connection has 60 seconds to come back before they forfeit.
+-   **Learn** – `/learn` is a seven-lesson interactive tutorial (moving, capturing, chains, danger, protecting beads, blocking, winning). First games against the computer also get context-sensitive coach tips, and the board highlights beads that can capture (gold) or are in danger (red).
 
 ## Features ⭐
 
--   User registration and login 🔑
--   Password reset functionality with OTP verification via email 📧
--   Email notifications on account creation 🎉
--   Real-time communication using WebSockets 💬
+-   User registration and login 🔑, password reset with OTP verification via email 📧
+-   Allies (friends), live presence, saved chat with unread badges 💬
+-   Elo ratings and a leaderboard 🏆, stats, head-to-head records and replays of every game (online games on the server, offline ones on the device) 📼
+-   Game settings: sound, music volume, vibration, move/capture/danger hints, confirm-move 🎛️
+-   Animated board: glossy beads, jump arcs, capture bursts, turn glow; respects the system 'reduce motion' setting ✨
+-   Change your email (verified with a code sent to the new address) ✉️
+-   Works on phones (bottom tab bar), light and dark mode 🌗
+
+## How it works 🛠️
+
+-   **Rules engine** – `client/src/game/engine.js` holds the board graph (37 points, with jump lines derived from the board geometry) and the rules. The server has a TypeScript copy in `server/src/game/engine.ts`; `scripts/engine-parity.test.mjs` checks the two behave identically.
+-   **AI** – `client/src/game/ai.js`: negamax search with alpha-beta pruning, iterative deepening, a transposition table and a capture-only quiescence search. It searches whole turns (including multi-capture chains). Hard looks about 7–8 turns ahead.
+-   **Online play** – the server is authoritative. `server/src/game/rooms.ts` stores the games and validates every move with the rules engine; `server/src/socketIOEventHandlers/gameEventHandler.ts` exposes it over socket.io (`game:create`, `game:join`, `game:action`, `game:resign`, `game:rematch`, `game:leave`, `game:quickMatch`).
+
+## Deploying 🚀
+
+-   **Client (Vercel)**: route env variables like `VITE_GAME_STATS_ROUTE` are optional; when they are missing the default path is used against `VITE_PROD_BASE_URL`.
+-   **Server (Render)**: online games, the turn clock and matchmaking live in memory, so run a single instance (a restart ends games in progress). The server trusts one proxy hop for rate limiting.
+-   **Database**: no migration needed; existing users get a 1200 rating on their first rated game.
+
+## Tests ✅
+
+```bash
+cd client && npm test                                                   # rules engine, AI, tutorial, replays
+cd server && npm test                                                   # game rooms, turn clock, ratings, stats, middleware
+node --experimental-strip-types --test scripts/engine-parity.test.mjs   # client/server engines agree (Node 22.6+)
+```
 
 ## Future Enhancements 🚀
 
-We are planning to add more features in the coming days, including an AI opponent. Stay tuned!
+-   Tournaments and seasonal leaderboards.
+-   Replays and analysis for games against the computer.
 
 ## Tech Stack 💻
 

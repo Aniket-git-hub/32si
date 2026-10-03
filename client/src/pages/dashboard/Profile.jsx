@@ -1,19 +1,22 @@
 import { AtSignIcon } from "@chakra-ui/icons";
-import { Box, Button, Center, Flex, HStack, Heading, Skeleton, SkeletonText, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, Center, Flex, HStack, Heading, Skeleton, SkeletonText, Stack, Text, VStack } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { BsPeople } from "react-icons/bs";
 import { HiOutlineRectangleGroup } from "react-icons/hi2";
 import { MdPlace } from "react-icons/md";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { acceptConnection, connectUser, disconnectUser, getAUserByUsername, getProfilePicture, getSmallProfilePicture } from "../../api/user";
 import ImageWithPreview from "../../components/utils/ImageWithPreview";
 import { useAuth } from "../../hooks/useAuth";
+import { getGameStats } from "../../api/game";
+import useChallenge from "../../hooks/useChallenge";
 import useSocket from "../../hooks/useSocket";
 
 export default function Profile() {
     const { socket } = useSocket()
     const { user, setUser } = useAuth()
     let { username } = useParams()
+    const navigate = useNavigate()
     const [profileUser, setProfileUser] = useState(null)
     const [isFriend, setIsFriend] = useState(false)
     const [isConnecting, setIsConnecting] = useState(false)
@@ -23,16 +26,31 @@ export default function Profile() {
     const [myProfile, setMyProfile] = useState(false)
 
     const controllerRef = useRef(null)
+    const { challenge, pendingId } = useChallenge()
+    const [record, setRecord] = useState(null)
+    const [loadError, setLoadError] = useState(null) // null | 'not-found' | 'failed'
+
+    useEffect(() => {
+        if (!profileUser?._id) return
+        const controller = new AbortController()
+        getGameStats({ userId: profileUser._id, limit: 1 }, controller.signal)
+            .then((res) => setRecord({ ...res.data.stats, rating: res.data.rating }))
+            .catch(() => setRecord(null))
+        return () => controller.abort()
+    }, [profileUser?._id])
 
     const loadProfileUserData = async (signal) => {
         try {
+            setLoadError(null)
             const response = await getAUserByUsername(username.replace(/@/g, ""), signal)
             setProfileUser(response.data.user)
             setIsFriend(response.data.user.friends?.map(friend => friend._id).includes(user._id))
             setRequestSent(response.data.user.connectionRequests.includes(user.username))
             setMyProfile(user._id === response.data.user._id)
         } catch (error) {
-            console.log(error)
+            if (error.code === "ERR_CANCELED") return
+            setProfileUser(null)
+            setLoadError(error.response?.status === 404 ? "not-found" : "failed")
         }
     }
 
@@ -53,12 +71,18 @@ export default function Profile() {
         }
     }, [username])
 
+    // Reload when a friend request to or from this player changes (listeners removed on leave).
     useEffect(() => {
-        if (socket) {
-            socket.on("connectionRequest", () => loadProfileUserData(controllerRef.current.signal));
-            socket.on("connectionRequestAccepted", () => loadProfileUserData(controllerRef.current.signal));
+        if (!socket) return
+        const reload = () => loadProfileUserData(controllerRef.current?.signal)
+        socket.on("connectionRequest", reload)
+        socket.on("connectionRequestAccepted", reload)
+        return () => {
+            socket.off("connectionRequest", reload)
+            socket.off("connectionRequestAccepted", reload)
         }
-    }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [socket, username])
 
     const handleConnectUser = async ({ username }) => {
         try {
@@ -112,13 +136,35 @@ export default function Profile() {
     }
 
 
-    const handleNewChallenge = () => {
-        socket.emit("newChallenge", {
-            userTo: profileUser,
-            message: `${user.username} has challenged you for a game.`
-        })
-    }
+    const handleNewChallenge = () => challenge(profileUser._id)
 
+
+    if (loadError) {
+        return (
+            <Center py={16}>
+                <VStack spacing={4} textAlign="center" px={4}>
+                    <Heading size="md">
+                        {loadError === "not-found" ? `There's no player called @${username.replace(/@/g, "")}` : "Couldn't load this profile"}
+                    </Heading>
+                    <Text color="gray.500">
+                        {loadError === "not-found"
+                            ? "Check the spelling, or find people to play on the Rivals page."
+                            : "Check your connection and try again."}
+                    </Text>
+                    <HStack>
+                        {loadError === "failed" && (
+                            <Button colorScheme="purple" onClick={() => loadProfileUserData(controllerRef.current?.signal)}>
+                                Try again
+                            </Button>
+                        )}
+                        <Button variant="outline" colorScheme="purple" onClick={() => navigate("/rivals")}>
+                            Browse rivals
+                        </Button>
+                    </HStack>
+                </VStack>
+            </Center>
+        )
+    }
 
     if (!profileUser) {
         return (
@@ -189,9 +235,11 @@ export default function Profile() {
                             borderRadius={5}
                         >
                             <HiOutlineRectangleGroup />
-                            <Text>
-                                {profileUser && profileUser?.gamesPlayed.length}
-
+                            <Text title="Online games: wins · draws · losses">
+                                {record
+                                    ? `${record.played} games · ${record.wins}W ${record.draws}D ${record.losses}L`
+                                    : profileUser?.gamesPlayed.length}
+                                {record?.rating?.ratedGames ? ` · ★ ${record.rating.rating}` : ""}
                             </Text>
                         </HStack>
                         <HStack
@@ -225,6 +273,7 @@ export default function Profile() {
                                 bg: 'gray.300'
                             }}
                             isDisabled={myProfile}
+                            isLoading={pendingId === profileUser._id}
                         >
                             Challenge
                         </Button>

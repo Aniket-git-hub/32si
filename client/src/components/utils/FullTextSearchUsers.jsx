@@ -7,13 +7,13 @@ import useDebounce from '../../hooks/useDebounce';
 import AvatarWithPreview from './AvatarWithPreview';
 
 function FullTextSearchUsers({ onClose }) {
-      const [page, setPage] = useState(1);
+      const [page] = useState(1);
       const [limit] = useState(10);
       const navigate = useNavigate()
 
       const [searchResults, setSearchResults] = useState([]);
       const [inputValue, setInputValue] = useState('')
-      const [hasMore, setHasMore] = useState(false)
+      const [, setHasMore] = useState(false)
 
       let abortController = new AbortController();
       const handleSearch = async (value, user) => {

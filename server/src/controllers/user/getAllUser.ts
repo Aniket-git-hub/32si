@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import USER from '../../models/user';
 
+// Aggregation stages are loosely typed; this builds plain MongoDB pipeline objects.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 function createPipeline(currentUser: any, friends: any[], limit: number, skips: number, geoNear: boolean) {
   const pipeline: any[] = [];
 

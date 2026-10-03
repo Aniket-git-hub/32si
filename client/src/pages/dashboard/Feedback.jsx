@@ -21,7 +21,6 @@ import {
 } from "@chakra-ui/react";
 import {
   MdEmail,
-  MdFacebook,
   MdLocationOn,
   MdOutlineEmail,
   MdPhone,
@@ -34,12 +33,8 @@ export default function Feedback() {
   const initialState = { name: "", email: "", message: "" };
 
   const submitFeedback = async (values) => {
-    try {
-      const response = await sendFeedback(values)
-      return { title: "Success", message: response.data.message };
-    } catch (error) {
-      throw error;
-    }
+    const response = await sendFeedback(values)
+    return { title: "Success", message: response.data.message };
   };
 
   const { values, errors, handleChange, handleSubmit, isSubmitting } =

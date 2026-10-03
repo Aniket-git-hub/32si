@@ -1,401 +1,568 @@
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import Piece from "./Piece";
-import Spot from "./Spot";
+import { useColorMode } from "@chakra-ui/react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+    BLUE,
+    DRAW,
+    EMPTY,
+    NEIGHBORS,
+    POINTS,
+    POSITIONS,
+    RED,
+    destinationsFrom,
+    opponent,
+} from "../../game/engine";
+import { useGameSettings } from "../../context/GameSettingsContext";
+import { capturingBeads, endangeredBeads } from "../../game/hints";
 
 const WIDTH = 430;
 const HEIGHT = 600;
-const BOARD_SIZE = 150;
+const UNIT = 37.5; // pixels per board unit (one square cell = 2 units = 75px)
+// The points span x 65..365 and y 75..525; crop the drawing to them plus room for a bead (symmetric, so
+// flipping the board keeps it centred).
+const VIEW = { x: 40, y: 50, width: 350, height: 500 };
+const SLAB = { x: 46, y: 56, width: 338, height: 488, radius: 28 };
+const BEAD = 15;
 
-const colors = {
-    red: "#E63946",    // Vibrant red
-    blue: "#457B9D"    // Muted slate blue
-}
+// Motion language: one easing curve, three durations, no overshoot ("premium").
+const EASE = [0.4, 0, 0.2, 1];
+const QUICK = 0.18;
+const STANDARD = 0.38;
+const SLOW = 0.6;
 
-const GameBoard = ({ spotOnClick, onScoreChange }) => {
-    const createInitialBoard = () => {
-        const board = Array(9).fill().map(() => Array(5).fill(0));
+const THEMES = {
+    light: {
+        slab: ["#f6e7c8", "#e9d2a6"],
+        slabEdge: "#c9a66b",
+        line: "#8a6a3d",
+        lineGlow: "rgba(255,255,255,0.55)",
+        hole: ["#a88553", "#e9d2a6"],
+        beads: {
+            [RED]: ["#ff9b9b", "#e63946", "#9e1b28"],
+            [BLUE]: ["#a8d4f5", "#3d82c0", "#1f4f7d"],
+        },
+        glow: { [RED]: "#e63946", [BLUE]: "#3d82c0" },
+        step: "#22a35a",
+        capture: "#e2a400",
+        danger: "#d62839",
+    },
+    dark: {
+        slab: ["#2b2858", "#1c1a3d"],
+        slabEdge: "#463f8a",
+        line: "#a49ce8",
+        lineGlow: "rgba(0,0,0,0.45)",
+        hole: ["#0f0e24", "#2b2858"],
+        beads: {
+            [RED]: ["#ffb0b0", "#ef4444", "#a3202a"],
+            [BLUE]: ["#c4e5ff", "#5da9e9", "#24619b"],
+        },
+        glow: { [RED]: "#ff6b6b", [BLUE]: "#6db8f5" },
+        step: "#4ade80",
+        capture: "#facc15",
+        danger: "#ff6b6b",
+    },
+};
 
-        // Red pieces (top)
-        // First 2 rows: 3 pieces each (columns 1-3)
-        for (let i = 0; i <= 1; i++) {
-            for (let j = 1; j <= 3; j++) board[i][j] = 1;
+const EDGES = POINTS.flatMap((a) => NEIGHBORS[a].filter((b) => b > a).map((b) => [a, b]));
+
+/**
+ * Keeps a stable id for every bead so a moving bead animates from its old point to its new one.
+ * Works by diffing the previous and the new board, so it also copes with states coming from the server.
+ * A fresh game gets fresh ids, so the beads cascade in instead of flying back to the start.
+ */
+const usePieceIds = (board, moveNumber) => {
+    const ref = useRef({ board: null, ids: null, next: 0, moveNumber: 0 });
+    return useMemo(() => {
+        const prev = ref.current;
+        if (prev.board === board) return prev.ids;
+        const ids = new Array(board.length).fill(null);
+        let next = prev.next;
+        const restart = moveNumber === 0 && prev.moveNumber !== 0;
+        if (!prev.board || restart) {
+            for (const p of POINTS) if (board[p] !== EMPTY) ids[p] = next++;
+        } else {
+            const vacated = [];
+            const filled = [];
+            for (const p of POINTS) {
+                if (prev.board[p] === board[p]) {
+                    if (board[p] !== EMPTY) ids[p] = prev.ids[p];
+                    continue;
+                }
+                if (prev.board[p] !== EMPTY) vacated.push(p);
+                if (board[p] !== EMPTY) filled.push(p);
+            }
+            for (const p of filled) {
+                const k = vacated.findIndex((v) => prev.board[v] === board[p]);
+                if (k >= 0) {
+                    ids[p] = prev.ids[vacated[k]];
+                    vacated.splice(k, 1);
+                } else {
+                    ids[p] = next++;
+                }
+            }
         }
-        // Next 2 rows: 5 pieces each (all columns)
-        for (let i = 2; i <= 3; i++) {
-            for (let j = 0; j <= 4; j++) board[i][j] = 1;
-        }
+        ref.current = { board, ids, next, moveNumber };
+        return ids;
+    }, [board, moveNumber]);
+};
 
-        // Blue pieces (bottom)
-        // First 2 rows of blue: 5 pieces each (all columns)
-        for (let i = 5; i <= 6; i++) {
-            for (let j = 0; j <= 4; j++) board[i][j] = 2;
-        }
-        // Last 2 rows of blue: 3 pieces each (columns 1-3)
-        for (let i = 7; i <= 8; i++) {
-            for (let j = 1; j <= 3; j++) board[i][j] = 2;
-        }
+/**
+ * Counts real moves: advances only when the board's contents change (ending a capture chain or the server
+ * re-sending the same position must not replay the last move's animation).
+ */
+const useMoveSequence = (board) => {
+    const ref = useRef({ key: null, seq: 0 });
+    const key = board.join("");
+    if (ref.current.key !== null && ref.current.key !== key) ref.current = { key, seq: ref.current.seq + 1 };
+    else if (ref.current.key === null) ref.current = { key, seq: 0 };
+    return ref.current.seq;
+};
 
-        return board;
-    };
-
-
-    const createEmptyMoves = () =>
-        Array(9).fill().map(() => Array(5).fill(false));
-
-
-    // Calculate positions similar to original createBoard
-    const calculateSizes = () => {
-        const x = WIDTH / 2;
-        const y = HEIGHT / 2;
-        const size = BOARD_SIZE;
-
-        return [
-            [
-                { x: 0, y: 0 },
-                { x: x - size / 2, y: y - size - size / 2 },
-                { x: x, y: y - size - size / 2 },
-                { x: x + size / 2, y: y - size - size / 2 },
-                { x: 0, y: 0 },
-            ],
-            [
-                { x: 0, y: 0 },
-                { x: x - size / 4, y: y - size - size / 4 },
-                { x: x, y: y - size - size / 4 },
-                { x: x + size / 4, y: y - size - size / 4 },
-                { x: 0, y: 0 },
-            ],
-            [
-                { x: x - size, y: y - size },
-                { x: x - size / 2, y: y - size },
-                { x: x, y: y - size },
-                { x: x + size / 2, y: y - size },
-                { x: x + size, y: y - size },
-            ],
-            [
-                { x: x - size, y: y - size / 2 },
-                { x: x - size / 2, y: y - size / 2 },
-                { x: x, y: y - size / 2 },
-                { x: x + size / 2, y: y - size / 2 },
-                { x: x + size, y: y - size / 2 },
-            ],
-            [
-                { x: x - size, y: y },
-                { x: x - size / 2, y: y },
-                { x: x, y: y },
-                { x: x + size / 2, y: y },
-                { x: x + size, y: y },
-            ],
-            [
-                { x: x - size, y: y + size / 2 },
-                { x: x - size / 2, y: y + size / 2 },
-                { x: x, y: y + size / 2 },
-                { x: x + size / 2, y: y + size / 2 },
-                { x: x + size, y: y + size / 2 },
-            ],
-            [
-                { x: x - size, y: y + size },
-                { x: x - size / 2, y: y + size },
-                { x: x, y: y + size },
-                { x: x + size / 2, y: y + size },
-                { x: x + size, y: y + size },
-            ],
-            [
-                { x: 0, y: 0 },
-                { x: x - size / 4, y: y + size + size / 4 },
-                { x: x, y: y + size + size / 4 },
-                { x: x + size / 4, y: y + size + size / 4 },
-                { x: 0, y: 0 },
-            ],
-            [
-                { x: 0, y: 0 },
-                { x: x - size / 2, y: y + size + size / 2 },
-                { x: x, y: y + size + size / 2 },
-                { x: x + size / 2, y: y + size + size / 2 },
-                { x: 0, y: 0 },
-            ],
-        ];
-    };
-
-    const sizes = calculateSizes();
-
-    const relations = {
-        "01": ["02", "11"],
-        "02": ["01", "03", "12"],
-        "03": ["02", "13"],
-        11: ["01", "12", "22"],
-        12: ["02", "11", "13", "22"],
-        13: ["03", "12", "22"],
-        20: ["21", "30", "31"],
-        21: ["20", "22", "31"],
-        22: ["21", "31", "32", "33", "23", "12", "11", "13"],
-        23: ["22", "24", "33"],
-        24: ["23", "33", "34"],
-        30: ["20", "31", "40"],
-        31: ["20", "21", "22", "32", "42", "41", "40", "30"],
-        32: ["22", "31", "42", "33"],
-        33: ["22", "23", "24", "34", "44", "43", "42", "32"],
-        34: ["24", "33", "44"],
-        40: ["30", "31", "41", "51", "50"],
-        41: ["31", "40", "51", "42"],
-        42: ["41", "31", "32", "33", "43", "53", "52", "51"],
-        43: ["42", "33", "44", "53"],
-        44: ["33", "34", "43", "53", "54"],
-        50: ["40", "51", "60"],
-        51: ["40", "41", "42", "50", "52", "60", "61", "62"],
-        52: ["51", "42", "53", "62"],
-        53: ["42", "43", "44", "52", "54", "62", "63", "64"],
-        54: ["44", "53", "64"],
-        60: ["50", "51", "61"],
-        61: ["51", "60", "62"],
-        62: ["51", "52", "53", "61", "63", "71", "72", "73"],
-        63: ["62", "53", "64"],
-        64: ["53", "54", "63"],
-        71: ["62", "72", "81"],
-        72: ["62", "71", "73", "82"],
-        73: ["62", "72", "83"],
-        81: ["71", "82"],
-        82: ["72", "81", "83"],
-        83: ["73", "82"],
-    }
-
-    const [boardState, setBoardState] = useState(() => createInitialBoard());
-    const [selectedPiece, setSelectedPiece] = useState(null);
-    const [possibleMoves, setPossibleMoves] = useState(
-        Array(9).fill().map(() => Array(5).fill(false))
+/** Particles and a shockwave where a bead was captured. */
+const CaptureBurst = ({ x, y, color, delay }) => {
+    const particles = useMemo(
+        () =>
+            Array.from({ length: 10 }, (_, i) => {
+                const angle = (i / 10) * Math.PI * 2 + Math.random() * 0.4;
+                const distance = 20 + Math.random() * 14;
+                return { dx: Math.cos(angle) * distance, dy: Math.sin(angle) * distance, r: 1.6 + Math.random() * 1.8 };
+            }),
+        []
     );
-    const [turn, setTurn] = useState("RED");
+    return (
+        <g pointerEvents="none" transform={`translate(${x} ${y})`}>
+            <motion.circle
+                r={BEAD}
+                fill="none"
+                stroke={color}
+                strokeWidth={2.5}
+                initial={{ scale: 0.6, opacity: 0.9 }}
+                animate={{ scale: 2.4, opacity: 0 }}
+                transition={{ duration: SLOW, delay, ease: EASE }}
+            />
+            {particles.map((p, i) => (
+                <motion.circle
+                    key={i}
+                    r={p.r}
+                    fill={color}
+                    initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+                    animate={{ x: p.dx, y: p.dy, opacity: 0, scale: 0.4 }}
+                    transition={{ duration: SLOW, delay, ease: [0.05, 0.7, 0.1, 1] }}
+                />
+            ))}
+        </g>
+    );
+};
 
+/**
+ * The 32 Beads board.
+ *
+ * Controlled component: it renders `state` (see game/engine.js) and reports the player's intent
+ * through `onAction({ type: 'move', from, to })` or `onAction({ type: 'endChain' })`.
+ * Hints and tap-to-confirm follow the player's game settings unless overridden with `hints`.
+ */
+const GameBoard = ({ state, onAction, canMove = true, flipped = false, hints }) => {
+    const [selected, setSelected] = useState(null);
+    // With "confirm moves" on, the first tap on a destination only marks it.
+    const [pending, setPending] = useState(null);
+    // A bead that was tapped but can't be used gives a small shake.
+    const [shake, setShake] = useState({ p: null, n: 0 });
+    const { settings } = useGameSettings();
+    const { moveHints, captureHints, confirmMoves } = { ...settings, ...hints };
+    const theme = THEMES[useColorMode().colorMode] ?? THEMES.light;
+    const reduceMotion = useReducedMotion();
+    const pieceIds = usePieceIds(state.board, state.moveNumber);
+    const moveSeq = useMoveSequence(state.board);
+    const uid = useMemo(() => Math.random().toString(36).slice(2, 8), []); // unique SVG ids per board
+
+    // Forget the selection whenever the position changes.
     useEffect(() => {
-        setBoardState(createInitialBoard());
-        setSelectedPiece(null);
-        setPossibleMoves(createEmptyMoves());
-        setTurn("RED");
-    }, []);
+        setSelected(null);
+        setPending(null);
+    }, [state.moveNumber, canMove]);
 
-    const isNullSpot = (i, j) => {
-        const positions = [
-            "84", "80", "74", "70",
-            "14", "10", "00", "04"
-        ];
-        return positions.includes(`${i}${j}`);
+    const active = canMove && state.winner === null;
+    // During a capture chain only the capturing bead may move.
+    const current = active ? (state.chain ?? selected) : null;
+    const destinations = useMemo(
+        () => (current === null ? [] : destinationsFrom(state, current)),
+        [state, current]
+    );
+    const movable = useMemo(() => {
+        if (!active || state.chain !== null || !moveHints) return new Set();
+        return new Set(POINTS.filter((p) => state.board[p] === state.turn && destinationsFrom(state, p).length > 0));
+    }, [state, active, moveHints]);
+    // Beads that can capture right now (captures are optional, so beginners easily miss them).
+    const capturers = useMemo(() => {
+        if (!active || state.chain !== null || !captureHints) return new Set();
+        return capturingBeads(state);
+    }, [state, active, captureHints]);
+
+    // Your beads the opponent could capture if it were their move (the classic beginner blunder).
+    const endangered = useMemo(() => {
+        if (!active || state.chain !== null || !captureHints) return new Set();
+        return endangeredBeads(state);
+    }, [state, active, captureHints]);
+
+    const toScreen = (p) => {
+        const { x, y } = POSITIONS[p];
+        const sx = WIDTH / 2 + x * UNIT;
+        const sy = HEIGHT / 2 + y * UNIT;
+        return flipped ? { x: WIDTH - sx, y: HEIGHT - sy } : { x: sx, y: sy };
     };
 
-    const isValidSpot = (i, j) => !isNullSpot(i, j);
+    const nudge = (p) => setShake((s) => ({ p, n: s.n + 1 }));
 
-    const findValidJumps = (startI, startJ, player, board, visited = new Set()) => {
-        const jumps = [];
-        const currentKey = `${startI},${startJ}`;
-        if (visited.has(currentKey) || !isValidSpot(startI, startJ)) return jumps;
-        visited.add(currentKey);
-
-        const neighbors = relations[`${startI}${startJ}`] || [];
-        neighbors.forEach(neighbor => {
-            const [midI, midJ] = neighbor.split('').map(Number);
-            if (!isValidSpot(midI, midJ)) return;
-            const midPiece = board[midI][midJ];
-
-            // Check if neighbor is opponent's piece
-            if (midPiece !== 0 && midPiece !== player) {
-                const dx = midI - startI;
-                const dy = midJ - startJ;
-                const landI = midI + dx;
-                const landJ = midJ + dy;
-
-                // Check landing spot exists and is empty
-                if (isValidSpot(landI, landJ) && board[landI]?.[landJ] === 0) {
-                    jumps.push({
-                        to: { i: landI, j: landJ },
-                        jumped: [{ i: midI, j: midJ }],
-                        additionalJumps: findValidJumps(landI, landJ, player, board, new Set(visited))
-                    });
-                }
+    const handleClick = (p) => {
+        if (!active) return;
+        if (current !== null && destinations.some((d) => d.to === p)) {
+            if (confirmMoves && pending !== p) {
+                setPending(p);
+                return;
             }
-        });
-
-        return jumps;
-    };
-
-
-
-    // Modified movement handler
-    const handleSpotClick = (i, j) => {
-        if (isNullSpot(i, j)) return;
-
-        if (selectedPiece) {
-            const move = possibleMoves[i][j];
-            if (move) {
-                // Update board state
-                const newBoard = boardState.map(row => [...row]);
-                newBoard[selectedPiece.i][selectedPiece.j] = 0;
-                newBoard[i][j] = selectedPiece.value;
-
-                // Calculate jumped pieces
-                const jumpedPieces = move.jumped.filter(({ i, j }) =>
-                    boardState[i][j] !== 0 && boardState[i][j] !== selectedPiece.value
-                );
-
-                // Update scores
-                if (jumpedPieces.length > 0) {
-                    const opponent = selectedPiece.value === 1 ? 'blue' : 'red';
-                    const scoreChange = {
-                        [opponent]: -jumpedPieces.length
-                    };
-                    onScoreChange(scoreChange);
-                }
-
-                // Remove jumped pieces
-                jumpedPieces.forEach(({ i, j }) => {
-                    newBoard[i][j] = 0;
-                });
-
-                setBoardState(newBoard);
-
-                // Check for multi-jump
-                if (jumpedPieces.length > 0) { // Only check for multi-jumps if we made a jump
-                    const followUpJumps = findValidJumps(i, j, selectedPiece.value, newBoard);
-                    if (followUpJumps.length > 0) {
-                        const newMoves = createEmptyMoves();
-                        followUpJumps.forEach(jump => {
-                            newMoves[jump.to.i][jump.to.j] = {
-                                ...jump,
-                                jumped: [...move.jumped, ...jump.jumped]
-                            };
-                        });
-                        setPossibleMoves(newMoves);
-                        setSelectedPiece({ i, j, value: selectedPiece.value });
-                    } else {
-                        // End turn after final jump
-                        setSelectedPiece(null);
-                        setPossibleMoves(createEmptyMoves());
-                        const newTurn = turn === 'RED' ? 'BLUE' : 'RED';
-                        setTurn(newTurn);
-                        spotOnClick(newTurn);
-                    }
-                } else {
-                    // End turn immediately if it was a simple move
-                    setSelectedPiece(null);
-                    setPossibleMoves(createEmptyMoves());
-                    const newTurn = turn === 'RED' ? 'BLUE' : 'RED';
-                    setTurn(newTurn);
-                    spotOnClick(newTurn);
-                }
-            } else {
-                const isCurrentPlayerPiece =
-                    (turn === 'RED' && boardState[i][j] === 1) ||
-                    (turn === 'BLUE' && boardState[i][j] === 2);
-
-                if (isCurrentPlayerPiece) {
-                    // Switch selection to new piece
-                    const moves = calculatePossibleMoves(i, j);
-                    setPossibleMoves(moves);
-                    setSelectedPiece({ i, j, value: boardState[i][j] });
-                } else {
-                    // Deselect if clicking empty or opponent's piece
-                    setSelectedPiece(null);
-                    setPossibleMoves(createEmptyMoves());
-                }
-            }
+            onAction({ type: "move", from: current, to: p });
+            setSelected(null);
+            setPending(null);
             return;
         }
-
-        // Select piece if belongs to current player
-        if (boardState[i][j] !== 0 && (
-            (turn === 'RED' && boardState[i][j] === 1) ||
-            (turn === 'BLUE' && boardState[i][j] === 2)
-        )) {
-            const moves = calculatePossibleMoves(i, j);
-            setPossibleMoves(moves);
-            setSelectedPiece({ i, j, value: boardState[i][j] });
+        setPending(null);
+        // Mid-chain the capturing bead stays selected; ending the chain early is an explicit button press
+        // (tapping the bead again is too easy to do by accident).
+        if (state.chain !== null) {
+            if (state.board[p] !== EMPTY && p !== state.chain) nudge(p);
+            return;
+        }
+        if (state.board[p] === state.turn && p !== selected) {
+            if (destinationsFrom(state, p).length === 0) nudge(p); // boxed in
+            else setSelected(p);
+        } else if (state.board[p] !== EMPTY && state.board[p] !== state.turn) {
+            nudge(p); // not your bead
+            setSelected(null);
+        } else {
+            setSelected(null);
         }
     };
 
-    const calculatePossibleMoves = (i, j) => {
-        const moves = createEmptyMoves();
-        if (!isValidSpot(i, j)) return moves;
-        const player = boardState[i][j];
+    // Destinations stay clickable without hints; they're just not drawn.
+    const highlighted = new Set(moveHints ? destinations.map((d) => d.to) : []);
+    const threatened = new Set(moveHints ? destinations.map((d) => d.capture).filter((c) => c !== null) : []);
+    const last = state.lastMove;
+    const lastWasJump = Boolean(last?.captured?.length);
+    const moveDuration = reduceMotion ? 0.01 : lastWasJump ? 0.52 : STANDARD;
 
-        // Check simple adjacent moves
-        const neighbors = relations[`${i}${j}`] || [];
-        neighbors.forEach(neighbor => {
-            const [x, y] = neighbor.split('').map(Number);
-            if (isValidSpot(x, y) && boardState[x][y] === 0) {
-                moves[x][y] = { jumped: [] };
-            }
-        });
+    const pieces = POINTS.filter((p) => state.board[p] !== EMPTY)
+        .map((p) => ({ p, id: pieceIds[p], color: state.board[p] }))
+        .sort((a, b) => a.id - b.id);
 
-
-        // Check jump moves
-        const jumps = findValidJumps(i, j, player, boardState);
-        jumps.forEach(jump => {
-            moves[jump.to.i][jump.to.j] = {
-                to: jump.to,
-                jumped: jump.jumped,
-                chain: jump.additionalJumps
-            };
-        });
-
-        return moves;
-    };
+    const gameOver = state.winner !== null;
+    const turnGlow = gameOver ? (state.winner === DRAW ? theme.slabEdge : theme.glow[state.winner]) : theme.glow[state.turn];
+    const id = (name) => `${name}-${uid}`;
 
     return (
-        <svg className="board" width={WIDTH} height={HEIGHT}>
-            {/* Render connection lines */}
-            {Object.entries(relations).map(([key, connections]) => {
-                const [iKey, jKey] = key.split("").map(Number);
-                const from = sizes[iKey][jKey];
+        <svg
+            viewBox={`${VIEW.x} ${VIEW.y} ${VIEW.width} ${VIEW.height}`}
+            width="100%"
+            style={{ maxWidth: 420, touchAction: "manipulation", userSelect: "none", WebkitTapHighlightColor: "transparent" }}
+            role="img"
+            aria-label="32 Beads board"
+        >
+            <defs>
+                <linearGradient id={id("slab")} x1="0" y1="0" x2="0.4" y2="1">
+                    <stop offset="0%" stopColor={theme.slab[0]} />
+                    <stop offset="100%" stopColor={theme.slab[1]} />
+                </linearGradient>
+                <radialGradient id={id("hole")} cx="50%" cy="40%" r="60%">
+                    <stop offset="0%" stopColor={theme.hole[0]} stopOpacity="0.85" />
+                    <stop offset="100%" stopColor={theme.hole[1]} stopOpacity="0" />
+                </radialGradient>
+                {[RED, BLUE].map((c) => (
+                    <radialGradient key={c} id={id(`bead-${c}`)} cx="35%" cy="30%" r="75%">
+                        <stop offset="0%" stopColor={theme.beads[c][0]} />
+                        <stop offset="45%" stopColor={theme.beads[c][1]} />
+                        <stop offset="100%" stopColor={theme.beads[c][2]} />
+                    </radialGradient>
+                ))}
+                <filter id={id("soft")} x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="1.8" />
+                </filter>
+                <filter id={id("slabShadow")} x="-10%" y="-10%" width="120%" height="120%">
+                    <feDropShadow dx="0" dy="6" stdDeviation="8" floodColor="#000" floodOpacity="0.28" />
+                </filter>
+                <filter id={id("glow")} x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="5" />
+                </filter>
+            </defs>
 
-                return connections.map((conn, idx) => {
-                    const [x, y] = conn.split("").map(Number);
-                    const toSpot = sizes[x][y];
-                    const isPossiblePath = possibleMoves[x]?.[y] || possibleMoves[iKey]?.[jKey];
+            {/* Board slab, with an edge glow in the colour of the player to move */}
+            <motion.rect
+                x={SLAB.x}
+                y={SLAB.y}
+                width={SLAB.width}
+                height={SLAB.height}
+                rx={SLAB.radius}
+                fill="none"
+                strokeWidth={6}
+                filter={`url(#${id("glow")})`}
+                initial={false}
+                animate={{ stroke: turnGlow, opacity: gameOver ? 0.9 : 0.55 }}
+                transition={{ duration: SLOW, ease: EASE }}
+            />
+            <rect
+                x={SLAB.x}
+                y={SLAB.y}
+                width={SLAB.width}
+                height={SLAB.height}
+                rx={SLAB.radius}
+                fill={`url(#${id("slab")})`}
+                stroke={theme.slabEdge}
+                strokeWidth={1.5}
+                filter={`url(#${id("slabShadow")})`}
+            />
 
+            {/* Engraved lines: a light offset under a dark groove */}
+            <g pointerEvents="none" strokeLinecap="round">
+                {EDGES.map(([a, b]) => {
+                    const from = toScreen(a);
+                    const to = toScreen(b);
+                    return (
+                        <line key={`g-${a}-${b}`} x1={from.x} y1={from.y + 1.2} x2={to.x} y2={to.y + 1.2} stroke={theme.lineGlow} strokeWidth={2} />
+                    );
+                })}
+                {EDGES.map(([a, b]) => {
+                    const from = toScreen(a);
+                    const to = toScreen(b);
+                    const isPath =
+                        current !== null &&
+                        ((a === current && highlighted.has(b)) ||
+                            (b === current && highlighted.has(a)) ||
+                            (threatened.has(a) && highlighted.has(b)) ||
+                            (threatened.has(b) && highlighted.has(a)));
                     return (
                         <motion.line
-                            key={`${key}-${idx}`}
+                            key={`${a}-${b}`}
                             x1={from.x}
                             y1={from.y}
-                            x2={toSpot.x}
-                            y2={toSpot.y}
-                            stroke={isPossiblePath ? "#4ade80" : "white"}
-                            strokeWidth="2"
-                            strokeOpacity={isPossiblePath ? 1 : 0.5}
+                            x2={to.x}
+                            y2={to.y}
+                            initial={false}
+                            animate={{
+                                stroke: isPath ? theme.step : theme.line,
+                                strokeWidth: isPath ? 3.2 : 2,
+                                opacity: isPath ? 1 : 0.7,
+                            }}
+                            transition={{ duration: QUICK, ease: EASE }}
                         />
                     );
-                });
+                })}
+            </g>
+
+            {/* Last move: a faint gold trace from where the bead came from */}
+            {last && last.from !== undefined && !gameOver && (
+                <g pointerEvents="none" key={`last-${moveSeq}`}>
+                    <motion.line
+                        x1={toScreen(last.from).x}
+                        y1={toScreen(last.from).y}
+                        x2={toScreen(last.to).x}
+                        y2={toScreen(last.to).y}
+                        stroke={theme.capture}
+                        strokeWidth={2.5}
+                        strokeLinecap="round"
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{ pathLength: 1, opacity: 0.5 }}
+                        transition={{ duration: moveDuration, ease: EASE }}
+                    />
+                    <circle cx={toScreen(last.from).x} cy={toScreen(last.from).y} r={BEAD - 3} fill="none" stroke={theme.capture} strokeOpacity={0.6} strokeWidth={1.5} />
+                </g>
+            )}
+
+            {/* Points: carved holes, destination markers and click targets */}
+            {POINTS.map((p) => {
+                const { x, y } = toScreen(p);
+                const target = highlighted.has(p);
+                const capture = target && destinations.find((d) => d.to === p)?.capture !== null;
+                const markerColor = capture ? theme.capture : theme.step;
+                return (
+                    <g key={p} onClick={() => handleClick(p)} style={{ cursor: active ? "pointer" : "default" }}>
+                        <circle cx={x} cy={y} r="22" fill="transparent" />
+                        <circle cx={x} cy={y} r="7" fill={`url(#${id("hole")})`} pointerEvents="none" />
+                        {pending === p && (
+                            <motion.circle
+                                cx={x}
+                                cy={y}
+                                r="19"
+                                fill="none"
+                                stroke={markerColor}
+                                strokeWidth="3"
+                                pointerEvents="none"
+                                animate={{ opacity: [1, 0.3, 1] }}
+                                transition={{ repeat: Infinity, duration: 1, ease: "easeInOut" }}
+                            />
+                        )}
+                        <AnimatePresence>
+                            {target && (
+                                <motion.g
+                                    key="target"
+                                    pointerEvents="none"
+                                    style={{ transformOrigin: `${x}px ${y}px` }}
+                                    initial={{ scale: 0.4, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0.4, opacity: 0, transition: { duration: QUICK * 0.7, ease: [0.3, 0, 1, 1] } }}
+                                    transition={{ duration: QUICK * 1.4, ease: EASE }}
+                                >
+                                    {!reduceMotion && (
+                                        <motion.circle
+                                            cx={x}
+                                            cy={y}
+                                            r="14"
+                                            fill="none"
+                                            stroke={markerColor}
+                                            strokeWidth="2"
+                                            animate={{ opacity: [0.7, 0.15, 0.7], scale: [1, 1.12, 1] }}
+                                            style={{ transformOrigin: `${x}px ${y}px` }}
+                                            transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+                                        />
+                                    )}
+                                    <circle cx={x} cy={y} r="8.5" fill={markerColor} opacity={0.9} />
+                                    {capture && <circle cx={x} cy={y} r="3.5" fill="white" opacity={0.85} />}
+                                </motion.g>
+                            )}
+                        </AnimatePresence>
+                    </g>
+                );
             })}
 
-            {/* Render spots */}
-            {boardState.map((row, i) => row.map((cell, j) => {
-                if (isNullSpot(i, j)) return null;
-                const { x, y } = sizes[i][j];
+            {/* Beads */}
+            <AnimatePresence>
+                {pieces.map(({ p, id: pieceId, color }, index) => {
+                    const { x, y } = toScreen(p);
+                    const isSelected = current === p;
+                    const isThreatened = threatened.has(p);
+                    const justMoved = last?.to === p && moveSeq > 0;
+                    const lift = justMoved && !reduceMotion ? (lastWasJump ? 18 : 6) : 0;
+                    const won = gameOver && state.winner === color;
+                    const lost = gameOver && state.winner === opponent(color);
+                    const shaking = shake.p === p;
+                    return (
+                        <motion.g
+                            key={pieceId}
+                            initial={reduceMotion ? { x, y, opacity: 0 } : { x, y: y - 14, opacity: 0 }}
+                            animate={{ x, y, opacity: lost ? 0.45 : 1 }}
+                            exit={{
+                                opacity: 0,
+                                scale: reduceMotion ? 1 : [1, 1.25, 0.2],
+                                transition: { duration: 0.42, delay: reduceMotion ? 0 : 0.22, ease: EASE },
+                            }}
+                            transition={{
+                                x: { duration: moveDuration, ease: EASE },
+                                y: { duration: moveDuration, ease: EASE, delay: state.moveNumber === 0 ? index * 0.012 : 0 },
+                                opacity: { duration: STANDARD, ease: EASE, delay: state.moveNumber === 0 ? index * 0.012 : 0 },
+                            }}
+                            onClick={() => handleClick(p)}
+                            style={{ cursor: active ? "pointer" : "default" }}
+                        >
+                            {/* Contact shadow: spreads and softens as the bead lifts */}
+                            <motion.ellipse
+                                cx={0}
+                                cy={5}
+                                rx={BEAD - 1}
+                                ry={6}
+                                fill="#000"
+                                filter={`url(#${id("soft")})`}
+                                initial={false}
+                                animate={
+                                    lift
+                                        ? { opacity: [0.32, 0.14, 0.32], scale: [1, 1.35, 1] }
+                                        : { opacity: isSelected ? 0.2 : 0.32, scale: isSelected ? 1.3 : 1 }
+                                }
+                                transition={{ duration: lift ? moveDuration : QUICK, ease: EASE }}
+                                key={lift ? `shadow-${moveSeq}` : "shadow"}
+                            />
 
-                return (
-                    <Spot
-                        key={`${i}-${j}`}
-                        x={x}
-                        y={y}
-                        isPossibleMove={possibleMoves[i][j]}
-                        onClick={() => handleSpotClick(i, j)}
-                    >
-                        {cell !== 0 && (
-                            <motion.g
-                                layoutId={`piece-${i}-${j}`}
-                                transition={{ type: "spring", stiffness: 300 }}
-                            >
-                                <Piece
-                                    x={x}
-                                    y={y}
-                                    color={cell === 1 ? colors.red : colors.blue}
-                                    isSelected={selectedPiece?.i === i && selectedPiece?.j === j}
+                            {capturers.has(p) && !isSelected && (
+                                <motion.circle
+                                    r={BEAD + 5}
+                                    fill="none"
+                                    stroke={theme.capture}
+                                    strokeWidth="3"
+                                    animate={reduceMotion ? { opacity: 1 } : { opacity: [1, 0.35, 1] }}
+                                    transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
                                 />
-                            </motion.g>
-                        )}
-                    </Spot>
-                );
-            }))}
-        </svg>
-    )
-}
+                            )}
+                            {!capturers.has(p) && movable.has(p) && !isSelected && (
+                                <circle r={BEAD + 4} fill="none" stroke={theme.glow[color]} strokeOpacity="0.55" strokeWidth="2" />
+                            )}
+                            {endangered.has(p) && !isSelected && (
+                                <motion.circle
+                                    r={BEAD + 8}
+                                    fill="none"
+                                    stroke={theme.danger}
+                                    strokeWidth="2"
+                                    strokeDasharray="4 4"
+                                    aria-label="This bead can be captured"
+                                    animate={reduceMotion ? { opacity: 0.9 } : { opacity: [0.95, 0.4, 0.95], rotate: 360 }}
+                                    transition={{
+                                        opacity: { repeat: Infinity, duration: 1.6, ease: "easeInOut" },
+                                        rotate: { repeat: Infinity, duration: 12, ease: "linear" },
+                                    }}
+                                />
+                            )}
+                            {won && !reduceMotion && (
+                                <motion.circle
+                                    r={BEAD + 4}
+                                    fill={theme.glow[color]}
+                                    filter={`url(#${id("glow")})`}
+                                    animate={{ opacity: [0.15, 0.55, 0.15] }}
+                                    transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: (index % 6) * 0.15 }}
+                                />
+                            )}
 
-export default GameBoard
+                            {/* The bead itself (lifted in an arc when it jumps; shakes when it can't be used) */}
+                            <motion.g
+                                key={`${justMoved ? moveSeq : "rest"}-${shaking ? shake.n : 0}`}
+                                initial={false}
+                                animate={{
+                                    y: lift ? [0, -lift, 0] : isSelected ? -3 : 0,
+                                    scale: lift ? [1, lastWasJump ? 1.16 : 1.06, 1] : isSelected ? 1.14 : 1,
+                                    x: shaking && !reduceMotion ? [0, -4, 4, -3, 3, 0] : 0,
+                                }}
+                                transition={{
+                                    y: { duration: lift ? moveDuration : QUICK, ease: EASE },
+                                    scale: { duration: lift ? moveDuration : QUICK, ease: EASE },
+                                    x: { duration: 0.34, ease: "easeInOut" },
+                                }}
+                                whileHover={active && state.board[p] === state.turn && !isSelected ? { y: -2 } : undefined}
+                            >
+                                <circle
+                                    r={BEAD}
+                                    fill={`url(#${id(`bead-${color}`)})`}
+                                    stroke={isSelected ? "white" : isThreatened ? theme.capture : "rgba(0,0,0,0.25)"}
+                                    strokeWidth={isSelected || isThreatened ? 2.5 : 0.8}
+                                />
+                                <ellipse cx={-4.5} cy={-6} rx={5} ry={3.2} fill="white" opacity={0.55} transform="rotate(-30 -4.5 -6)" pointerEvents="none" />
+                                <circle r={BEAD - 1} fill="none" stroke="white" strokeOpacity={0.12} strokeWidth={1} pointerEvents="none" />
+                            </motion.g>
+                        </motion.g>
+                    );
+                })}
+            </AnimatePresence>
+
+            {/* Capture bursts, timed to the jumper passing over the captured bead */}
+            {!reduceMotion &&
+                lastWasJump &&
+                last.captured.map((c) => {
+                    const { x, y } = toScreen(c);
+                    return (
+                        <CaptureBurst
+                            key={`burst-${moveSeq}-${c}`}
+                            x={x}
+                            y={y}
+                            color={theme.glow[opponent(last.player)]}
+                            delay={moveDuration * 0.45}
+                        />
+                    );
+                })}
+        </svg>
+    );
+};
+
+export default GameBoard;

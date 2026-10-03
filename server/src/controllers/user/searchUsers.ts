@@ -28,21 +28,21 @@ type SkipStage = { $skip: number };
 type LimitStage = { $limit: number };
 type FacetStage = {
   $facet: {
-    metadata: Array<{ $count: string } | { $addFields: { page: number, limit: number } }>;
+    metadata: Array<{ $count: string } | { $addFields: { page: number; limit: number } }>;
     data: Array<{ $skip: number } | { $limit: number }>;
   };
 };
 
 async function searchUsers(req: Request, res: Response, next: NextFunction) {
-  let searchQuery = req.query.q as string;
-  let userLocation = [parseFloat(req.query.longitude as string), parseFloat(req.query.latitude as string)];
-  let page = parseInt(req.query.page as string) || 1;
-  let limit = parseInt(req.query.limit as string) || 10;
+  const searchQuery = req.query.q as string;
+  const userLocation = [parseFloat(req.query.longitude as string), parseFloat(req.query.latitude as string)];
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
 
-  let skip = (page - 1) * limit;
+  const skip = (page - 1) * limit;
 
   try {
-    let pipeline: (MatchStage | ProjectStage | SkipStage | LimitStage | FacetStage)[] = [
+    const pipeline: (MatchStage | ProjectStage | SkipStage | LimitStage | FacetStage)[] = [
       { $match: { $text: { $search: searchQuery } } },
       { $project: { name: 1, username: 1, profilePhoto: 1 } },
     ];
@@ -53,21 +53,21 @@ async function searchUsers(req: Request, res: Response, next: NextFunction) {
           location: {
             $nearSphere: {
               $geometry: {
-                type: "Point",
-                coordinates: userLocation
+                type: 'Point',
+                coordinates: userLocation,
               },
-              $maxDistance: 5000
-            }
-          }
-        }
+              $maxDistance: 5000,
+            },
+          },
+        },
       });
     }
 
     pipeline.push({
       $facet: {
-        metadata: [{ $count: "total" }, { $addFields: { page: page, limit: limit } }],
-        data: [{ $skip: skip }, { $limit: limit }]
-      }
+        metadata: [{ $count: 'total' }, { $addFields: { page: page, limit: limit } }],
+        data: [{ $skip: skip }, { $limit: limit }],
+      },
     });
 
     const result = await USER.aggregate(pipeline);
@@ -77,7 +77,7 @@ async function searchUsers(req: Request, res: Response, next: NextFunction) {
     if (result[0].metadata[0]) {
       metadata = result[0].metadata[0];
     }
-    const hasMore = (metadata.page * metadata.limit) < metadata.total;
+    const hasMore = metadata.page * metadata.limit < metadata.total;
 
     res.status(200).json({
       users,
@@ -86,7 +86,6 @@ async function searchUsers(req: Request, res: Response, next: NextFunction) {
       limit,
       hasMore,
     });
-
   } catch (err) {
     next(err);
   }

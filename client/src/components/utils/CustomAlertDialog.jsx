@@ -1,5 +1,5 @@
 import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button, useDisclosure } from "@chakra-ui/react";
-import React, { useRef } from "react";
+import { useRef } from "react";
 
 function CustomAlertDialog({ title, trigger, children, footer }) {
       const { isOpen, onOpen, onClose } = useDisclosure();

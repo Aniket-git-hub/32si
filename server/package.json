@@ -16,6 +16,13 @@
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
       "/node_modules/"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest",
+      "^.+\\.js$": "babel-jest"
+    },
+    "testMatch": [
+      "**/tests/**/*.test.[jt]s"
     ]
   },
   "keywords": [],
@@ -28,8 +35,10 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-rate-limit": "^7.5.1",
     "express-validator": "^7.0.1",
     "gridfs-stream": "^1.1.1",
+    "helmet": "^7.2.0",
     "jsonwebtoken": "^9.0.1",
     "mongoose": "^7.4.3",
     "multer": "^1.4.4",
@@ -46,6 +55,7 @@
     "@types/cookie-parser": "^1.4.4",
     "@types/express": "^4.17.17",
     "@types/gridfs-stream": "^0.5.37",
+    "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.3",
     "@types/mongoose": "^5.11.97",
     "@types/multer": "^1.4.7",
@@ -63,6 +73,7 @@
     "nodemon": "^3.0.1",
     "prettier": "^3.0.3",
     "supertest": "^6.3.3",
+    "ts-jest": "^29.4.14",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   }

@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { gfs, gridfsBucket } from '../../dbInitialization';
+import { gridfsBucket } from '../../dbInitialization';
 import CustomError from '../../utils/createError';
 import USER from '../../models/user';
-import mongoose from 'mongoose';
 import path from 'path';
 
 async function deleteProfilePicture(req: Request, res: Response, next: NextFunction) {

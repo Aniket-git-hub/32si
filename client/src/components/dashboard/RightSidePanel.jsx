@@ -1,6 +1,7 @@
-import { AvatarBadge, Box, Center, Flex, Heading, IconButton, Input, InputGroup, InputLeftElement, List, ListItem, Stack, Text, useColorModeValue } from "@chakra-ui/react";
-import React from 'react';
+import { AvatarBadge, Badge, Box, Center, Flex, Heading, IconButton, Input, InputGroup, InputLeftElement, List, ListItem, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 import { FiMessageCircle, FiSearch } from "react-icons/fi";
+import { GiCrossedSwords } from "react-icons/gi";
+import useChallenge from "../../hooks/useChallenge";
 import { useNavigate } from "react-router-dom";
 import { getProfilePicture, getSmallProfilePicture } from '../../api/user';
 import { useAllData } from "../../hooks/useAllData";
@@ -12,8 +13,9 @@ import FullTextSearchUsers from '../utils/FullTextSearchUsers';
 function RightSidePanel() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const { onlineFriends } = useAllData()
+  const { onlineFriends, unreadMessages } = useAllData()
   const hoverColor = useColorModeValue("gray.100", "gray.700")
+  const { challenge, pendingId } = useChallenge()
 
   return (
     <Box minH="100%" p={5}>
@@ -60,7 +62,36 @@ function RightSidePanel() {
                   </AvatarWithPreview>
                   <Text ml={2}>  {friend?.username}</Text>
                 </Center>
-                <IconButton _hover={{}} variant={"ghost"} icon={<FiMessageCircle />} onClick={() => navigate(`/chat/${friend.username}`)} />
+                <Flex>
+                  {onlineFriends?.includes(friend._id) && (
+                    <IconButton
+                      variant={"ghost"}
+                      aria-label={`Challenge ${friend.username}`}
+                      title={`Challenge ${friend.username}`}
+                      icon={<GiCrossedSwords />}
+                      isLoading={pendingId === friend._id}
+                      onClick={() => challenge(friend._id)}
+                    />
+                  )}
+                  <Box position="relative">
+                    <IconButton _hover={{}} variant={"ghost"} aria-label={`Chat with ${friend.username}`} icon={<FiMessageCircle />} onClick={() => navigate(`/chat/${friend.username}`)} />
+                    {unreadMessages?.[friend._id] > 0 && (
+                      <Badge
+                        position="absolute"
+                        top="2px"
+                        right="2px"
+                        colorScheme="red"
+                        variant="solid"
+                        borderRadius="full"
+                        fontSize="10px"
+                        pointerEvents="none"
+                        aria-label={`${unreadMessages[friend._id]} unread`}
+                      >
+                        {unreadMessages[friend._id]}
+                      </Badge>
+                    )}
+                  </Box>
+                </Flex>
               </Flex>
             </ListItem>
           ))}

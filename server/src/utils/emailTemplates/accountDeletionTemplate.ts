@@ -1,4 +1,9 @@
-const accountDeletionEmailTemplate = (name: string, confirmationLink: string, otp: number, cancellationLink: string) => `
+const accountDeletionEmailTemplate = (
+  name: string,
+  confirmationLink: string,
+  otp: number,
+  cancellationLink: string,
+) => `
   <div style="max-width: 600px; margin: auto; padding: 20px; font-family: Arial, sans-serif; color: #333; border: 1px solid #b8b8b8; border-radius:.3rem;">
     <h2 style="font-size: 24px;">Account Deletion Request</h2>
     <p style="font-size: 18px;">Dear ${name},</p>

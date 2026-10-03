@@ -2,19 +2,15 @@ import { instance } from "../config/axios.config"
 import { getEndpoint } from "../utils/Helper"
 
 const handleRequest = async (url, data) => {
-    try {
-        const response = await instance.post(url, data, {
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json"
-            },
-            withCredentials: true
-        })
-        if ([200, 201].includes(response.status)) {
-            return response
-        }
-    } catch (error) {
-        throw error
+    const response = await instance.post(url, data, {
+        headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json"
+        },
+        withCredentials: true
+    })
+    if ([200, 201].includes(response.status)) {
+        return response
     }
 }
 
