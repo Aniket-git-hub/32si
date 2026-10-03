@@ -69,3 +69,5 @@ export const getChatHistory = async ({ userId, before, limit = 50 }, signal) => 
     return handleRequest(`${getEndpoint("VITE_CHAT_HISTORY_ROUTE", '/user/chat')}/${userId}?${params}`, null, "GET", signal)
 }
 export const getUnreadCounts = async (signal) => handleRequest(getEndpoint("VITE_CHAT_UNREAD_ROUTE", '/user/chat-unread'), null, "GET", signal)
+export const requestEmailChange = async (data) => handleRequest(getEndpoint("VITE_EMAIL_CHANGE_REQUEST_ROUTE", '/user/email/change-request'), data, "POST")
+export const confirmEmailChange = async (data) => handleRequest(getEndpoint("VITE_EMAIL_CHANGE_CONFIRM_ROUTE", '/user/email/change-confirm'), data, "POST")

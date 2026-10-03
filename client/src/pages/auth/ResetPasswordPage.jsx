@@ -12,8 +12,8 @@ export default function ResetPasswordPage() {
     const location = useLocation()
     const navigate = useNavigate()
     const savePassword = async () => {
-        const email = location.state.email
-        const response = await resetPassword({ password: values.password, email })
+        const { email, resetToken } = location.state ?? {}
+        const response = await resetPassword({ password: values.password, email, resetToken })
         const { message } = response.data
         setVerifyOTP(false)
         navigate("/login", { replace: true })

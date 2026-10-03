@@ -9,6 +9,7 @@ import otpEmailTemplate from './emailTemplates/otpEmailTemplate';
 import passwordResetInitiatedTemplate from './emailTemplates/passwordResetInitiatedTemplate';
 import passwordResetSuccessfulTemplate from './emailTemplates/passwordResetSuccessfulTemplate';
 import registrationSuccessfulTemplate from './emailTemplates/registrationSuccessfulTemplate';
+import emailChangedTemplate from './emailTemplates/emailChangedTemplate';
 
 interface EmailResponse {
   success: boolean;
@@ -75,3 +76,6 @@ export const sendNewFeedbackReceivedEmail = (
     'New User Feedback Received',
     newFeedbackReceivedTemplate('Aniket Singh', userName, userEmail, userMessage),
   );
+
+export const sendEmailChangedEmail = (receiverEmail: string, name: string, newEmail: string) =>
+  sendEmail(receiverEmail, 'Your 32 Beads email address was changed', emailChangedTemplate(name, newEmail));

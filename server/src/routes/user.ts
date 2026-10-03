@@ -20,6 +20,8 @@ import searchUsers from '../controllers/user/searchUsers';
 import deleteUserRequest from '../controllers/user/deleteUserRequest';
 import cancelAccountDeletion from '../controllers/user/cancelDeletionRequest';
 import { getChatHistory, getUnreadCounts } from '../controllers/user/chat';
+import { confirmEmailChange, requestEmailChange } from '../controllers/user/changeEmail';
+import { otpLimiter } from '../config/security.config';
 
 const router: Router = express.Router();
 
@@ -60,6 +62,8 @@ router.post(
 
 router.get('/users/search', verifyJWT, searchUsers);
 router.get('/chat-unread', verifyJWT, getUnreadCounts);
+router.post('/email/change-request', verifyJWT, otpLimiter, requestEmailChange);
+router.post('/email/change-confirm', verifyJWT, otpLimiter, confirmEmailChange);
 router.get('/chat/:userId', verifyJWT, getChatHistory);
 
 export default router;

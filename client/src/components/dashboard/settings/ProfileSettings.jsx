@@ -11,6 +11,7 @@ import useDebounce from "../../../hooks/useDebounce.jsx";
 import { useFormValidation } from "../../../hooks/useFormValidation";
 import CustomAlertDialog from "../../utils/CustomAlertDialog";
 import ImageWithPreview from "../../utils/ImageWithPreview";
+import ChangeEmail from "./ChangeEmail";
 import ComboBox from "../../utils/locationSelector";
 export default function ProfileSettings() {
     const alert = useToast()
@@ -356,24 +357,9 @@ export default function ProfileSettings() {
                 </Stack>
             </Flex >
 
-            <Heading size="md" my={1}>Danger</Heading>
+            <Heading size="md" my={1}>Account</Heading>
             <Box p={5}>
-                <form>
-                    <Flex justifyContent={"space-between "} alignItems="flex-end">
-                        <FormControl flex={20} >
-                            <FormLabel>Email</FormLabel>
-                            <InputGroup>
-                                <Input
-                                    value={user.email}
-                                    onChange={() => alert({ description: "comming soom" })}
-                                />
-                            </InputGroup>
-                            <FormErrorMessage> </FormErrorMessage>
-                        </FormControl>
-                        <Spacer flex={1} />
-                        <Button isDisabled title="Changing your email is not available yet" flex={2} colorScheme="red" variant={"outline"} onClick={() => alert({ description: "Coming soon" })}>Update</Button>
-                    </Flex>
-                </form>
+                <ChangeEmail />
 
                 <Divider my={5}></Divider>
 

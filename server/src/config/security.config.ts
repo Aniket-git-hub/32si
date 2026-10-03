@@ -17,7 +17,7 @@ export const authLimiter = rateLimit({
 /** Password reset: emails and 6-digit codes are expensive / guessable, so keep these tight. */
 export const otpLimiter = rateLimit({
   windowMs: minutes(15),
-  limit: 8,
+  limit: 10,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: limitMessage('Too many password reset attempts. Please wait 15 minutes and try again.'),
